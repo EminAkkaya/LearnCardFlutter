@@ -66,12 +66,17 @@
    cd LearnCardFlutter
    ```
 
-2. Bağımlılıkları yükleyin:
+2. Supabase konfigürasyon dosyasını şablondan oluşturun ve kendi API bilgilerinizi girin:
+   ```bash
+   cp lib/config/supabase_config.template.dart lib/config/supabase_config.dart
+   ```
+
+3. Bağımlılıkları yükleyin:
    ```bash
    flutter pub get
    ```
 
-3. Uygulamayı çalıştırın:
+4. Uygulamayı çalıştırın:
    ```bash
    # Mobil (Android/iOS) veya Masaüstü (Linux/Windows/macOS)
    flutter run
