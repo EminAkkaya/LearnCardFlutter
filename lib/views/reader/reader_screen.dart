@@ -16,111 +16,29 @@ class ReaderScreen extends ConsumerStatefulWidget {
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   late final TextEditingController _textController;
   static const Color emerald = Color(0xFF10B981);
-
-  final List<TapGestureRecognizer> _recognizers = [];
-  List<TextToken>? _cachedTokens;
-  String? _cachedText;
+  
+  List<String> _paragraphs = [];
 
   @override
   void initState() {
     super.initState();
     final initialText = ref.read(readingProvider).currentText;
     _textController = TextEditingController(text: initialText);
+    _updateParagraphs(initialText);
   }
 
   @override
   void dispose() {
-    _clearRecognizers();
     _textController.dispose();
     super.dispose();
   }
 
-  void _clearRecognizers() {
-    for (final recognizer in _recognizers) {
-      recognizer.dispose();
+  void _updateParagraphs(String text) {
+    if (text.trim().isEmpty) {
+      _paragraphs = [];
+    } else {
+      _paragraphs = text.split('\n');
     }
-    _recognizers.clear();
-  }
-
-  List<TextToken> _getTokens(String text) {
-    if (_cachedText != text || _cachedTokens == null) {
-      _cachedText = text;
-      _cachedTokens = TextParser.parseTextToTokens(text);
-    }
-    return _cachedTokens!;
-  }
-
-  List<InlineSpan> _buildSpans(
-    String text,
-    bool isFocusMode,
-    Map<String, String> cardMap,
-    ReaderThemeColors colors,
-  ) {
-    _clearRecognizers();
-
-    final tokens = _getTokens(text);
-    final List<InlineSpan> spans = [];
-    final double fontSize = isFocusMode ? 20 : 18;
-
-    for (final token in tokens) {
-      if (!token.isWord) {
-        spans.add(
-          TextSpan(
-            text: token.text,
-            style: TextStyle(
-              fontSize: fontSize,
-              height: 1.6,
-              color: colors.defaultText,
-            ),
-          ),
-        );
-      } else {
-        final recognizer = TapGestureRecognizer()
-          ..onTap = () => _openWordSheet(token.cleanWord);
-        _recognizers.add(recognizer);
-
-        final status = cardMap[token.cleanWord];
-        final Color wordColor;
-        final Color underlineColor;
-        final double decorationThickness;
-
-        if (status == 'new') {
-          wordColor = colors.newWordColor;
-          underlineColor = colors.newWordColor.withValues(alpha: 0.8);
-          decorationThickness = 2.0;
-        } else if (status == 'learning') {
-          wordColor = colors.learningWordColor;
-          underlineColor = colors.learningWordColor.withValues(alpha: 0.8);
-          decorationThickness = 2.0;
-        } else if (status == 'mastered') {
-          wordColor = colors.masteredWordColor;
-          underlineColor = colors.masteredWordColor.withValues(alpha: 0.8);
-          decorationThickness = 2.0;
-        } else {
-          wordColor = colors.unaddedWordColor;
-          underlineColor = colors.defaultText.withValues(alpha: 0.25);
-          decorationThickness = 1.0;
-        }
-
-        spans.add(
-          TextSpan(
-            text: token.text,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: status != null ? FontWeight.bold : FontWeight.w500,
-              color: wordColor,
-              height: 1.6,
-              decoration: TextDecoration.underline,
-              decorationColor: underlineColor,
-              decorationThickness: decorationThickness,
-            ),
-            recognizer: recognizer,
-          ),
-        );
-      }
-    }
-
-    return spans;
   }
 
   void _openWordSheet(String word) {
@@ -195,7 +113,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     ),
                     subtitle: Row(
                       children: [
-                        Text('Örnek metin: ', style: TextStyle(color: themeColors.defaultText, fontSize: 12)),
+                        Text('Örnek: ', style: TextStyle(color: themeColors.defaultText, fontSize: 12)),
                         Text('Yeni ', style: TextStyle(color: themeColors.newWordColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         Text('Öğrenilen ', style: TextStyle(color: themeColors.learningWordColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         Text('Öğrenildi', style: TextStyle(color: themeColors.masteredWordColor, fontWeight: FontWeight.bold, fontSize: 12)),
@@ -433,21 +351,22 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         if (_textController.text != next.currentText) {
           setState(() {
             _textController.text = next.currentText;
+            _updateParagraphs(next.currentText);
           });
         }
       }
     });
 
     final readingState = ref.watch(readingProvider);
-    final flashcardState = ref.watch(flashcardProvider);
+    // Optimization: Only rebuild when the cards list changes, not on every flashcard state change
+    final flashcardCards = ref.watch(flashcardProvider.select((state) => state.cards));
+    
     final isFocusMode = readingState.isFocusMode;
     final themeColors = ReaderThemeColors.fromMode(readingState.themeMode);
 
     final cardMap = {
-      for (final card in flashcardState.cards) card.word.toLowerCase(): card.status
+      for (final card in flashcardCards) card.word.toLowerCase(): card.status
     };
-
-    final spans = _buildSpans(_textController.text, isFocusMode, cardMap, themeColors);
 
     return Scaffold(
       backgroundColor: themeColors.background,
@@ -522,14 +441,21 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             if (!isFocusMode) _buildLegendBar(themeColors),
 
             Expanded(
-              child: SingleChildScrollView(
+              child: ListView.builder(
                 padding: EdgeInsets.symmetric(
                   horizontal: isFocusMode ? 24 : 16,
                   vertical: isFocusMode ? 20 : 16,
                 ),
-                child: Text.rich(
-                  TextSpan(children: spans),
-                ),
+                itemCount: _paragraphs.length,
+                itemBuilder: (context, index) {
+                  return ReaderParagraph(
+                    text: _paragraphs[index],
+                    isFocusMode: isFocusMode,
+                    cardMap: cardMap,
+                    colors: themeColors,
+                    onWordTap: _openWordSheet,
+                  );
+                },
               ),
             ),
 
@@ -571,6 +497,118 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ReaderParagraph extends StatefulWidget {
+  final String text;
+  final bool isFocusMode;
+  final Map<String, String> cardMap;
+  final ReaderThemeColors colors;
+  final Function(String) onWordTap;
+
+  const ReaderParagraph({
+    super.key,
+    required this.text,
+    required this.isFocusMode,
+    required this.cardMap,
+    required this.colors,
+    required this.onWordTap,
+  });
+
+  @override
+  State<ReaderParagraph> createState() => _ReaderParagraphState();
+}
+
+class _ReaderParagraphState extends State<ReaderParagraph> {
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
+
+  void _clearRecognizers() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.text.trim().isEmpty) {
+      return const SizedBox(height: 16); 
+    }
+
+    _clearRecognizers();
+    final tokens = TextParser.parseTextToTokens(widget.text);
+    final List<InlineSpan> spans = [];
+    final double fontSize = widget.isFocusMode ? 20 : 18;
+
+    for (final token in tokens) {
+      if (!token.isWord) {
+        spans.add(
+          TextSpan(
+            text: token.text,
+            style: TextStyle(
+              fontSize: fontSize,
+              height: 1.6,
+              color: widget.colors.defaultText,
+            ),
+          ),
+        );
+      } else {
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () => widget.onWordTap(token.cleanWord);
+        _recognizers.add(recognizer);
+
+        final status = widget.cardMap[token.cleanWord];
+        final Color wordColor;
+        final Color underlineColor;
+        final double decorationThickness;
+
+        if (status == 'new') {
+          wordColor = widget.colors.newWordColor;
+          underlineColor = widget.colors.newWordColor.withValues(alpha: 0.8);
+          decorationThickness = 2.0;
+        } else if (status == 'learning') {
+          wordColor = widget.colors.learningWordColor;
+          underlineColor = widget.colors.learningWordColor.withValues(alpha: 0.8);
+          decorationThickness = 2.0;
+        } else if (status == 'mastered') {
+          wordColor = widget.colors.masteredWordColor;
+          underlineColor = widget.colors.masteredWordColor.withValues(alpha: 0.8);
+          decorationThickness = 2.0;
+        } else {
+          wordColor = widget.colors.unaddedWordColor;
+          underlineColor = widget.colors.defaultText.withValues(alpha: 0.25);
+          decorationThickness = 1.0;
+        }
+
+        spans.add(
+          TextSpan(
+            text: token.text,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: status != null ? FontWeight.bold : FontWeight.w500,
+              color: wordColor,
+              height: 1.6,
+              decoration: TextDecoration.underline,
+              decorationColor: underlineColor,
+              decorationThickness: decorationThickness,
+            ),
+            recognizer: recognizer,
+          ),
+        );
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Text.rich(TextSpan(children: spans)),
     );
   }
 }
