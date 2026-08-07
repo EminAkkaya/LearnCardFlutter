@@ -58,3 +58,4 @@ Thumbs.db
 .env
 *.env
 *.local
+lib/config/supabase_config.dart
