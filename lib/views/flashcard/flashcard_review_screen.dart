@@ -7,7 +7,14 @@ import '../../providers/flashcard_provider.dart';
 import '../../services/srs_service.dart';
 
 class FlashcardReviewScreen extends ConsumerStatefulWidget {
-  const FlashcardReviewScreen({super.key});
+  final List<FlashcardModel>? customCards;
+  final bool isCustomStudy;
+
+  const FlashcardReviewScreen({
+    super.key,
+    this.customCards,
+    this.isCustomStudy = false,
+  });
 
   @override
   ConsumerState<FlashcardReviewScreen> createState() => _FlashcardReviewScreenState();
@@ -20,6 +27,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
 
   bool _isFlipped = false;
   int _currentIndex = 0;
+  List<FlashcardModel>? _sessionCards;
 
   static const Color emerald = Color(0xFF10B981);
 
@@ -53,7 +61,9 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
   }
 
   void _handleRating(FlashcardModel card, ReviewRating rating) {
-    ref.read(flashcardProvider.notifier).reviewCard(card.id, rating);
+    if (!widget.isCustomStudy) {
+      ref.read(flashcardProvider.notifier).reviewCard(card.id, rating);
+    }
     if (_isFlipped) {
       _flipController.reverse();
       _isFlipped = false;
@@ -67,13 +77,15 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardState = ref.watch(flashcardProvider);
-    final dueCards = cardState.dueCards;
 
     if (cardState.isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    _sessionCards ??= widget.customCards ?? cardState.dueCards;
+    final dueCards = _sessionCards!;
 
     if (dueCards.isEmpty || _currentIndex >= dueCards.length) {
       return Scaffold(
@@ -104,7 +116,9 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Bugün gözden geçirilecek tüm kartları başarıyla tamamladın.',
+                  widget.isCustomStudy
+                      ? 'Özel çalışma seansı tamamlandı!'
+                      : 'Bugün gözden geçirilecek tüm kartları başarıyla tamamladın.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -113,19 +127,38 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _currentIndex = 0;
-                      _isFlipped = false;
-                    });
-                    ref.read(flashcardProvider.notifier).loadCards();
+                  onPressed: () async {
+                    if (widget.isCustomStudy) {
+                      setState(() {
+                        _currentIndex = 0;
+                        _isFlipped = false;
+                      });
+                    } else {
+                      await ref.read(flashcardProvider.notifier).loadCards();
+                      setState(() {
+                        _sessionCards = ref.read(flashcardProvider).dueCards;
+                        _currentIndex = 0;
+                        _isFlipped = false;
+                      });
+                    }
                   },
                   icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('Kartları Yeniden Yükle'),
+                  label: Text(widget.isCustomStudy ? 'Aynı Seansı Tekrar Et' : 'Kartları Yeniden Yükle'),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
                   ),
                 ),
+                if (widget.isCustomStudy) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    label: const Text('Deste Yönetimine Dön'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -138,7 +171,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kart Tekrarı (SRS)'),
+        title: Text(widget.isCustomStudy ? 'Özel Çalışma Modu' : 'Kart Tekrarı (SRS)'),
         centerTitle: true,
         actions: [
           Padding(
@@ -217,7 +250,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
                                 ? Transform(
                                     transform: Matrix4.identity()..rotateY(pi),
                                     alignment: Alignment.center,
-                                    child: _buildCardBack(card, theme),
+                                    child: _buildCardBack(card, theme, previews),
                                   )
                                 : _buildCardFront(card, theme),
                           ),
@@ -227,69 +260,6 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
                   ),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-              child: _isFlipped
-                  ? Column(
-                      children: [
-                        Text(
-                          'Hatırlama Kalitesini Seçin',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            _buildRatingBtn(
-                              label: 'Tekrar',
-                              days: '${previews[ReviewRating.again]}g',
-                              color: Colors.red,
-                              onPressed: () => _handleRating(card, ReviewRating.again),
-                            ),
-                            const SizedBox(width: 8),
-                            _buildRatingBtn(
-                              label: 'Zor',
-                              days: '${previews[ReviewRating.hard]}g',
-                              color: Colors.orange,
-                              onPressed: () => _handleRating(card, ReviewRating.hard),
-                            ),
-                            const SizedBox(width: 8),
-                            _buildRatingBtn(
-                              label: 'İyi',
-                              days: '${previews[ReviewRating.good]}g',
-                              color: Colors.blue,
-                              onPressed: () => _handleRating(card, ReviewRating.good),
-                            ),
-                            const SizedBox(width: 8),
-                            _buildRatingBtn(
-                              label: 'Kolay',
-                              days: '${previews[ReviewRating.easy]}g',
-                              color: emerald,
-                              onPressed: () => _handleRating(card, ReviewRating.easy),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )
-                  : SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton.icon(
-                        onPressed: _flipCard,
-                        icon: const Icon(Icons.flip_rounded),
-                        label: const Text(
-                          'Cevabı Göster',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
             ),
           ],
         ),
@@ -382,7 +352,11 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
     );
   }
 
-  Widget _buildCardBack(FlashcardModel card, ThemeData theme) {
+  Widget _buildCardBack(
+    FlashcardModel card,
+    ThemeData theme,
+    Map<ReviewRating, String> previews,
+  ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -442,6 +416,46 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
           ),
         ],
         const Spacer(),
+        Text(
+          'Hatırlama Kalitesini Seçin',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _buildRatingBtn(
+              label: 'Tekrar',
+              days: previews[ReviewRating.again] ?? '',
+              color: Colors.red,
+              onPressed: () => _handleRating(card, ReviewRating.again),
+            ),
+            const SizedBox(width: 8),
+            _buildRatingBtn(
+              label: 'Zor',
+              days: previews[ReviewRating.hard] ?? '',
+              color: Colors.orange,
+              onPressed: () => _handleRating(card, ReviewRating.hard),
+            ),
+            const SizedBox(width: 8),
+            _buildRatingBtn(
+              label: 'İyi',
+              days: previews[ReviewRating.good] ?? '',
+              color: Colors.blue,
+              onPressed: () => _handleRating(card, ReviewRating.good),
+            ),
+            const SizedBox(width: 8),
+            _buildRatingBtn(
+              label: 'Kolay',
+              days: previews[ReviewRating.easy] ?? '',
+              color: emerald,
+              onPressed: () => _handleRating(card, ReviewRating.easy),
+            ),
+          ],
+        ),
       ],
     );
   }

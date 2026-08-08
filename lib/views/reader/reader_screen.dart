@@ -21,7 +21,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   late final TextEditingController _textController;
   late final ScrollController _scrollController;
   final GlobalKey _scrollKey = GlobalKey();
-  static const Color emerald = Color(0xFF10B981);
 
   List<String> _paragraphs = [];
   List<GlobalKey> _paragraphKeys = [];
