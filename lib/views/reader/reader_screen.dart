@@ -1,10 +1,14 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/text_parser.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../providers/reading_provider.dart';
 import 'word_detail_sheet.dart';
+import 'widgets/reader_paragraph.dart';
+import 'widgets/reader_legend_bar.dart';
+import 'widgets/reader_bottom_bar.dart';
+import 'widgets/theme_selector_sheet.dart';
+import 'dialogs/reader_dialogs.dart';
 
 class ReaderScreen extends ConsumerStatefulWidget {
   const ReaderScreen({super.key});
@@ -15,30 +19,122 @@ class ReaderScreen extends ConsumerStatefulWidget {
 
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   late final TextEditingController _textController;
+  late final ScrollController _scrollController;
+  final GlobalKey _scrollKey = GlobalKey();
   static const Color emerald = Color(0xFF10B981);
 
   List<String> _paragraphs = [];
+  List<GlobalKey> _paragraphKeys = [];
 
   @override
   void initState() {
     super.initState();
     final initialText = ref.read(readingProvider).currentText;
     _textController = TextEditingController(text: initialText);
+    _scrollController = ScrollController();
     _updateParagraphs(initialText);
+    _restoreScrollPosition();
   }
 
   @override
   void dispose() {
+    _saveCurrentPosition();
     _textController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _updateParagraphs(String text) {
     if (text.trim().isEmpty) {
       _paragraphs = [];
+      _paragraphKeys = [];
     } else {
       _paragraphs = text.split('\n');
+      _paragraphKeys = List.generate(_paragraphs.length, (_) => GlobalKey());
     }
+  }
+
+  int _findTopVisibleParagraphIndex() {
+    if (!_scrollController.hasClients || _paragraphKeys.isEmpty) return 0;
+    final RenderBox? scrollBox =
+        _scrollKey.currentContext?.findRenderObject() as RenderBox?;
+    if (scrollBox == null) return 0;
+
+    final double scrollBoxTop = scrollBox.localToGlobal(Offset.zero).dy;
+
+    int bestIndex = 0;
+    double minDistance = double.infinity;
+
+    for (int i = 0; i < _paragraphKeys.length; i++) {
+      final ctx = _paragraphKeys[i].currentContext;
+      if (ctx != null) {
+        final RenderBox? box = ctx.findRenderObject() as RenderBox?;
+        if (box != null && box.attached) {
+          final double pTop = box.localToGlobal(Offset.zero).dy - scrollBoxTop;
+          final double pBottom = pTop + box.size.height;
+
+          if (pTop <= 40 && pBottom > 0) {
+            return i;
+          }
+          final dist = pTop.abs();
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestIndex = i;
+          }
+        }
+      }
+    }
+    return bestIndex;
+  }
+
+  void _saveCurrentPosition() {
+    if (!_scrollController.hasClients) return;
+    final topIndex = _findTopVisibleParagraphIndex();
+    final offset = _scrollController.offset;
+    ref.read(readingProvider.notifier).savePosition(topIndex, offset);
+  }
+
+  void _restoreScrollPosition() async {
+    final pos = await ref.read(readingProvider.notifier).loadPosition();
+    final int paraIndex = pos['paragraphIndex'] ?? 0;
+    final double offset = pos['offset'] ?? 0.0;
+
+    if (!mounted) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      if (paraIndex > 0 && paraIndex < _paragraphKeys.length) {
+        final ctx = _paragraphKeys[paraIndex].currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            alignment: 0.0,
+            duration: Duration.zero,
+          );
+          return;
+        }
+      }
+      if (offset > 0 && offset <= _scrollController.position.maxScrollExtent) {
+        _scrollController.jumpTo(offset);
+      }
+    });
+  }
+
+  void _preservePositionAcrossFocusMode() {
+    final targetIndex = _findTopVisibleParagraphIndex();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+      if (targetIndex >= 0 && targetIndex < _paragraphKeys.length) {
+        final ctx = _paragraphKeys[targetIndex].currentContext;
+        if (ctx != null) {
+          Scrollable.ensureVisible(
+            ctx,
+            alignment: 0.0,
+            duration: Duration.zero,
+          );
+        }
+      }
+    });
   }
 
   void _openWordSheet(String word) {
@@ -55,369 +151,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     );
   }
 
-  void _showThemeSelectorSheet(ReaderThemeColors currentColors) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: currentColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        final currentThemeMode = ref.watch(readingProvider).themeMode;
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Okuma Teması ve Görünüm',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: currentColors.defaultText,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: currentColors.defaultText),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ...ReaderThemeMode.values.map((mode) {
-                final themeColors = ReaderThemeColors.fromMode(mode);
-                final bool isSelected = currentThemeMode == mode;
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    color: themeColors.background,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isSelected
-                          ? themeColors.newWordColor
-                          : themeColors.defaultText.withValues(alpha: 0.2),
-                      width: isSelected ? 2.5 : 1.0,
-                    ),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    title: Text(
-                      themeColors.label,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: themeColors.defaultText,
-                      ),
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          'Örnek: ',
-                          style: TextStyle(
-                            color: themeColors.defaultText,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'Yeni ',
-                          style: TextStyle(
-                            color: themeColors.newWordColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'Öğrenilen ',
-                          style: TextStyle(
-                            color: themeColors.learningWordColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'Öğrenildi',
-                          style: TextStyle(
-                            color: themeColors.masteredWordColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: isSelected
-                        ? Icon(
-                            Icons.check_circle_rounded,
-                            color: themeColors.newWordColor,
-                          )
-                        : null,
-                    onTap: () {
-                      ref.read(readingProvider.notifier).setThemeMode(mode);
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                );
-              }),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showSaveArticleDialog() {
-    final titleController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Makaleyi Kaydet'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Makale Başlığı',
-                hintText: 'Örn: The Art of Learning',
-              ),
-              autofocus: true,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (_textController.text.trim().isNotEmpty) {
-                final messenger = ScaffoldMessenger.of(context);
-                final navigator = Navigator.of(ctx);
-
-                await ref
-                    .read(readingProvider.notifier)
-                    .saveArticle(titleController.text, _textController.text);
-
-                navigator.pop();
-                messenger.showSnackBar(
-                  const SnackBar(
-                    content: Text('Makale Supabase veritabanına kaydedildi!'),
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: emerald,
-                  ),
-                );
-              }
-            },
-            child: const Text('Kaydet'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSavedArticlesSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return Consumer(
-          builder: (context, ref, _) {
-            final readingState = ref.watch(readingProvider);
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.7,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Kaydedilen Okuma Metinleri',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(ctx),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  if (readingState.articles.isEmpty)
-                    const Expanded(
-                      child: Center(
-                        child: Text('Henüz kaydedilmiş bir okuma metni yok.'),
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: readingState.articles.length,
-                        itemBuilder: (context, index) {
-                          final article = readingState.articles[index];
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            child: ListTile(
-                              title: Text(
-                                article.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              subtitle: Text(
-                                article.text.length > 80
-                                    ? '${article.text.substring(0, 80)}...'
-                                    : article.text,
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () {
-                                  ref
-                                      .read(readingProvider.notifier)
-                                      .deleteArticle(article.id);
-                                },
-                              ),
-                              onTap: () {
-                                ref
-                                    .read(readingProvider.notifier)
-                                    .selectArticle(article);
-                                Navigator.pop(ctx);
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showNewTextDialog() {
-    final inputCtrl = TextEditingController(text: _textController.text);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Yeni Okuma Metni Girin'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: TextField(
-            controller: inputCtrl,
-            maxLines: 8,
-            decoration: const InputDecoration(
-              hintText: 'Metninizi buraya yapıştırın...',
-              border: OutlineInputBorder(),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              ref
-                  .read(readingProvider.notifier)
-                  .updateCurrentText(inputCtrl.text);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Metni Yükle'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendBar(ReaderThemeColors colors) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: colors.surface,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildLegendItem(colors.newWordColor, 'Öğrenilmemiş'),
-            const SizedBox(width: 14),
-            _buildLegendItem(colors.learningWordColor, 'Öğrenilmekte'),
-            const SizedBox(width: 14),
-            _buildLegendItem(colors.masteredWordColor, 'Öğrenildi'),
-            const SizedBox(width: 14),
-            _buildLegendItem(colors.unaddedWordColor, 'Destede Yok'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: color.withValues(alpha: 0.9),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomAction({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: color,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen<ReadingState>(readingProvider, (previous, next) {
@@ -427,7 +160,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             _textController.text = next.currentText;
             _updateParagraphs(next.currentText);
           });
+          _restoreScrollPosition();
         }
+      }
+      if (previous?.isFocusMode != next.isFocusMode) {
+        _preservePositionAcrossFocusMode();
       }
     });
 
@@ -453,12 +190,44 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               foregroundColor: themeColors.defaultText,
               elevation: 0,
               centerTitle: true,
-              title: Text(
-                'İnteraktif Okuma',
-                style: TextStyle(
-                  color: themeColors.defaultText,
-                  fontWeight: FontWeight.bold,
-                ),
+              title: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    readingState.selectedArticle?.title ?? 'İnteraktif Okuma',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: themeColors.defaultText,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  if (readingState.selectedArticle != null) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.folder_outlined,
+                          size: 12,
+                          color: themeColors.defaultText.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          readingState.selectedArticle!.folder,
+                          style: TextStyle(
+                            color: themeColors.defaultText.withValues(
+                              alpha: 0.65,
+                            ),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
       body: SafeArea(
@@ -474,7 +243,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                       icon: const Icon(Icons.palette_outlined, size: 24),
                       color: themeColors.defaultText.withValues(alpha: 0.7),
                       tooltip: 'Tema Seç',
-                      onPressed: () => _showThemeSelectorSheet(themeColors),
+                      onPressed: () =>
+                          ThemeSelectorSheet.show(context, themeColors),
                     ),
                     IconButton(
                       icon: const Icon(Icons.fullscreen_exit_rounded, size: 28),
@@ -488,204 +258,64 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 ),
               ),
 
-            if (!isFocusMode) _buildLegendBar(themeColors),
+            if (!isFocusMode) ReaderLegendBar(colors: themeColors),
 
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isFocusMode ? 24 : 16,
-                  vertical: isFocusMode ? 20 : 16,
-                ),
-                itemCount: _paragraphs.length,
-                itemBuilder: (context, index) {
-                  return ReaderParagraph(
-                    text: _paragraphs[index],
-                    isFocusMode: isFocusMode,
-                    cardMap: cardMap,
-                    colors: themeColors,
-                    onWordTap: _openWordSheet,
-                  );
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (scrollNotification) {
+                  if (scrollNotification is ScrollEndNotification) {
+                    _saveCurrentPosition();
+                  }
+                  return false;
                 },
+                child: ListView.builder(
+                  key: _scrollKey,
+                  controller: _scrollController,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isFocusMode ? 24 : 16,
+                    vertical: isFocusMode ? 20 : 16,
+                  ),
+                  itemCount: _paragraphs.length,
+                  itemBuilder: (context, index) {
+                    return ReaderParagraph(
+                      key: _paragraphKeys.length > index
+                          ? _paragraphKeys[index]
+                          : null,
+                      text: _paragraphs[index],
+                      isFocusMode: isFocusMode,
+                      cardMap: cardMap,
+                      colors: themeColors,
+                      onWordTap: _openWordSheet,
+                      fontSize: readingState.fontSize,
+                      lineHeight: readingState.lineHeight,
+                    );
+                  },
+                ),
               ),
             ),
 
             if (!isFocusMode)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 10,
+              ReaderBottomBar(
+                colors: themeColors,
+                onNewTextTap: () => ReaderDialogs.showNewTextDialog(
+                  context,
+                  ref,
+                  _textController.text,
                 ),
-                decoration: BoxDecoration(
-                  color: themeColors.surface,
-                  border: Border(
-                    top: BorderSide(
-                      color: themeColors.defaultText.withValues(alpha: 0.08),
-                    ),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, -4),
-                    ),
-                  ],
+                onSavedTap: () =>
+                    ReaderDialogs.showSavedArticlesSheet(context, ref),
+                onThemeTap: () => ThemeSelectorSheet.show(context, themeColors),
+                onSaveTap: () => ReaderDialogs.showSaveArticleDialog(
+                  context,
+                  ref,
+                  _textController.text,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildBottomAction(
-                      icon: Icons.paste_rounded,
-                      label: 'Yeni Metin',
-                      color: themeColors.defaultText,
-                      onTap: _showNewTextDialog,
-                    ),
-                    _buildBottomAction(
-                      icon: Icons.folder_open_rounded,
-                      label: 'Kayıtlılar',
-                      color: themeColors.defaultText,
-                      onTap: _showSavedArticlesSheet,
-                    ),
-                    _buildBottomAction(
-                      icon: Icons.palette_outlined,
-                      label: 'Tema',
-                      color: themeColors.defaultText,
-                      onTap: () => _showThemeSelectorSheet(themeColors),
-                    ),
-                    _buildBottomAction(
-                      icon: Icons.save_outlined,
-                      label: 'Kaydet',
-                      color: themeColors.defaultText,
-                      onTap: _showSaveArticleDialog,
-                    ),
-                    _buildBottomAction(
-                      icon: Icons.fullscreen_rounded,
-                      label: 'Odak Modu',
-                      color: themeColors.defaultText,
-                      onTap: () =>
-                          ref.read(readingProvider.notifier).toggleFocusMode(),
-                    ),
-                  ],
-                ),
+                onFocusTap: () =>
+                    ref.read(readingProvider.notifier).toggleFocusMode(),
               ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class ReaderParagraph extends StatefulWidget {
-  final String text;
-  final bool isFocusMode;
-  final Map<String, String> cardMap;
-  final ReaderThemeColors colors;
-  final Function(String) onWordTap;
-
-  const ReaderParagraph({
-    super.key,
-    required this.text,
-    required this.isFocusMode,
-    required this.cardMap,
-    required this.colors,
-    required this.onWordTap,
-  });
-
-  @override
-  State<ReaderParagraph> createState() => _ReaderParagraphState();
-}
-
-class _ReaderParagraphState extends State<ReaderParagraph> {
-  final List<TapGestureRecognizer> _recognizers = [];
-
-  @override
-  void dispose() {
-    _clearRecognizers();
-    super.dispose();
-  }
-
-  void _clearRecognizers() {
-    for (final r in _recognizers) {
-      r.dispose();
-    }
-    _recognizers.clear();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.text.trim().isEmpty) {
-      return const SizedBox(height: 16);
-    }
-
-    _clearRecognizers();
-    final tokens = TextParser.parseTextToTokens(widget.text);
-    final List<InlineSpan> spans = [];
-    final double fontSize = widget.isFocusMode ? 20 : 18;
-
-    for (final token in tokens) {
-      if (!token.isWord) {
-        spans.add(
-          TextSpan(
-            text: token.text,
-            style: TextStyle(
-              fontSize: fontSize,
-              height: 1.6,
-              color: widget.colors.defaultText,
-            ),
-          ),
-        );
-      } else {
-        final recognizer = TapGestureRecognizer()
-          ..onTap = () => widget.onWordTap(token.cleanWord);
-        _recognizers.add(recognizer);
-
-        final status = widget.cardMap[token.cleanWord];
-        final Color wordColor;
-        final Color underlineColor;
-        final double decorationThickness;
-
-        if (status == 'new') {
-          wordColor = widget.colors.newWordColor;
-          underlineColor = widget.colors.newWordColor.withValues(alpha: 0.8);
-          decorationThickness = 2.0;
-        } else if (status == 'learning') {
-          wordColor = widget.colors.learningWordColor;
-          underlineColor = widget.colors.learningWordColor.withValues(
-            alpha: 0.8,
-          );
-          decorationThickness = 2.0;
-        } else if (status == 'mastered') {
-          wordColor = widget.colors.masteredWordColor;
-          underlineColor = widget.colors.masteredWordColor.withValues(
-            alpha: 0.8,
-          );
-          decorationThickness = 2.0;
-        } else {
-          wordColor = widget.colors.unaddedWordColor;
-          underlineColor = widget.colors.defaultText.withValues(alpha: 0.25);
-          decorationThickness = 1.0;
-        }
-
-        spans.add(
-          TextSpan(
-            text: token.text,
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: status != null ? FontWeight.bold : FontWeight.w500,
-              color: wordColor,
-              height: 1.6,
-              decoration: TextDecoration.underline,
-              decorationColor: underlineColor,
-              decorationThickness: decorationThickness,
-            ),
-            recognizer: recognizer,
-          ),
-        );
-      }
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Text.rich(TextSpan(children: spans)),
     );
   }
 }

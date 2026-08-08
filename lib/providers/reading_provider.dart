@@ -103,6 +103,8 @@ class ReadingState {
   final ReaderThemeMode themeMode;
   final double fontSize;
   final double lineHeight;
+  final String selectedFolder;
+  final List<String> customFolders;
 
   ReadingState({
     this.articles = const [],
@@ -113,30 +115,50 @@ class ReadingState {
     this.themeMode = ReaderThemeMode.matteDark,
     this.fontSize = 18.0,
     this.lineHeight = 1.6,
+    this.selectedFolder = 'Tümü',
+    this.customFolders = const ['Genel', 'Makaleler', 'Hikayeler', 'Haberler'],
   }) : currentText = currentText ?? defaultText;
+
+  List<String> get allFolders {
+    final set = <String>{'Genel', ...customFolders};
+    for (final article in articles) {
+      if (article.folder.trim().isNotEmpty) {
+        set.add(article.folder.trim());
+      }
+    }
+    return set.toList();
+  }
 
   ReadingState copyWith({
     List<ReadingArticleModel>? articles,
-    ReadingArticleModel? selectedArticle,
+    Object? selectedArticle = _sentinel,
     bool? isLoading,
     bool? isFocusMode,
     String? currentText,
     ReaderThemeMode? themeMode,
     double? fontSize,
     double? lineHeight,
+    String? selectedFolder,
+    List<String>? customFolders,
   }) {
     return ReadingState(
       articles: articles ?? this.articles,
-      selectedArticle: selectedArticle ?? this.selectedArticle,
+      selectedArticle: selectedArticle == _sentinel
+          ? this.selectedArticle
+          : (selectedArticle as ReadingArticleModel?),
       isLoading: isLoading ?? this.isLoading,
       isFocusMode: isFocusMode ?? this.isFocusMode,
       currentText: currentText ?? this.currentText,
       themeMode: themeMode ?? this.themeMode,
       fontSize: fontSize ?? this.fontSize,
       lineHeight: lineHeight ?? this.lineHeight,
+      selectedFolder: selectedFolder ?? this.selectedFolder,
+      customFolders: customFolders ?? this.customFolders,
     );
   }
 }
+
+const Object _sentinel = Object();
 
 class ReadingNotifier extends StateNotifier<ReadingState> {
   ReadingNotifier() : super(ReadingState()) {
@@ -154,6 +176,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       final modeName = prefs.getString('reader_theme_mode');
       final fontSize = prefs.getDouble('reader_font_size');
       final lineHeight = prefs.getDouble('reader_line_height');
+      final savedFolders = prefs.getStringList('reader_custom_folders');
 
       ReaderThemeMode mode = state.themeMode;
       if (modeName != null) {
@@ -167,6 +190,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
         themeMode: mode,
         fontSize: fontSize ?? 18.0,
         lineHeight: lineHeight ?? 1.6,
+        customFolders: savedFolders ?? state.customFolders,
       );
     } catch (_) {}
   }
@@ -190,7 +214,61 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
   }
 
   void updateCurrentText(String text) {
-    state = state.copyWith(currentText: text);
+    state = state.copyWith(currentText: text, selectedArticle: null);
+  }
+
+  void setSelectedFolder(String folder) {
+    state = state.copyWith(selectedFolder: folder);
+  }
+
+  Future<void> addCustomFolder(String folderName) async {
+    final trimmed = folderName.trim();
+    if (trimmed.isEmpty) return;
+    if (!state.customFolders.contains(trimmed)) {
+      final updatedFolders = [...state.customFolders, trimmed];
+      state = state.copyWith(customFolders: updatedFolders);
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList('reader_custom_folders', updatedFolders);
+      } catch (_) {}
+    }
+  }
+
+  Future<void> deleteCustomFolder(String folderName) async {
+    final trimmed = folderName.trim();
+    if (trimmed == 'Genel' || trimmed == 'Tümü') return;
+
+    bool stateChanged = false;
+    List<ReadingArticleModel> updatedArticles = state.articles;
+
+    if (state.articles.any((a) => a.folder == trimmed)) {
+      updatedArticles = state.articles.map((a) {
+        if (a.folder == trimmed) {
+          final updated = a.copyWith(folder: 'Genel');
+          SupabaseService.saveReadingArticle(updated);
+          return updated;
+        }
+        return a;
+      }).toList();
+      stateChanged = true;
+    }
+
+    List<String> updatedFolders = state.customFolders;
+    if (state.customFolders.contains(trimmed)) {
+      updatedFolders = state.customFolders.where((f) => f != trimmed).toList();
+      stateChanged = true;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList('reader_custom_folders', updatedFolders);
+      } catch (_) {}
+    }
+
+    if (stateChanged) {
+      state = state.copyWith(
+        articles: updatedArticles,
+        customFolders: updatedFolders,
+      );
+    }
   }
 
   Future<void> setThemeMode(ReaderThemeMode mode) async {
@@ -228,12 +306,14 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     }
   }
 
-  Future<ReadingArticleModel> saveArticle(String title, String text) async {
+  Future<ReadingArticleModel> saveArticle(String title, String text, {String folder = 'Genel'}) async {
+    final folderName = folder.trim().isEmpty ? 'Genel' : folder.trim();
     final article = ReadingArticleModel(
       id: 'reading_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 6)}',
       title: title.trim().isEmpty ? 'Untitled Article' : title.trim(),
       text: text.trim(),
       createdAt: DateTime.now().toIso8601String(),
+      folder: folderName,
     );
 
     final updated = [article, ...state.articles.where((a) => a.id != article.id)];
@@ -243,8 +323,20 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       currentText: text.trim(),
     );
 
+    await addCustomFolder(folderName);
     await SupabaseService.saveReadingArticle(article);
     return article;
+  }
+
+  Future<void> updateArticle(ReadingArticleModel article) async {
+    final updatedArticles = state.articles.map((a) => a.id == article.id ? article : a).toList();
+    ReadingArticleModel? selected = state.selectedArticle;
+    if (selected?.id == article.id) {
+      selected = article;
+    }
+    state = state.copyWith(articles: updatedArticles, selectedArticle: selected);
+    await addCustomFolder(article.folder);
+    await SupabaseService.saveReadingArticle(article);
   }
 
   Future<void> deleteArticle(String id) async {
@@ -255,6 +347,34 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     }
     state = state.copyWith(articles: updated, selectedArticle: selected);
     await SupabaseService.deleteReadingArticle(id);
+  }
+
+  String get currentTextKey {
+    if (state.selectedArticle != null) {
+      return 'article_${state.selectedArticle!.id}';
+    }
+    return 'text_${state.currentText.hashCode}';
+  }
+
+  Future<void> savePosition(int paragraphIndex, double offset) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = currentTextKey;
+      await prefs.setInt('reader_last_para_$key', paragraphIndex);
+      await prefs.setDouble('reader_last_offset_$key', offset);
+    } catch (_) {}
+  }
+
+  Future<Map<String, dynamic>> loadPosition({String? customKey}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = customKey ?? currentTextKey;
+      final para = prefs.getInt('reader_last_para_$key') ?? 0;
+      final offset = prefs.getDouble('reader_last_offset_$key') ?? 0.0;
+      return {'paragraphIndex': para, 'offset': offset};
+    } catch (_) {
+      return {'paragraphIndex': 0, 'offset': 0.0};
+    }
   }
 }
 
