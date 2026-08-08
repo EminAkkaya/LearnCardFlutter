@@ -16,7 +16,7 @@ class ReaderScreen extends ConsumerStatefulWidget {
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   late final TextEditingController _textController;
   static const Color emerald = Color(0xFF10B981);
-  
+
   List<String> _paragraphs = [];
 
   @override
@@ -42,15 +42,16 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   }
 
   void _openWordSheet(String word) {
-    final String contextStr = TextParser.extractSentence(_textController.text, word);
+    final String contextStr = TextParser.extractSentence(
+      _textController.text,
+      word,
+    );
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => WordDetailSheet(
-        word: word,
-        sentenceContext: contextStr,
-      ),
+      builder: (ctx) =>
+          WordDetailSheet(word: word, sentenceContext: contextStr),
     );
   }
 
@@ -103,7 +104,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     ),
                   ),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     title: Text(
                       themeColors.label,
                       style: TextStyle(
@@ -113,14 +117,44 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     ),
                     subtitle: Row(
                       children: [
-                        Text('Örnek: ', style: TextStyle(color: themeColors.defaultText, fontSize: 12)),
-                        Text('Yeni ', style: TextStyle(color: themeColors.newWordColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                        Text('Öğrenilen ', style: TextStyle(color: themeColors.learningWordColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                        Text('Öğrenildi', style: TextStyle(color: themeColors.masteredWordColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text(
+                          'Örnek: ',
+                          style: TextStyle(
+                            color: themeColors.defaultText,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Yeni ',
+                          style: TextStyle(
+                            color: themeColors.newWordColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Öğrenilen ',
+                          style: TextStyle(
+                            color: themeColors.learningWordColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Öğrenildi',
+                          style: TextStyle(
+                            color: themeColors.masteredWordColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
                     ),
                     trailing: isSelected
-                        ? Icon(Icons.check_circle_rounded, color: themeColors.newWordColor)
+                        ? Icon(
+                            Icons.check_circle_rounded,
+                            color: themeColors.newWordColor,
+                          )
                         : null,
                     onTap: () {
                       ref.read(readingProvider.notifier).setThemeMode(mode);
@@ -166,10 +200,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 final messenger = ScaffoldMessenger.of(context);
                 final navigator = Navigator.of(ctx);
 
-                await ref.read(readingProvider.notifier).saveArticle(
-                      titleController.text,
-                      _textController.text,
-                    );
+                await ref
+                    .read(readingProvider.notifier)
+                    .saveArticle(titleController.text, _textController.text);
 
                 navigator.pop();
                 messenger.showSnackBar(
@@ -207,7 +240,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     children: [
                       const Text(
                         'Kaydedilen Okuma Metinleri',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
@@ -233,7 +269,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                             child: ListTile(
                               title: Text(
                                 article.title,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               subtitle: Text(
                                 article.text.length > 80
@@ -241,13 +279,20 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                                     : article.text,
                               ),
                               trailing: IconButton(
-                                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.red,
+                                ),
                                 onPressed: () {
-                                  ref.read(readingProvider.notifier).deleteArticle(article.id);
+                                  ref
+                                      .read(readingProvider.notifier)
+                                      .deleteArticle(article.id);
                                 },
                               ),
                               onTap: () {
-                                ref.read(readingProvider.notifier).selectArticle(article);
+                                ref
+                                    .read(readingProvider.notifier)
+                                    .selectArticle(article);
                                 Navigator.pop(ctx);
                               },
                             ),
@@ -288,7 +333,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(readingProvider.notifier).updateCurrentText(inputCtrl.text);
+              ref
+                  .read(readingProvider.notifier)
+                  .updateCurrentText(inputCtrl.text);
               Navigator.pop(ctx);
             },
             child: const Text('Metni Yükle'),
@@ -326,10 +373,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 5),
         Text(
@@ -341,6 +385,36 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBottomAction({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -359,13 +433,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     final readingState = ref.watch(readingProvider);
     // Optimization: Only rebuild when the cards list changes, not on every flashcard state change
-    final flashcardCards = ref.watch(flashcardProvider.select((state) => state.cards));
-    
+    final flashcardCards = ref.watch(
+      flashcardProvider.select((state) => state.cards),
+    );
+
     final isFocusMode = readingState.isFocusMode;
     final themeColors = ReaderThemeColors.fromMode(readingState.themeMode);
 
     final cardMap = {
-      for (final card in flashcardCards) card.word.toLowerCase(): card.status
+      for (final card in flashcardCards) card.word.toLowerCase(): card.status,
     };
 
     return Scaffold(
@@ -376,42 +452,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               backgroundColor: themeColors.surface,
               foregroundColor: themeColors.defaultText,
               elevation: 0,
+              centerTitle: true,
               title: Text(
-                'İnteraktif Okuyucu',
-                style: TextStyle(color: themeColors.defaultText),
+                'İnteraktif Okuma',
+                style: TextStyle(
+                  color: themeColors.defaultText,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.palette_outlined),
-                  tooltip: 'Tema Seç',
-                  color: themeColors.defaultText,
-                  onPressed: () => _showThemeSelectorSheet(themeColors),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.bookmark_border_rounded),
-                  tooltip: 'Kayıtlı Metinler',
-                  color: themeColors.defaultText,
-                  onPressed: _showSavedArticlesSheet,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.save_outlined),
-                  tooltip: 'Metni Kaydet',
-                  color: themeColors.defaultText,
-                  onPressed: _showSaveArticleDialog,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_note_rounded),
-                  tooltip: 'Metni Düzenle',
-                  color: themeColors.defaultText,
-                  onPressed: _showNewTextDialog,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.fullscreen_rounded),
-                  tooltip: 'Odak Modu',
-                  color: themeColors.defaultText,
-                  onPressed: () => ref.read(readingProvider.notifier).toggleFocusMode(),
-                ),
-              ],
             ),
       body: SafeArea(
         child: Column(
@@ -432,7 +480,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                       icon: const Icon(Icons.fullscreen_exit_rounded, size: 28),
                       color: themeColors.defaultText.withValues(alpha: 0.7),
                       tooltip: 'Odak Modundan Çık',
-                      onPressed: () => ref.read(readingProvider.notifier).setFocusMode(false),
+                      onPressed: () => ref
+                          .read(readingProvider.notifier)
+                          .setFocusMode(false),
                     ),
                   ],
                 ),
@@ -461,35 +511,58 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
             if (!isFocusMode)
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: themeColors.surface,
-                  border: Border(top: BorderSide(color: themeColors.defaultText.withValues(alpha: 0.1))),
+                  border: Border(
+                    top: BorderSide(
+                      color: themeColors.defaultText.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: themeColors.defaultText,
-                          side: BorderSide(color: themeColors.defaultText.withValues(alpha: 0.3)),
-                        ),
-                        onPressed: _showNewTextDialog,
-                        icon: const Icon(Icons.paste_rounded, size: 18),
-                        label: const Text('Yeni Metin Yapıştır'),
-                      ),
+                    _buildBottomAction(
+                      icon: Icons.paste_rounded,
+                      label: 'Yeni Metin',
+                      color: themeColors.defaultText,
+                      onTap: _showNewTextDialog,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: themeColors.defaultText.withValues(alpha: 0.15),
-                          foregroundColor: themeColors.defaultText,
-                        ),
-                        onPressed: _showSavedArticlesSheet,
-                        icon: const Icon(Icons.folder_open_rounded, size: 18),
-                        label: const Text('Kayıtlı Metinler'),
-                      ),
+                    _buildBottomAction(
+                      icon: Icons.folder_open_rounded,
+                      label: 'Kayıtlılar',
+                      color: themeColors.defaultText,
+                      onTap: _showSavedArticlesSheet,
+                    ),
+                    _buildBottomAction(
+                      icon: Icons.palette_outlined,
+                      label: 'Tema',
+                      color: themeColors.defaultText,
+                      onTap: () => _showThemeSelectorSheet(themeColors),
+                    ),
+                    _buildBottomAction(
+                      icon: Icons.save_outlined,
+                      label: 'Kaydet',
+                      color: themeColors.defaultText,
+                      onTap: _showSaveArticleDialog,
+                    ),
+                    _buildBottomAction(
+                      icon: Icons.fullscreen_rounded,
+                      label: 'Odak Modu',
+                      color: themeColors.defaultText,
+                      onTap: () =>
+                          ref.read(readingProvider.notifier).toggleFocusMode(),
                     ),
                   ],
                 ),
@@ -540,7 +613,7 @@ class _ReaderParagraphState extends State<ReaderParagraph> {
   @override
   Widget build(BuildContext context) {
     if (widget.text.trim().isEmpty) {
-      return const SizedBox(height: 16); 
+      return const SizedBox(height: 16);
     }
 
     _clearRecognizers();
@@ -576,11 +649,15 @@ class _ReaderParagraphState extends State<ReaderParagraph> {
           decorationThickness = 2.0;
         } else if (status == 'learning') {
           wordColor = widget.colors.learningWordColor;
-          underlineColor = widget.colors.learningWordColor.withValues(alpha: 0.8);
+          underlineColor = widget.colors.learningWordColor.withValues(
+            alpha: 0.8,
+          );
           decorationThickness = 2.0;
         } else if (status == 'mastered') {
           wordColor = widget.colors.masteredWordColor;
-          underlineColor = widget.colors.masteredWordColor.withValues(alpha: 0.8);
+          underlineColor = widget.colors.masteredWordColor.withValues(
+            alpha: 0.8,
+          );
           decorationThickness = 2.0;
         } else {
           wordColor = widget.colors.unaddedWordColor;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/reading_article_model.dart';
 import '../services/supabase_service.dart';
@@ -100,6 +101,8 @@ class ReadingState {
   final bool isFocusMode;
   final String currentText;
   final ReaderThemeMode themeMode;
+  final double fontSize;
+  final double lineHeight;
 
   ReadingState({
     this.articles = const [],
@@ -108,6 +111,8 @@ class ReadingState {
     this.isFocusMode = false,
     String? currentText,
     this.themeMode = ReaderThemeMode.matteDark,
+    this.fontSize = 18.0,
+    this.lineHeight = 1.6,
   }) : currentText = currentText ?? defaultText;
 
   ReadingState copyWith({
@@ -117,6 +122,8 @@ class ReadingState {
     bool? isFocusMode,
     String? currentText,
     ReaderThemeMode? themeMode,
+    double? fontSize,
+    double? lineHeight,
   }) {
     return ReadingState(
       articles: articles ?? this.articles,
@@ -125,13 +132,43 @@ class ReadingState {
       isFocusMode: isFocusMode ?? this.isFocusMode,
       currentText: currentText ?? this.currentText,
       themeMode: themeMode ?? this.themeMode,
+      fontSize: fontSize ?? this.fontSize,
+      lineHeight: lineHeight ?? this.lineHeight,
     );
   }
 }
 
 class ReadingNotifier extends StateNotifier<ReadingState> {
   ReadingNotifier() : super(ReadingState()) {
-    loadReadings();
+    _initNotifier();
+  }
+
+  Future<void> _initNotifier() async {
+    await loadPreferences();
+    await loadReadings();
+  }
+
+  Future<void> loadPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final modeName = prefs.getString('reader_theme_mode');
+      final fontSize = prefs.getDouble('reader_font_size');
+      final lineHeight = prefs.getDouble('reader_line_height');
+
+      ReaderThemeMode mode = state.themeMode;
+      if (modeName != null) {
+        mode = ReaderThemeMode.values.firstWhere(
+          (m) => m.name == modeName,
+          orElse: () => ReaderThemeMode.matteDark,
+        );
+      }
+
+      state = state.copyWith(
+        themeMode: mode,
+        fontSize: fontSize ?? 18.0,
+        lineHeight: lineHeight ?? 1.6,
+      );
+    } catch (_) {}
   }
 
   Future<void> loadReadings() async {
@@ -156,8 +193,28 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     state = state.copyWith(currentText: text);
   }
 
-  void setThemeMode(ReaderThemeMode mode) {
+  Future<void> setThemeMode(ReaderThemeMode mode) async {
     state = state.copyWith(themeMode: mode);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('reader_theme_mode', mode.name);
+    } catch (_) {}
+  }
+
+  Future<void> setFontSize(double size) async {
+    state = state.copyWith(fontSize: size);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('reader_font_size', size);
+    } catch (_) {}
+  }
+
+  Future<void> setLineHeight(double height) async {
+    state = state.copyWith(lineHeight: height);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('reader_line_height', height);
+    } catch (_) {}
   }
 
   void selectArticle(ReadingArticleModel? article) {
