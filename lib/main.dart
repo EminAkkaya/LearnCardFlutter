@@ -27,14 +27,14 @@ class LearnCardApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeProvider);
+    final themeState = ref.watch(themeProvider);
 
     return MaterialApp(
       title: 'LearnCard Mobile',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+      theme: AppTheme.getLightTheme(themeState.primaryColor),
+      darkTheme: AppTheme.getDarkTheme(themeState.primaryColor),
+      themeMode: themeState.themeMode,
       home: const HomeScreen(),
     );
   }

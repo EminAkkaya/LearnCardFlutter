@@ -20,53 +20,15 @@ class FlashcardReviewScreen extends ConsumerStatefulWidget {
   ConsumerState<FlashcardReviewScreen> createState() => _FlashcardReviewScreenState();
 }
 
-class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _flipController;
-  late Animation<double> _flipAnimation;
-
-  bool _isFlipped = false;
+class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   int _currentIndex = 0;
   List<FlashcardModel>? _sessionCards;
 
   static const Color emerald = Color(0xFF10B981);
 
-  @override
-  void initState() {
-    super.initState();
-    _flipController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _flipController.dispose();
-    super.dispose();
-  }
-
-  void _flipCard() {
-    if (_isFlipped) {
-      _flipController.reverse();
-    } else {
-      _flipController.forward();
-    }
-    setState(() {
-      _isFlipped = !_isFlipped;
-    });
-  }
-
   void _handleRating(FlashcardModel card, ReviewRating rating) {
     if (!widget.isCustomStudy) {
       ref.read(flashcardProvider.notifier).reviewCard(card.id, rating);
-    }
-    if (_isFlipped) {
-      _flipController.reverse();
-      _isFlipped = false;
     }
     setState(() {
       _currentIndex += 1;
@@ -131,14 +93,12 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
                     if (widget.isCustomStudy) {
                       setState(() {
                         _currentIndex = 0;
-                        _isFlipped = false;
                       });
                     } else {
                       await ref.read(flashcardProvider.notifier).loadCards();
                       setState(() {
                         _sessionCards = ref.read(flashcardProvider).dueCards;
                         _currentIndex = 0;
-                        _isFlipped = false;
                       });
                     }
                   },
@@ -209,60 +169,144 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: GestureDetector(
-                  onTap: _flipCard,
-                  child: AnimatedBuilder(
-                    animation: _flipAnimation,
-                    builder: (context, child) {
-                      final double angle = _flipAnimation.value * pi;
-                      final isBackVisible = angle >= pi / 2;
-
-                      return Transform(
-                        transform: Matrix4.identity()
-                          ..setEntry(3, 2, 0.001)
-                          ..rotateY(angle),
-                        alignment: Alignment.center,
-                        child: Card(
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(28.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              gradient: LinearGradient(
-                                colors: isBackVisible
-                                    ? [
-                                        theme.colorScheme.secondaryContainer,
-                                        theme.colorScheme.surface,
-                                      ]
-                                    : [
-                                        theme.colorScheme.surface,
-                                        theme.colorScheme.primaryContainer.withOpacity(0.3),
-                                      ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: isBackVisible
-                                ? Transform(
-                                    transform: Matrix4.identity()..rotateY(pi),
-                                    alignment: Alignment.center,
-                                    child: _buildCardBack(card, theme, previews),
-                                  )
-                                : _buildCardFront(card, theme),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.95, end: 1.0).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
                           ),
                         ),
-                      );
-                    },
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _FlashcardItemView(
+                    key: ValueKey<String>('${card.id}_$_currentIndex'),
+                    card: card,
+                    previews: previews,
+                    onRating: (rating) => _handleRating(card, rating),
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FlashcardItemView extends ConsumerStatefulWidget {
+  final FlashcardModel card;
+  final Map<ReviewRating, String> previews;
+  final void Function(ReviewRating rating) onRating;
+
+  const _FlashcardItemView({
+    super.key,
+    required this.card,
+    required this.previews,
+    required this.onRating,
+  });
+
+  @override
+  ConsumerState<_FlashcardItemView> createState() => _FlashcardItemViewState();
+}
+
+class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _flipController;
+  late Animation<double> _flipAnimation;
+  bool _isFlipped = false;
+
+  static const Color emerald = Color(0xFF10B981);
+
+  @override
+  void initState() {
+    super.initState();
+    _flipController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    super.dispose();
+  }
+
+  void _flipCard() {
+    if (_isFlipped) {
+      _flipController.reverse();
+    } else {
+      _flipController.forward();
+    }
+    setState(() {
+      _isFlipped = !_isFlipped;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final card = widget.card;
+
+    return GestureDetector(
+      onTap: _flipCard,
+      child: AnimatedBuilder(
+        animation: _flipAnimation,
+        builder: (context, child) {
+          final double angle = _flipAnimation.value * pi;
+          final isBackVisible = angle >= pi / 2;
+
+          return Transform(
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(angle),
+            alignment: Alignment.center,
+            child: Card(
+              elevation: 6,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(28.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    colors: isBackVisible
+                        ? [
+                            theme.colorScheme.secondaryContainer,
+                            theme.colorScheme.surface,
+                          ]
+                        : [
+                            theme.colorScheme.surface,
+                            theme.colorScheme.primaryContainer.withOpacity(0.3),
+                          ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: isBackVisible
+                    ? Transform(
+                        transform: Matrix4.identity()..rotateY(pi),
+                        alignment: Alignment.center,
+                        child: _buildCardBack(card, theme, widget.previews),
+                      )
+                    : _buildCardFront(card, theme),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -431,28 +475,28 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen>
               label: 'Tekrar',
               days: previews[ReviewRating.again] ?? '',
               color: Colors.red,
-              onPressed: () => _handleRating(card, ReviewRating.again),
+              onPressed: () => widget.onRating(ReviewRating.again),
             ),
             const SizedBox(width: 8),
             _buildRatingBtn(
               label: 'Zor',
               days: previews[ReviewRating.hard] ?? '',
               color: Colors.orange,
-              onPressed: () => _handleRating(card, ReviewRating.hard),
+              onPressed: () => widget.onRating(ReviewRating.hard),
             ),
             const SizedBox(width: 8),
             _buildRatingBtn(
               label: 'İyi',
               days: previews[ReviewRating.good] ?? '',
               color: Colors.blue,
-              onPressed: () => _handleRating(card, ReviewRating.good),
+              onPressed: () => widget.onRating(ReviewRating.good),
             ),
             const SizedBox(width: 8),
             _buildRatingBtn(
               label: 'Kolay',
               days: previews[ReviewRating.easy] ?? '',
               color: emerald,
-              onPressed: () => _handleRating(card, ReviewRating.easy),
+              onPressed: () => widget.onRating(ReviewRating.easy),
             ),
           ],
         ),

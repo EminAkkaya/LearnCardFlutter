@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/flashcard_provider.dart';
-import '../../providers/theme_provider.dart';
+import '../settings/settings_screen.dart';
 
 class StatsOverviewScreen extends ConsumerWidget {
   final Function(int tabIndex)? onNavigateToTab;
@@ -15,7 +15,6 @@ class StatsOverviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cardState = ref.watch(flashcardProvider);
-    final isDark = ref.watch(themeProvider) == ThemeMode.dark;
 
     final totalCount = cardState.cards.length;
     final dueCount = cardState.dueCards.length;
@@ -30,9 +29,14 @@ class StatsOverviewScreen extends ConsumerWidget {
         title: const Text('Genel İstatistikler'),
         actions: [
           IconButton(
-            icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
-            tooltip: 'Tema Değiştir',
-            onPressed: () => ref.read(themeProvider.notifier).toggleTheme(),
+            icon: const Icon(Icons.settings_rounded),
+            tooltip: 'Ayarlar',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
           ),
         ],
       ),

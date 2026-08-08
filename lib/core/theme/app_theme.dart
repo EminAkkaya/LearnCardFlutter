@@ -19,103 +19,110 @@ class AppTheme {
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFF1F5F9);
 
-  static ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryColor,
+  static ThemeData getLightTheme([Color primary = primaryColor]) {
+    return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.light,
-      primary: primaryColor,
-      secondary: secondaryColor,
-      tertiary: accentColor,
-      surface: lightSurface,
-      error: errorColor,
-    ),
-    scaffoldBackgroundColor: lightBg,
-    textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.light().textTheme),
-    cardTheme: CardThemeData(
-      color: lightSurface,
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.05),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: lightBg,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: GoogleFonts.plusJakartaSans(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: const Color(0xFF0F172A),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        brightness: Brightness.light,
+        primary: primary,
+        secondary: secondaryColor,
+        tertiary: accentColor,
+        surface: lightSurface,
+        error: errorColor,
       ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
+      scaffoldBackgroundColor: lightBg,
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.light().textTheme),
+      cardTheme: CardThemeData(
+        color: lightSurface,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.05),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: lightBg,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFF0F172A),
         ),
       ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: lightSurface,
-      selectedItemColor: primaryColor,
-      unselectedItemColor: Color(0xFF94A3B8),
-      type: BottomNavigationBarType.fixed,
-      elevation: 8,
-    ),
-  );
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: lightSurface,
+        selectedItemColor: primary,
+        unselectedItemColor: const Color(0xFF94A3B8),
+        type: BottomNavigationBarType.fixed,
+        elevation: 8,
+      ),
+    );
+  }
 
-  static ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryColor,
+  static ThemeData getDarkTheme([Color primary = primaryColor]) {
+    return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
-      primary: primaryColor,
-      secondary: secondaryColor,
-      tertiary: accentColor,
-      surface: darkSurface,
-      error: errorColor,
-    ),
-    scaffoldBackgroundColor: darkBg,
-    textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme),
-    cardTheme: CardThemeData(
-      color: darkSurface,
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: darkBg,
-      elevation: 0,
-      centerTitle: true,
-      titleTextStyle: GoogleFonts.plusJakartaSans(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        brightness: Brightness.dark,
+        primary: primary,
+        secondary: secondaryColor,
+        tertiary: accentColor,
+        surface: darkSurface,
+        error: errorColor,
       ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
+      scaffoldBackgroundColor: darkBg,
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme),
+      cardTheme: CardThemeData(
+        color: darkSurface,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: darkBg,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
       ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: darkSurface,
-      selectedItemColor: primaryColor,
-      unselectedItemColor: Color(0xFF64748B),
-      type: BottomNavigationBarType.fixed,
-      elevation: 8,
-    ),
-  );
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: darkSurface,
+        selectedItemColor: primary,
+        unselectedItemColor: const Color(0xFF64748B),
+        type: BottomNavigationBarType.fixed,
+        elevation: 8,
+      ),
+    );
+  }
+
+  static ThemeData lightTheme = getLightTheme();
+  static ThemeData darkTheme = getDarkTheme();
 }

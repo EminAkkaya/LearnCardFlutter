@@ -1,9 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/text_parser.dart';
-import '../../../providers/reading_provider.dart'; // Ensure ReaderThemeColors is here or in its own file
+import '../../../providers/reading_provider.dart';
 
-class ReaderParagraph extends StatefulWidget {
+class ReaderParagraph extends ConsumerStatefulWidget {
   final String text;
   final bool isFocusMode;
   final Map<String, String> cardMap;
@@ -24,10 +25,10 @@ class ReaderParagraph extends StatefulWidget {
   });
 
   @override
-  State<ReaderParagraph> createState() => _ReaderParagraphState();
+  ConsumerState<ReaderParagraph> createState() => _ReaderParagraphState();
 }
 
-class _ReaderParagraphState extends State<ReaderParagraph> {
+class _ReaderParagraphState extends ConsumerState<ReaderParagraph> {
   final List<TapGestureRecognizer> _recognizers = [];
 
   @override

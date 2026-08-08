@@ -199,7 +199,36 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     state = state.copyWith(isLoading: true);
     try {
       final articles = await SupabaseService.getSavedReadings();
-      state = state.copyWith(articles: articles, isLoading: false);
+
+      ReadingArticleModel? restoredArticle;
+      String restoredText = state.currentText;
+
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final lastArticleId = prefs.getString('reader_last_article_id');
+        final lastCustomText = prefs.getString('reader_last_custom_text');
+
+        if (lastArticleId != null && lastArticleId.isNotEmpty) {
+          for (final a in articles) {
+            if (a.id == lastArticleId) {
+              restoredArticle = a;
+              restoredText = a.text;
+              break;
+            }
+          }
+        }
+
+        if (restoredArticle == null && lastCustomText != null && lastCustomText.isNotEmpty) {
+          restoredText = lastCustomText;
+        }
+      } catch (_) {}
+
+      state = state.copyWith(
+        articles: articles,
+        selectedArticle: restoredArticle,
+        currentText: restoredText,
+        isLoading: false,
+      );
     } catch (_) {
       state = state.copyWith(isLoading: false);
     }
@@ -213,8 +242,14 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     state = state.copyWith(isFocusMode: isFocus);
   }
 
-  void updateCurrentText(String text) {
-    state = state.copyWith(currentText: text, selectedArticle: null);
+  void updateCurrentText(String text) async {
+    final trimmed = text.trim();
+    state = state.copyWith(currentText: trimmed, selectedArticle: null);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('reader_last_article_id');
+      await prefs.setString('reader_last_custom_text', trimmed);
+    } catch (_) {}
   }
 
   void setSelectedFolder(String folder) {
@@ -295,14 +330,23 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     } catch (_) {}
   }
 
-  void selectArticle(ReadingArticleModel? article) {
+  void selectArticle(ReadingArticleModel? article) async {
     if (article != null) {
       state = state.copyWith(
         selectedArticle: article,
         currentText: article.text,
       );
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('reader_last_article_id', article.id);
+        await prefs.remove('reader_last_custom_text');
+      } catch (_) {}
     } else {
       state = state.copyWith(selectedArticle: null);
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('reader_last_article_id');
+      } catch (_) {}
     }
   }
 
@@ -323,6 +367,12 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       currentText: text.trim(),
     );
 
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('reader_last_article_id', article.id);
+      await prefs.remove('reader_last_custom_text');
+    } catch (_) {}
+
     await addCustomFolder(folderName);
     await SupabaseService.saveReadingArticle(article);
     return article;
@@ -342,10 +392,17 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
   Future<void> deleteArticle(String id) async {
     final updated = state.articles.where((a) => a.id != id).toList();
     ReadingArticleModel? selected = state.selectedArticle;
-    if (selected?.id == id) {
+    final wasSelected = (selected?.id == id);
+    if (wasSelected) {
       selected = null;
     }
     state = state.copyWith(articles: updated, selectedArticle: selected);
+    if (wasSelected) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('reader_last_article_id');
+      } catch (_) {}
+    }
     await SupabaseService.deleteReadingArticle(id);
   }
 
