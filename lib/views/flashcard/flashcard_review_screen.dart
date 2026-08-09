@@ -515,28 +515,36 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
             color: color.withOpacity(0.12),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: color.withOpacity(0.4)),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                  fontSize: 14,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                    fontSize: 13,
+                  ),
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                days,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: color.withOpacity(0.8),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  days,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: color.withOpacity(0.85),
+                  ),
                 ),
               ),
             ],

@@ -111,7 +111,12 @@ class SupabaseService {
     try {
       final rows = cards.map((c) => c.toSupabaseRow()).toList();
       await _client.from('flashcards').upsert(rows, onConflict: 'id');
-    } catch (_) {}
+    } catch (_) {
+      try {
+        final rows = cards.map((c) => c.toSupabaseRow()..remove('learning_step')).toList();
+        await _client.from('flashcards').upsert(rows, onConflict: 'id');
+      } catch (_) {}
+    }
   }
 
   static Future<void> upsertCard(FlashcardModel card) async {
@@ -126,7 +131,12 @@ class SupabaseService {
 
     try {
       await _client.from('flashcards').upsert(card.toSupabaseRow(), onConflict: 'id');
-    } catch (_) {}
+    } catch (_) {
+      try {
+        final row = card.toSupabaseRow()..remove('learning_step');
+        await _client.from('flashcards').upsert(row, onConflict: 'id');
+      } catch (_) {}
+    }
   }
 
   static Future<void> deleteCard(String cardId) async {

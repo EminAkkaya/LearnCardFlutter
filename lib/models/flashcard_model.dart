@@ -10,6 +10,7 @@ class FlashcardModel {
   final String status; // 'new', 'learning', 'mastered'
   final int interval;
   final int repetitions;
+  final int learningStep;
   final double easeFactor;
   final String nextReviewDate;
   final String createdAt;
@@ -26,6 +27,7 @@ class FlashcardModel {
     this.status = 'new',
     this.interval = 0,
     this.repetitions = 0,
+    this.learningStep = 0,
     this.easeFactor = 2.5,
     required this.nextReviewDate,
     required this.createdAt,
@@ -45,6 +47,11 @@ class FlashcardModel {
       status: map['status']?.toString() ?? 'new',
       interval: (map['interval'] is num) ? (map['interval'] as num).toInt() : 0,
       repetitions: (map['repetitions'] is num) ? (map['repetitions'] as num).toInt() : 0,
+      learningStep: (map['learning_step'] is num)
+          ? (map['learning_step'] as num).toInt()
+          : (map['learningStep'] is num)
+              ? (map['learningStep'] as num).toInt()
+              : 0,
       easeFactor: (map['ease_factor'] is num)
           ? (map['ease_factor'] as num).toDouble()
           : (map['easeFactor'] is num)
@@ -69,6 +76,7 @@ class FlashcardModel {
       'status': status,
       'interval': interval,
       'repetitions': repetitions,
+      'learning_step': learningStep,
       'ease_factor': easeFactor,
       'next_review_date': nextReviewDate,
       'created_at': createdAt,
@@ -89,6 +97,7 @@ class FlashcardModel {
     String? status,
     int? interval,
     int? repetitions,
+    int? learningStep,
     double? easeFactor,
     String? nextReviewDate,
     String? createdAt,
@@ -105,6 +114,7 @@ class FlashcardModel {
       status: status ?? this.status,
       interval: interval ?? this.interval,
       repetitions: repetitions ?? this.repetitions,
+      learningStep: learningStep ?? this.learningStep,
       easeFactor: easeFactor ?? this.easeFactor,
       nextReviewDate: nextReviewDate ?? this.nextReviewDate,
       createdAt: createdAt ?? this.createdAt,
