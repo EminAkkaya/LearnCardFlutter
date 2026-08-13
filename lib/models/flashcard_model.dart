@@ -35,6 +35,20 @@ class FlashcardModel {
 
   /// Factory constructor to map Supabase table row (or Local JSON) to Dart object
   factory FlashcardModel.fromMap(Map<String, dynamic> map) {
+    int parseInt(dynamic val, int defaultValue) {
+      if (val == null) return defaultValue;
+      if (val is num) return val.toInt();
+      if (val is String) return int.tryParse(val) ?? defaultValue;
+      return defaultValue;
+    }
+
+    double parseDouble(dynamic val, double defaultValue) {
+      if (val == null) return defaultValue;
+      if (val is num) return val.toDouble();
+      if (val is String) return double.tryParse(val) ?? defaultValue;
+      return defaultValue;
+    }
+
     return FlashcardModel(
       id: map['id']?.toString() ?? '',
       word: map['word']?.toString() ?? '',
@@ -45,18 +59,10 @@ class FlashcardModel {
       exampleSentence: map['example_sentence']?.toString() ?? map['exampleSentence']?.toString() ?? '',
       audioUrl: map['audio_url']?.toString() ?? map['audioUrl']?.toString() ?? '',
       status: map['status']?.toString() ?? 'new',
-      interval: (map['interval'] is num) ? (map['interval'] as num).toInt() : 0,
-      repetitions: (map['repetitions'] is num) ? (map['repetitions'] as num).toInt() : 0,
-      learningStep: (map['learning_step'] is num)
-          ? (map['learning_step'] as num).toInt()
-          : (map['learningStep'] is num)
-              ? (map['learningStep'] as num).toInt()
-              : 0,
-      easeFactor: (map['ease_factor'] is num)
-          ? (map['ease_factor'] as num).toDouble()
-          : (map['easeFactor'] is num)
-              ? (map['easeFactor'] as num).toDouble()
-              : 2.5,
+      interval: parseInt(map['interval'], 0),
+      repetitions: parseInt(map['repetitions'], 0),
+      learningStep: parseInt(map['learning_step'] ?? map['learningStep'], 0),
+      easeFactor: parseDouble(map['ease_factor'] ?? map['easeFactor'], 2.5),
       nextReviewDate: map['next_review_date']?.toString() ?? map['nextReviewDate']?.toString() ?? DateTime.now().toIso8601String(),
       createdAt: map['created_at']?.toString() ?? map['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
     );

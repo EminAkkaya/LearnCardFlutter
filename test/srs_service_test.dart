@@ -138,5 +138,36 @@ void main() {
       expect(updated.interval, greaterThanOrEqualTo(SRSService.masteredMinIntervalDays));
       expect(updated.status, equals('mastered'));
     });
+
+    test('7. isCardDue strictly respects minute-based scheduled time', () {
+      final now = DateTime.now();
+
+      // Card scheduled 10 minutes in the past -> DUE
+      final cardPast = newCard.copyWith(
+        status: 'learning',
+        interval: 0,
+        nextReviewDate: now.subtract(const Duration(minutes: 10)).toIso8601String(),
+      );
+      expect(SRSService.isCardDue(cardPast), isTrue);
+
+      // Card scheduled 10 minutes in the future -> NOT DUE YET
+      final cardFuture = newCard.copyWith(
+        status: 'learning',
+        interval: 0,
+        nextReviewDate: now.add(const Duration(minutes: 10)).toIso8601String(),
+      );
+      expect(SRSService.isCardDue(cardFuture), isFalse);
+    });
+
+    test('8. isCardDue correctly parses Supabase timestamptz with +00 offset (e.g. 2026-08-09 23:29:10.805991+00)', () {
+      final cardUser = newCard.copyWith(
+        status: 'learning',
+        interval: 0,
+        nextReviewDate: '2026-08-09 23:29:10.805991+00',
+      );
+
+      // Card target is 23:29:10, current local time is 23:31+, so it MUST be due
+      expect(SRSService.isCardDue(cardUser), isTrue);
+    });
   });
 }

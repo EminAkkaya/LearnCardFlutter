@@ -17,7 +17,8 @@ class FlashcardReviewScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FlashcardReviewScreen> createState() => _FlashcardReviewScreenState();
+  ConsumerState<FlashcardReviewScreen> createState() =>
+      _FlashcardReviewScreenState();
 }
 
 class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
@@ -41,13 +42,22 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
     final cardState = ref.watch(flashcardProvider);
 
     if (cardState.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    _sessionCards ??= widget.customCards ?? cardState.dueCards;
-    final dueCards = _sessionCards!;
+    if (!widget.isCustomStudy) {
+      if (_sessionCards == null ||
+          (_sessionCards!.isEmpty && cardState.dueCards.isNotEmpty) ||
+          (_currentIndex >= _sessionCards!.length && cardState.dueCards.isNotEmpty)) {
+        _sessionCards = widget.customCards ?? cardState.dueCards;
+        if (_currentIndex >= _sessionCards!.length) {
+          _currentIndex = 0;
+        }
+      }
+    } else {
+      _sessionCards ??= widget.customCards ?? cardState.dueCards;
+    }
+    final dueCards = _sessionCards ?? [];
 
     if (dueCards.isEmpty || _currentIndex >= dueCards.length) {
       return Scaffold(
@@ -71,7 +81,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Tebrikler! 🎉',
+                  'Tebrikler!',
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -103,7 +113,11 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                     }
                   },
                   icon: const Icon(Icons.refresh_rounded),
-                  label: Text(widget.isCustomStudy ? 'Aynı Seansı Tekrar Et' : 'Kartları Yeniden Yükle'),
+                  label: Text(
+                    widget.isCustomStudy
+                        ? 'Aynı Seansı Tekrar Et'
+                        : 'Kartları Yeniden Yükle',
+                  ),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 50),
                   ),
@@ -131,14 +145,19 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isCustomStudy ? 'Özel Çalışma Modu' : 'Kart Tekrarı (SRS)'),
+        title: Text(
+          widget.isCustomStudy ? 'Özel Çalışma Modu' : 'Kart Tekrarı (SRS)',
+        ),
         centerTitle: true,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
@@ -171,20 +190,21 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(
-                        scale: Tween<double>(begin: 0.95, end: 1.0).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: ScaleTransition(
+                            scale: Tween<double>(begin: 0.95, end: 1.0).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                            child: child,
                           ),
-                        ),
-                        child: child,
-                      ),
-                    );
-                  },
+                        );
+                      },
                   child: _FlashcardItemView(
                     key: ValueKey<String>('${card.id}_$_currentIndex'),
                     card: card,
@@ -359,10 +379,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
           const SizedBox(height: 4),
           Text(
             '(${card.partOfSpeech})',
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.secondary,
-            ),
+            style: TextStyle(fontSize: 14, color: theme.colorScheme.secondary),
           ),
         ],
         if (card.exampleSentence.isNotEmpty) ...[
@@ -435,7 +452,9 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
         ),
         const SizedBox(height: 8),
         Text(
-          card.trTranslation.isNotEmpty ? card.trTranslation : 'Çeviri bulunamadı',
+          card.trTranslation.isNotEmpty
+              ? card.trTranslation
+              : 'Çeviri bulunamadı',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),

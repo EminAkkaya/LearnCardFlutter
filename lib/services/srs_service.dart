@@ -173,13 +173,27 @@ class SRSService {
     );
   }
 
+  /// Helper to parse date strings (including Supabase timestamptz with +00 offset) as local device time
+  static DateTime _parseAsLocal(String dateStr) {
+    if (dateStr.isEmpty) return DateTime.now();
+    try {
+      final cleanStr = dateStr
+          .replaceAll('Z', '')
+          .replaceAll(RegExp(r'[\+\-]\d{2}(:\d{2})?$'), '')
+          .replaceAll(' ', 'T');
+      return DateTime.parse(cleanStr);
+    } catch (_) {
+      return DateTime.tryParse(dateStr) ?? DateTime.now();
+    }
+  }
+
   /// Calculates next review interval preview in string format for each rating
   static Map<ReviewRating, String> getNextIntervalPreviews(FlashcardModel card) {
     final Map<ReviewRating, String> previews = {};
     final DateTime now = DateTime.now();
     for (final rating in ReviewRating.values) {
       final updated = calculateSRS(card, rating);
-      final DateTime nextDate = DateTime.tryParse(updated.nextReviewDate) ?? now;
+      final DateTime nextDate = _parseAsLocal(updated.nextReviewDate);
       final Duration diff = nextDate.difference(now);
 
       if (diff.inMinutes < 60) {
@@ -194,17 +208,21 @@ class SRSService {
     return previews;
   }
 
-  /// Checks if card is due for review today or overdue
+  /// Checks if card is due for review (its exact scheduled date/time has arrived or passed)
   static bool isCardDue(FlashcardModel card) {
+    if (card.status == 'new') return true;
     if (card.nextReviewDate.isEmpty) return true;
+
     final DateTime now = DateTime.now();
+
     try {
-      final DateTime reviewDate = DateTime.parse(card.nextReviewDate);
+      final DateTime reviewDate = _parseAsLocal(card.nextReviewDate);
       return reviewDate.isBefore(now) || reviewDate.isAtSameMomentAs(now);
     } catch (e) {
-      // Fallback for older formats (YYYY-MM-DD)
+      // Fallback for YYYY-MM-DD string comparisons
       final String todayStr = now.toIso8601String().split('T')[0];
-      return card.nextReviewDate.compareTo(todayStr) <= 0;
+      final String cardDateStr = card.nextReviewDate.split('T')[0].split(' ')[0];
+      return cardDateStr.compareTo(todayStr) <= 0;
     }
   }
 }
