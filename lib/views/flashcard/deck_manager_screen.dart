@@ -97,7 +97,7 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
                   'Hiç kart bulunamadı.',
                   style: TextStyle(
                     fontSize: 16,
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                   ),
                 ),
               ),

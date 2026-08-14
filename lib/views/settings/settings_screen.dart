@@ -98,7 +98,7 @@ class SettingsScreen extends ConsumerWidget {
                   runSpacing: 14,
                   children: ThemeNotifier.colorOptions.map((option) {
                     final isSelected =
-                        themeState.primaryColor.value == option.color.value;
+                        themeState.primaryColor.toARGB32() == option.color.toARGB32();
                     return InkWell(
                       onTap: () => themeNotifier.setPrimaryColor(option.color),
                       borderRadius: BorderRadius.circular(12),
@@ -109,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? option.color.withOpacity(0.15)
+                              ? option.color.withValues(alpha: 0.15)
                               : theme.colorScheme.surface,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
@@ -130,7 +130,7 @@ class SettingsScreen extends ConsumerWidget {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: option.color.withOpacity(0.4),
+                                    color: option.color.withValues(alpha: 0.4),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -184,8 +184,8 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: themeState.primaryColor.withOpacity(
-                        0.15,
+                      backgroundColor: themeState.primaryColor.withValues(
+                        alpha: 0.15,
                       ),
                       child: Icon(
                         Icons.touch_app_rounded,
@@ -198,8 +198,8 @@ class SettingsScreen extends ConsumerWidget {
                   const Divider(height: 1),
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: themeState.primaryColor.withOpacity(
-                        0.15,
+                      backgroundColor: themeState.primaryColor.withValues(
+                        alpha: 0.15,
                       ),
                       child: Icon(
                         Icons.vibration_rounded,
@@ -212,8 +212,8 @@ class SettingsScreen extends ConsumerWidget {
                   const Divider(height: 1),
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: themeState.primaryColor.withOpacity(
-                        0.15,
+                      backgroundColor: themeState.primaryColor.withValues(
+                        alpha: 0.15,
                       ),
                       child: Icon(
                         Icons.cloud_done_rounded,
@@ -284,7 +284,7 @@ class SettingsScreen extends ConsumerWidget {
       onTap: onTap,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: CircleAvatar(
-        backgroundColor: iconColor.withOpacity(0.15),
+        backgroundColor: iconColor.withValues(alpha: 0.15),
         child: Icon(icon, color: iconColor),
       ),
       title: Text(
@@ -307,13 +307,13 @@ class SettingsScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
-          colors: [primary, primary.withOpacity(0.7)],
+          colors: [primary, primary.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: primary.withOpacity(0.3),
+            color: primary.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -339,7 +339,7 @@ class SettingsScreen extends ConsumerWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.25),
+                  color: Colors.white.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -387,7 +387,7 @@ class SettingsScreen extends ConsumerWidget {
                 height: 8,
                 width: 80,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: FractionallySizedBox(

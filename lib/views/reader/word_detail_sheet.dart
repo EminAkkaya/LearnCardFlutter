@@ -95,7 +95,7 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -123,7 +123,7 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withOpacity(0.1),
+                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -142,7 +142,7 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                           _dictResult!.phonetic,
                           style: TextStyle(
                             fontSize: 14,
-                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -217,7 +217,7 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -235,7 +235,7 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                     ? Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: emerald.withOpacity(0.15),
+                          color: emerald.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: emerald),
                         ),

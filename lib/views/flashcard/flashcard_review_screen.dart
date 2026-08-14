@@ -70,7 +70,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: emerald.withOpacity(0.1),
+                    color: emerald.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -94,7 +94,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -310,7 +310,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
                           ]
                         : [
                             theme.colorScheme.surface,
-                            theme.colorScheme.primaryContainer.withOpacity(0.3),
+                            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                           ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -341,7 +341,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.15),
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -371,7 +371,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
             style: TextStyle(
               fontSize: 16,
               fontStyle: FontStyle.italic,
-              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -387,7 +387,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -484,7 +484,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 10),
@@ -536,9 +536,9 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.4)),
+            border: Border.all(color: color.withValues(alpha: 0.4)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -562,7 +562,7 @@ class _FlashcardItemViewState extends ConsumerState<_FlashcardItemView>
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: color.withOpacity(0.85),
+                    color: color.withValues(alpha: 0.85),
                   ),
                 ),
               ),

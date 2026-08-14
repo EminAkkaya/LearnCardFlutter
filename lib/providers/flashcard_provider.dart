@@ -59,8 +59,11 @@ class FlashcardState {
 }
 
 class FlashcardNotifier extends StateNotifier<FlashcardState> {
-  FlashcardNotifier() : super(FlashcardState()) {
-    loadCards();
+  FlashcardNotifier([FlashcardState? initialState, bool autoLoad = true])
+      : super(initialState ?? FlashcardState()) {
+    if (autoLoad && initialState == null) {
+      loadCards();
+    }
   }
 
   Future<void> loadCards() async {

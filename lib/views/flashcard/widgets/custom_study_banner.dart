@@ -25,7 +25,7 @@ class CustomStudyBanner extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -33,7 +33,7 @@ class CustomStudyBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.15),
+              color: theme.colorScheme.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -59,8 +59,8 @@ class CustomStudyBanner extends StatelessWidget {
                   'Algoritmayı etkilemeden istediğin kelimeleri çalış',
                   style: TextStyle(
                     fontSize: 12,
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(
-                      0.7,
+                    color: theme.textTheme.bodyMedium?.color?.withValues(
+                      alpha: 0.7,
                     ),
                   ),
                 ),

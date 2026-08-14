@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import '../core/database/app_database.dart';
 import '../models/reading_article_model.dart';
 import '../services/supabase_service.dart';
 
@@ -161,8 +161,14 @@ class ReadingState {
 const Object _sentinel = Object();
 
 class ReadingNotifier extends StateNotifier<ReadingState> {
-  ReadingNotifier() : super(ReadingState()) {
-    _initNotifier();
+  final AppDatabase _db;
+
+  ReadingNotifier([AppDatabase? database, bool autoInit = true])
+      : _db = database ?? appDatabase,
+        super(ReadingState()) {
+    if (autoInit) {
+      _initNotifier();
+    }
   }
 
   Future<void> _initNotifier() async {
@@ -172,11 +178,10 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
 
   Future<void> loadPreferences() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final modeName = prefs.getString('reader_theme_mode');
-      final fontSize = prefs.getDouble('reader_font_size');
-      final lineHeight = prefs.getDouble('reader_line_height');
-      final savedFolders = prefs.getStringList('reader_custom_folders');
+      final modeName = await _db.getString('reader_theme_mode');
+      final fontSize = await _db.getDouble('reader_font_size');
+      final lineHeight = await _db.getDouble('reader_line_height');
+      final savedFolders = await _db.getStringList('reader_custom_folders');
 
       ReaderThemeMode mode = state.themeMode;
       if (modeName != null) {
@@ -204,9 +209,8 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       String restoredText = state.currentText;
 
       try {
-        final prefs = await SharedPreferences.getInstance();
-        final lastArticleId = prefs.getString('reader_last_article_id');
-        final lastCustomText = prefs.getString('reader_last_custom_text');
+        final lastArticleId = await _db.getString('reader_last_article_id');
+        final lastCustomText = await _db.getString('reader_last_custom_text');
 
         if (lastArticleId != null && lastArticleId.isNotEmpty) {
           for (final a in articles) {
@@ -246,9 +250,8 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     final trimmed = text.trim();
     state = state.copyWith(currentText: trimmed, selectedArticle: null);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('reader_last_article_id');
-      await prefs.setString('reader_last_custom_text', trimmed);
+      await _db.removeKey('reader_last_article_id');
+      await _db.setString('reader_last_custom_text', trimmed);
     } catch (_) {}
   }
 
@@ -263,8 +266,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       final updatedFolders = [...state.customFolders, trimmed];
       state = state.copyWith(customFolders: updatedFolders);
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setStringList('reader_custom_folders', updatedFolders);
+        await _db.setStringList('reader_custom_folders', updatedFolders);
       } catch (_) {}
     }
   }
@@ -293,8 +295,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       updatedFolders = state.customFolders.where((f) => f != trimmed).toList();
       stateChanged = true;
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setStringList('reader_custom_folders', updatedFolders);
+        await _db.setStringList('reader_custom_folders', updatedFolders);
       } catch (_) {}
     }
 
@@ -309,24 +310,21 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
   Future<void> setThemeMode(ReaderThemeMode mode) async {
     state = state.copyWith(themeMode: mode);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('reader_theme_mode', mode.name);
+      await _db.setString('reader_theme_mode', mode.name);
     } catch (_) {}
   }
 
   Future<void> setFontSize(double size) async {
     state = state.copyWith(fontSize: size);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble('reader_font_size', size);
+      await _db.setDouble('reader_font_size', size);
     } catch (_) {}
   }
 
   Future<void> setLineHeight(double height) async {
     state = state.copyWith(lineHeight: height);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble('reader_line_height', height);
+      await _db.setDouble('reader_line_height', height);
     } catch (_) {}
   }
 
@@ -337,15 +335,13 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
         currentText: article.text,
       );
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('reader_last_article_id', article.id);
-        await prefs.remove('reader_last_custom_text');
+        await _db.setString('reader_last_article_id', article.id);
+        await _db.removeKey('reader_last_custom_text');
       } catch (_) {}
     } else {
       state = state.copyWith(selectedArticle: null);
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('reader_last_article_id');
+        await _db.removeKey('reader_last_article_id');
       } catch (_) {}
     }
   }
@@ -368,9 +364,8 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     );
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('reader_last_article_id', article.id);
-      await prefs.remove('reader_last_custom_text');
+      await _db.setString('reader_last_article_id', article.id);
+      await _db.removeKey('reader_last_custom_text');
     } catch (_) {}
 
     await addCustomFolder(folderName);
@@ -399,8 +394,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     state = state.copyWith(articles: updated, selectedArticle: selected);
     if (wasSelected) {
       try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('reader_last_article_id');
+        await _db.removeKey('reader_last_article_id');
       } catch (_) {}
     }
     await SupabaseService.deleteReadingArticle(id);
@@ -415,19 +409,17 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
 
   Future<void> savePosition(int paragraphIndex, double offset) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final key = currentTextKey;
-      await prefs.setInt('reader_last_para_$key', paragraphIndex);
-      await prefs.setDouble('reader_last_offset_$key', offset);
+      await _db.setInt('reader_last_para_$key', paragraphIndex);
+      await _db.setDouble('reader_last_offset_$key', offset);
     } catch (_) {}
   }
 
   Future<Map<String, dynamic>> loadPosition({String? customKey}) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final key = customKey ?? currentTextKey;
-      final para = prefs.getInt('reader_last_para_$key') ?? 0;
-      final offset = prefs.getDouble('reader_last_offset_$key') ?? 0.0;
+      final para = await _db.getInt('reader_last_para_$key') ?? 0;
+      final offset = await _db.getDouble('reader_last_offset_$key') ?? 0.0;
       return {'paragraphIndex': para, 'offset': offset};
     } catch (_) {
       return {'paragraphIndex': 0, 'offset': 0.0};
@@ -436,5 +428,6 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
 }
 
 final readingProvider = StateNotifierProvider<ReadingNotifier, ReadingState>((ref) {
-  return ReadingNotifier();
+  final db = ref.watch(appDatabaseProvider);
+  return ReadingNotifier(db);
 });

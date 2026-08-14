@@ -40,7 +40,7 @@ class DeckCardListItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontStyle: FontStyle.italic,
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                 ),
               ),
           ],
@@ -135,7 +135,7 @@ class DeckCardListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

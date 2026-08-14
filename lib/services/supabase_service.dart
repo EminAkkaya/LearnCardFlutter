@@ -1,13 +1,9 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/database/app_database.dart';
 import '../models/flashcard_model.dart';
 import '../models/reading_article_model.dart';
 
 class SupabaseService {
-  static const String _cardsStorageKey = 'learncard_flashcards_v2';
-  static const String _readingsStorageKey = 'learncard_saved_readings_v1';
-
   static SupabaseClient get _client => Supabase.instance.client;
 
   static final List<Map<String, dynamic>> _seedCards = [
@@ -74,11 +70,11 @@ class SupabaseService {
   ];
 
   // ---------------------------------------------------------------------------
-  // FLASHCARDS TABLE OPERATIONS
+  // FLASHCARDS TABLE OPERATIONS (DRIFT + SUPABASE)
   // ---------------------------------------------------------------------------
 
   static Future<List<FlashcardModel>> getSavedCards() async {
-    List<FlashcardModel> localCards = await _getLocalCards();
+    List<FlashcardModel> localCards = await appDatabase.getAllFlashcards();
 
     try {
       final List<dynamic> data = await _client
@@ -88,7 +84,7 @@ class SupabaseService {
 
       if (data.isNotEmpty) {
         final cards = data.map((row) => FlashcardModel.fromMap(row as Map<String, dynamic>)).toList();
-        await _saveLocalCards(cards);
+        await appDatabase.batchUpsertFlashcards(cards);
         return cards;
       } else {
         if (localCards.isEmpty) {
@@ -101,13 +97,13 @@ class SupabaseService {
 
     if (localCards.isEmpty) {
       localCards = _seedCards.map((c) => FlashcardModel.fromMap(c)).toList();
-      await _saveLocalCards(localCards);
+      await appDatabase.batchUpsertFlashcards(localCards);
     }
     return localCards;
   }
 
   static Future<void> saveCardsToSupabase(List<FlashcardModel> cards) async {
-    await _saveLocalCards(cards);
+    await appDatabase.batchUpsertFlashcards(cards);
     try {
       final rows = cards.map((c) => c.toSupabaseRow()).toList();
       await _client.from('flashcards').upsert(rows, onConflict: 'id');
@@ -120,14 +116,7 @@ class SupabaseService {
   }
 
   static Future<void> upsertCard(FlashcardModel card) async {
-    final cards = await _getLocalCards();
-    final index = cards.indexWhere((c) => c.id == card.id);
-    if (index != -1) {
-      cards[index] = card;
-    } else {
-      cards.add(card);
-    }
-    await _saveLocalCards(cards);
+    await appDatabase.upsertFlashcard(card);
 
     try {
       await _client.from('flashcards').upsert(card.toSupabaseRow(), onConflict: 'id');
@@ -140,36 +129,15 @@ class SupabaseService {
   }
 
   static Future<void> deleteCard(String cardId) async {
-    final cards = await _getLocalCards();
-    cards.removeWhere((c) => c.id == cardId);
-    await _saveLocalCards(cards);
+    await appDatabase.deleteFlashcard(cardId);
 
     try {
       await _client.from('flashcards').delete().eq('id', cardId);
     } catch (_) {}
   }
 
-  static Future<List<FlashcardModel>> _getLocalCards() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? jsonStr = prefs.getString(_cardsStorageKey);
-    if (jsonStr == null || jsonStr.isEmpty) return [];
-
-    try {
-      final List decoded = jsonDecode(jsonStr);
-      return decoded.map((item) => FlashcardModel.fromMap(item as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  static Future<void> _saveLocalCards(List<FlashcardModel> cards) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = jsonEncode(cards.map((c) => c.toSupabaseRow()).toList());
-    await prefs.setString(_cardsStorageKey, jsonStr);
-  }
-
   // ---------------------------------------------------------------------------
-  // SAVED READINGS TABLE OPERATIONS
+  // SAVED READINGS TABLE OPERATIONS (DRIFT + SUPABASE)
   // ---------------------------------------------------------------------------
 
   static Future<List<ReadingArticleModel>> getSavedReadings() async {
@@ -180,18 +148,15 @@ class SupabaseService {
           .order('created_at', ascending: false);
 
       final readings = data.map((row) => ReadingArticleModel.fromMap(row as Map<String, dynamic>)).toList();
-      await _saveLocalReadings(readings);
+      await appDatabase.batchUpsertReadingArticles(readings);
       return readings;
     } catch (_) {}
 
-    return await _getLocalReadings();
+    return await appDatabase.getAllReadingArticles();
   }
 
   static Future<void> saveReadingArticle(ReadingArticleModel article) async {
-    final current = await _getLocalReadings();
-    current.removeWhere((r) => r.id == article.id);
-    current.insert(0, article);
-    await _saveLocalReadings(current);
+    await appDatabase.upsertReadingArticle(article);
 
     try {
       await _client.from('saved_readings').upsert(article.toSupabaseRow(), onConflict: 'id');
@@ -199,31 +164,10 @@ class SupabaseService {
   }
 
   static Future<void> deleteReadingArticle(String articleId) async {
-    final current = await _getLocalReadings();
-    current.removeWhere((r) => r.id == articleId);
-    await _saveLocalReadings(current);
+    await appDatabase.deleteReadingArticle(articleId);
 
     try {
       await _client.from('saved_readings').delete().eq('id', articleId);
     } catch (_) {}
-  }
-
-  static Future<List<ReadingArticleModel>> _getLocalReadings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? jsonStr = prefs.getString(_readingsStorageKey);
-    if (jsonStr == null || jsonStr.isEmpty) return [];
-
-    try {
-      final List decoded = jsonDecode(jsonStr);
-      return decoded.map((item) => ReadingArticleModel.fromMap(item as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  static Future<void> _saveLocalReadings(List<ReadingArticleModel> readings) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = jsonEncode(readings.map((r) => r.toSupabaseRow()).toList());
-    await prefs.setString(_readingsStorageKey, jsonStr);
   }
 }

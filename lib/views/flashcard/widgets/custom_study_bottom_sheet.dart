@@ -53,7 +53,7 @@ void showCustomStudyBottomSheet(BuildContext context, FlashcardState cardState) 
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -82,7 +82,7 @@ void showCustomStudyBottomSheet(BuildContext context, FlashcardState cardState) 
                     fontSize: 13,
                     color: Theme.of(
                       context,
-                    ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    ).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                   ),
                 ),
                 const Divider(height: 24),
@@ -175,7 +175,7 @@ void showCustomStudyBottomSheet(BuildContext context, FlashcardState cardState) 
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
-                    ).colorScheme.primaryContainer.withOpacity(0.4),
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(

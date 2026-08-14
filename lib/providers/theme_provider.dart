@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../core/database/app_database.dart';
 
 class AppColorOption {
   final String name;
@@ -43,8 +43,11 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     AppColorOption(name: 'Kırmızı', color: Color(0xFFEF4444)),
   ];
 
-  ThemeNotifier()
-      : super(const ThemeState(
+  final AppDatabase _db;
+
+  ThemeNotifier([AppDatabase? database])
+      : _db = database ?? appDatabase,
+        super(const ThemeState(
           themeMode: ThemeMode.dark,
           primaryColor: defaultPrimary,
         )) {
@@ -55,9 +58,8 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   static const String _prefColorKey = 'app_primary_color';
 
   Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? isDarkStr = prefs.getString(_prefThemeKey);
-    final int? colorValue = prefs.getInt(_prefColorKey);
+    final String? isDarkStr = await _db.getString(_prefThemeKey);
+    final int? colorValue = await _db.getInt(_prefColorKey);
 
     ThemeMode mode = ThemeMode.dark;
     if (isDarkStr == 'light') {
@@ -78,17 +80,15 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   Future<void> setThemeMode(ThemeMode mode) async {
     state = state.copyWith(themeMode: mode);
-    final prefs = await SharedPreferences.getInstance();
     String val = 'dark';
     if (mode == ThemeMode.light) val = 'light';
     if (mode == ThemeMode.system) val = 'system';
-    await prefs.setString(_prefThemeKey, val);
+    await _db.setString(_prefThemeKey, val);
   }
 
   Future<void> setPrimaryColor(Color color) async {
     state = state.copyWith(primaryColor: color);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_prefColorKey, color.value);
+    await _db.setInt(_prefColorKey, color.toARGB32());
   }
 
   Future<void> toggleTheme() async {
@@ -98,5 +98,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 }
 
 final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
-  return ThemeNotifier();
+  final db = ref.watch(appDatabaseProvider);
+  return ThemeNotifier(db);
 });

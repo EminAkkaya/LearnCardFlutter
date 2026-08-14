@@ -102,7 +102,7 @@ class StatsOverviewScreen extends ConsumerWidget {
                       child: LinearProgressIndicator(
                         value: masteryRatio,
                         minHeight: 8,
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
                         color: emeraldAccent,
                       ),
                     ),
@@ -241,7 +241,7 @@ class StatsOverviewScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                     ),
                   ),
                   Icon(icon, color: color, size: 22),
