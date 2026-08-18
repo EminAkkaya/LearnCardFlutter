@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/flashcard_provider.dart';
+import '../games/mini_games_hub_screen.dart';
 import '../settings/settings_screen.dart';
 
 class StatsOverviewScreen extends ConsumerWidget {
@@ -193,6 +194,24 @@ class StatsOverviewScreen extends ConsumerWidget {
                 subtitle: const Text('Metin oku ve dokunarak çevirileri gör'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => onNavigateToTab?.call(1),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFF6366F1),
+                  child: Icon(Icons.sports_esports_rounded, color: Colors.white),
+                ),
+                title: const Text('Kelime Öğrenme Mini Oyunları'),
+                subtitle: const Text('Eşleştirme, Harf Dizici, Hızlı Test, Boşluk Doldurma'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MiniGamesHubScreen()),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 8),

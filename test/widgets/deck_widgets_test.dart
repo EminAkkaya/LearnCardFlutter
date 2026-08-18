@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learncard_flutter/models/flashcard_model.dart';
 import 'package:learncard_flutter/providers/flashcard_provider.dart';
-import 'package:learncard_flutter/views/flashcard/widgets/custom_study_banner.dart';
 import 'package:learncard_flutter/views/flashcard/widgets/deck_card_list_item.dart';
 import 'package:learncard_flutter/views/flashcard/widgets/deck_filter_chips.dart';
+import 'package:learncard_flutter/views/flashcard/widgets/deck_search_bar.dart';
 
 void main() {
   group('Deck Widgets Tests', () {
@@ -56,28 +56,33 @@ void main() {
       expect(selectedFilter, equals('new'));
     });
 
-    testWidgets('2. CustomStudyBanner renders description and invokes onStartPressed callback', (WidgetTester tester) async {
-      bool bannerPressed = false;
+    testWidgets('2. DeckSearchBar renders input field and triggers callbacks', (WidgetTester tester) async {
+      final controller = TextEditingController();
+      String changedText = '';
+      bool clearTriggered = false;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: CustomStudyBanner(
-              onStartPressed: () {
-                bannerPressed = true;
+            body: DeckSearchBar(
+              controller: controller,
+              onChanged: (val) {
+                changedText = val;
+              },
+              onClear: () {
+                clearTriggered = true;
               },
             ),
           ),
         ),
       );
 
-      expect(find.text('Özel Çalışma (Serbest Mod)'), findsOneWidget);
-      expect(find.text('Başlat'), findsOneWidget);
+      expect(find.text('Kartlarda ara (Kelime, çeviri)...'), findsOneWidget);
 
-      await tester.tap(find.text('Başlat'));
+      await tester.enterText(find.byType(TextField), 'resilient');
       await tester.pump();
 
-      expect(bannerPressed, isTrue);
+      expect(changedText, equals('resilient'));
     });
 
     testWidgets('3. DeckCardListItem renders word, definition, status and handles menu actions', (WidgetTester tester) async {

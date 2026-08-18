@@ -135,6 +135,38 @@ void main() {
       await db.deleteFlashcard('del-1');
       expect((await db.getAllFlashcards()), isEmpty);
     });
+
+    test('5. Multi-user flashcard isolation by userId', () async {
+      final cardUserA = FlashcardModel(
+        id: 'card-user-a',
+        userId: 'user_111',
+        word: 'apple',
+        nextReviewDate: '2026-08-14',
+        createdAt: '2026-08-14T10:00:00.000Z',
+      );
+
+      final cardUserB = FlashcardModel(
+        id: 'card-user-b',
+        userId: 'user_222',
+        word: 'banana',
+        nextReviewDate: '2026-08-14',
+        createdAt: '2026-08-14T10:00:00.000Z',
+      );
+
+      await db.upsertFlashcard(cardUserA);
+      await db.upsertFlashcard(cardUserB);
+
+      final cardsA = await db.getAllFlashcards(userId: 'user_111');
+      expect(cardsA.any((c) => c.id == 'card-user-a'), isTrue);
+
+      final cardsB = await db.getAllFlashcards(userId: 'user_222');
+      expect(cardsB.any((c) => c.id == 'card-user-b'), isTrue);
+
+      // Clear only User A's data
+      await db.clearAllFlashcards(userId: 'user_111');
+      expect(await db.getAllFlashcards(userId: 'user_111'), isEmpty);
+      expect((await db.getAllFlashcards(userId: 'user_222')).length, equals(1));
+    });
   });
 
   group('Drift AppDatabase - Reading Articles Table Tests', () {
@@ -179,6 +211,34 @@ void main() {
 
       await db.deleteReadingArticle('art-del');
       expect((await db.getAllReadingArticles()), isEmpty);
+    });
+
+    test('3. Multi-user reading article isolation by userId', () async {
+      final articleA = ReadingArticleModel(
+        id: 'art-user-a',
+        userId: 'user_111',
+        title: 'User A Article',
+        text: 'Content A',
+        createdAt: '2026-08-14T10:00:00.000Z',
+      );
+
+      final articleB = ReadingArticleModel(
+        id: 'art-user-b',
+        userId: 'user_222',
+        title: 'User B Article',
+        text: 'Content B',
+        createdAt: '2026-08-14T10:00:00.000Z',
+      );
+
+      await db.upsertReadingArticle(articleA);
+      await db.upsertReadingArticle(articleB);
+
+      final articlesA = await db.getAllReadingArticles(userId: 'user_111');
+      expect(articlesA.any((a) => a.id == 'art-user-a'), isTrue);
+
+      await db.clearAllReadingArticles(userId: 'user_111');
+      expect(await db.getAllReadingArticles(userId: 'user_111'), isEmpty);
+      expect((await db.getAllReadingArticles(userId: 'user_222')).length, equals(1));
     });
   });
 

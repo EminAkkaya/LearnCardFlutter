@@ -32,7 +32,7 @@ class DictionaryService {
       final uri = Uri.parse(
         'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=tr&dt=t&q=${Uri.encodeComponent(clean)}',
       );
-      final response = await http.get(uri);
+      final response = await http.get(uri).timeout(const Duration(seconds: 4));
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
         if (data.isNotEmpty && data[0] is List) {
@@ -50,7 +50,7 @@ class DictionaryService {
       final fallbackUri = Uri.parse(
         'https://api.mymemory.translated.net/get?q=${Uri.encodeComponent(clean)}&langpair=en|tr',
       );
-      final response = await http.get(fallbackUri);
+      final response = await http.get(fallbackUri).timeout(const Duration(seconds: 4));
       if (response.statusCode == 200) {
         final Map data = jsonDecode(response.body);
         final String? translatedText = data['responseData']?['translatedText'];
@@ -79,7 +79,7 @@ class DictionaryService {
 
     try {
       final uri = Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/${Uri.encodeComponent(normalized)}');
-      final response = await http.get(uri);
+      final response = await http.get(uri).timeout(const Duration(seconds: 4));
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
         if (data.isNotEmpty) {

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/flashcard_provider.dart';
+import '../games/mini_games_hub_screen.dart';
 import 'widgets/add_edit_card_dialog.dart';
-import 'widgets/custom_study_banner.dart';
-import 'widgets/custom_study_bottom_sheet.dart';
 import 'widgets/deck_card_list_item.dart';
 import 'widgets/deck_filter_chips.dart';
 import 'widgets/deck_search_bar.dart';
@@ -35,7 +34,18 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
         title: const Text('Deste Yönetimi'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.sports_esports_rounded),
+            tooltip: 'Mini Oyunlar & Alıştırmalar',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MiniGamesHubScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Kartları Yenile',
             onPressed: () => ref.read(flashcardProvider.notifier).loadCards(),
           ),
         ],
@@ -48,40 +58,31 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomStudyBanner(
-                  onStartPressed: () =>
-                      showCustomStudyBottomSheet(context, cardState),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
-                  child: Column(
-                    children: [
-                      DeckSearchBar(
-                        controller: _searchController,
-                        onChanged: (val) => ref
-                            .read(flashcardProvider.notifier)
-                            .setSearchQuery(val),
-                        onClear: () {
-                          _searchController.clear();
-                          ref
-                              .read(flashcardProvider.notifier)
-                              .setSearchQuery('');
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      DeckFilterChips(
-                        cardState: cardState,
-                        onSelected: (status) => ref
-                            .read(flashcardProvider.notifier)
-                            .setFilterStatus(status),
-                      ),
-                    ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+              child: Column(
+                children: [
+                  DeckSearchBar(
+                    controller: _searchController,
+                    onChanged: (val) => ref
+                        .read(flashcardProvider.notifier)
+                        .setSearchQuery(val),
+                    onClear: () {
+                      _searchController.clear();
+                      ref
+                          .read(flashcardProvider.notifier)
+                          .setSearchQuery('');
+                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  DeckFilterChips(
+                    cardState: cardState,
+                    onSelected: (status) => ref
+                        .read(flashcardProvider.notifier)
+                        .setFilterStatus(status),
+                  ),
+                ],
+              ),
             ),
           ),
           if (cardState.isLoading)

@@ -1,5 +1,6 @@
 class FlashcardModel {
   final String id;
+  final String? userId;
   final String word;
   final String definition;
   final String trTranslation;
@@ -17,6 +18,7 @@ class FlashcardModel {
 
   FlashcardModel({
     required this.id,
+    this.userId,
     required this.word,
     this.definition = '',
     this.trTranslation = '',
@@ -51,6 +53,7 @@ class FlashcardModel {
 
     return FlashcardModel(
       id: map['id']?.toString() ?? '',
+      userId: map['user_id']?.toString() ?? map['userId']?.toString(),
       word: map['word']?.toString() ?? '',
       definition: map['definition']?.toString() ?? '',
       trTranslation: map['tr_translation']?.toString() ?? map['trTranslation']?.toString() ?? '',
@@ -70,7 +73,7 @@ class FlashcardModel {
 
   /// Converts object to Map matching Supabase `flashcards` table columns
   Map<String, dynamic> toSupabaseRow() {
-    return {
+    final row = <String, dynamic>{
       'id': id,
       'word': word,
       'definition': definition,
@@ -87,12 +90,17 @@ class FlashcardModel {
       'next_review_date': nextReviewDate,
       'created_at': createdAt,
     };
+    if (userId != null && userId!.isNotEmpty) {
+      row['user_id'] = userId;
+    }
+    return row;
   }
 
   Map<String, dynamic> toMap() => toSupabaseRow();
 
   FlashcardModel copyWith({
     String? id,
+    String? userId,
     String? word,
     String? definition,
     String? trTranslation,
@@ -110,6 +118,7 @@ class FlashcardModel {
   }) {
     return FlashcardModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       word: word ?? this.word,
       definition: definition ?? this.definition,
       trTranslation: trTranslation ?? this.trTranslation,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/flashcard_provider.dart';
 import '../providers/reading_provider.dart';
 import 'extractor/text_extractor_screen.dart';
 import 'flashcard/deck_manager_screen.dart';
@@ -16,6 +17,15 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(flashcardProvider.notifier).loadCards();
+      ref.read(readingProvider.notifier).loadReadings();
+    });
+  }
 
   void _onTabTapped(int index) {
     setState(() {

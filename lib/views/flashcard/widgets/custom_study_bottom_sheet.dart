@@ -3,9 +3,13 @@ import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../flashcard_review_screen.dart';
 
-void showCustomStudyBottomSheet(BuildContext context, FlashcardState cardState) {
+void showCustomStudyBottomSheet(
+  BuildContext context,
+  FlashcardState cardState, {
+  String initialStatus = 'all',
+}) {
   const Color emerald = Color(0xFF10B981);
-  String selectedStatus = 'all';
+  String selectedStatus = initialStatus;
   int countOption = 10;
   bool shuffle = true;
 

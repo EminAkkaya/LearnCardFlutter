@@ -80,5 +80,24 @@ void main() {
       expect(updated.folder, equals('Makaleler'));
       expect(original.title, equals('Original Title'));
     });
+
+    test('5. userId field is correctly parsed in fromMap and serialized in toSupabaseRow', () {
+      final map = {
+        'id': 'art_uid_1',
+        'user_id': 'uid_789',
+        'title': 'Multi User Article',
+        'text': 'User specific text',
+        'created_at': '2026-08-14',
+      };
+
+      final article = ReadingArticleModel.fromMap(map);
+      expect(article.userId, equals('uid_789'));
+
+      final row = article.toSupabaseRow();
+      expect(row['user_id'], equals('uid_789'));
+
+      final updated = article.copyWith(userId: 'uid_999');
+      expect(updated.userId, equals('uid_999'));
+    });
   });
 }

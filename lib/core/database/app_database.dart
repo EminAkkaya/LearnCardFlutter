@@ -14,6 +14,7 @@ part 'app_database.g.dart';
 @DataClassName('FlashcardEntry')
 class FlashcardEntries extends Table {
   TextColumn get id => text()();
+  TextColumn get userId => text().nullable()();
   TextColumn get word => text()();
   TextColumn get definition => text().withDefault(const Constant(''))();
   TextColumn get trTranslation => text().withDefault(const Constant(''))();
@@ -36,6 +37,7 @@ class FlashcardEntries extends Table {
 @DataClassName('ReadingArticleEntry')
 class ReadingArticleEntries extends Table {
   TextColumn get id => text()();
+  TextColumn get userId => text().nullable()();
   TextColumn get title => text()();
   TextColumn get textContent => text()();
   TextColumn get createdAt => text()();
@@ -65,7 +67,22 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          await m.addColumn(flashcardEntries, flashcardEntries.userId);
+          await m.addColumn(readingArticleEntries, readingArticleEntries.userId);
+        }
+      },
+    );
+  }
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'learncard_drift_db');
@@ -75,8 +92,13 @@ class AppDatabase extends _$AppDatabase {
   // FLASHCARD OPERATIONS
   // ---------------------------------------------------------------------------
 
-  Future<List<FlashcardModel>> getAllFlashcards() async {
-    final rows = await (select(flashcardEntries)..orderBy([(t) => OrderingTerm(expression: t.createdAt)])).get();
+  Future<List<FlashcardModel>> getAllFlashcards({String? userId}) async {
+    final query = select(flashcardEntries);
+    if (userId != null && userId.isNotEmpty) {
+      query.where((t) => t.userId.equals(userId) | t.userId.isNull());
+    }
+    query.orderBy([(t) => OrderingTerm(expression: t.createdAt)]);
+    final rows = await query.get();
     return rows.map(_mapEntryToFlashcard).toList();
   }
 
@@ -100,13 +122,18 @@ class AppDatabase extends _$AppDatabase {
     await (delete(flashcardEntries)..where((t) => t.id.equals(id))).go();
   }
 
-  Future<void> clearAllFlashcards() async {
-    await delete(flashcardEntries).go();
+  Future<void> clearAllFlashcards({String? userId}) async {
+    if (userId != null && userId.isNotEmpty) {
+      await (delete(flashcardEntries)..where((t) => t.userId.equals(userId))).go();
+    } else {
+      await delete(flashcardEntries).go();
+    }
   }
 
   FlashcardModel _mapEntryToFlashcard(FlashcardEntry row) {
     return FlashcardModel(
       id: row.id,
+      userId: row.userId,
       word: row.word,
       definition: row.definition,
       trTranslation: row.trTranslation,
@@ -127,6 +154,7 @@ class AppDatabase extends _$AppDatabase {
   FlashcardEntriesCompanion _mapFlashcardToCompanion(FlashcardModel card) {
     return FlashcardEntriesCompanion(
       id: Value(card.id),
+      userId: Value(card.userId),
       word: Value(card.word),
       definition: Value(card.definition),
       trTranslation: Value(card.trTranslation),
@@ -148,8 +176,13 @@ class AppDatabase extends _$AppDatabase {
   // READING ARTICLE OPERATIONS
   // ---------------------------------------------------------------------------
 
-  Future<List<ReadingArticleModel>> getAllReadingArticles() async {
-    final rows = await (select(readingArticleEntries)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
+  Future<List<ReadingArticleModel>> getAllReadingArticles({String? userId}) async {
+    final query = select(readingArticleEntries);
+    if (userId != null && userId.isNotEmpty) {
+      query.where((t) => t.userId.equals(userId) | t.userId.isNull());
+    }
+    query.orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+    final rows = await query.get();
     return rows.map(_mapEntryToArticle).toList();
   }
 
@@ -173,13 +206,18 @@ class AppDatabase extends _$AppDatabase {
     await (delete(readingArticleEntries)..where((t) => t.id.equals(id))).go();
   }
 
-  Future<void> clearAllReadingArticles() async {
-    await delete(readingArticleEntries).go();
+  Future<void> clearAllReadingArticles({String? userId}) async {
+    if (userId != null && userId.isNotEmpty) {
+      await (delete(readingArticleEntries)..where((t) => t.userId.equals(userId))).go();
+    } else {
+      await delete(readingArticleEntries).go();
+    }
   }
 
   ReadingArticleModel _mapEntryToArticle(ReadingArticleEntry row) {
     return ReadingArticleModel(
       id: row.id,
+      userId: row.userId,
       title: row.title,
       text: row.textContent,
       createdAt: row.createdAt,
@@ -190,6 +228,7 @@ class AppDatabase extends _$AppDatabase {
   ReadingArticleEntriesCompanion _mapArticleToCompanion(ReadingArticleModel article) {
     return ReadingArticleEntriesCompanion(
       id: Value(article.id),
+      userId: Value(article.userId),
       title: Value(article.title),
       textContent: Value(article.text),
       createdAt: Value(article.createdAt),

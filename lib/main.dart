@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/theme_provider.dart';
-import 'views/home_screen.dart';
+import 'views/auth/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +35,7 @@ class LearnCardApp extends ConsumerWidget {
       theme: AppTheme.getLightTheme(themeState.primaryColor),
       darkTheme: AppTheme.getDarkTheme(themeState.primaryColor),
       themeMode: themeState.themeMode,
-      home: const HomeScreen(),
+      home: const AuthGate(),
     );
   }
 }

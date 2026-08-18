@@ -163,5 +163,24 @@ void main() {
       expect(original.status, equals('new'));
       expect(original.interval, equals(0));
     });
+
+    test('6. userId field is correctly mapped in fromMap and toSupabaseRow', () {
+      final map = {
+        'id': 'c_user',
+        'user_id': 'user_guid_123',
+        'word': 'serendipity',
+        'next_review_date': '2026-08-14',
+        'created_at': '2026-08-14',
+      };
+
+      final model = FlashcardModel.fromMap(map);
+      expect(model.userId, equals('user_guid_123'));
+
+      final row = model.toSupabaseRow();
+      expect(row['user_id'], equals('user_guid_123'));
+
+      final updated = model.copyWith(userId: 'user_guid_456');
+      expect(updated.userId, equals('user_guid_456'));
+    });
   });
 }

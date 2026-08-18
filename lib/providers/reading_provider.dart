@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../core/database/app_database.dart';
 import '../models/reading_article_model.dart';
 import '../services/supabase_service.dart';
+import 'auth_provider.dart';
 
 enum ReaderThemeMode {
   matteDark, // Mat Siyah
@@ -429,5 +430,16 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
 
 final readingProvider = StateNotifierProvider<ReadingNotifier, ReadingState>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  return ReadingNotifier(db);
+  final notifier = ReadingNotifier(db);
+  ref.listen<AppAuthState>(authProvider, (previous, next) {
+    final prevUserId = previous?.user?.id;
+    final nextUserId = next.user?.id;
+    final prevGuest = previous?.isGuestMode;
+    final nextGuest = next.isGuestMode;
+
+    if (prevUserId != nextUserId || prevGuest != nextGuest) {
+      notifier.loadReadings();
+    }
+  });
+  return notifier;
 });

@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/flashcard_model.dart';
 import '../services/srs_service.dart';
 import '../services/supabase_service.dart';
+import 'auth_provider.dart';
 
 class FlashcardState {
   final List<FlashcardModel> cards;
@@ -189,5 +190,16 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
 }
 
 final flashcardProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
-  return FlashcardNotifier();
+  final notifier = FlashcardNotifier();
+  ref.listen<AppAuthState>(authProvider, (previous, next) {
+    final prevUserId = previous?.user?.id;
+    final nextUserId = next.user?.id;
+    final prevGuest = previous?.isGuestMode;
+    final nextGuest = next.isGuestMode;
+
+    if (prevUserId != nextUserId || prevGuest != nextGuest) {
+      notifier.loadCards();
+    }
+  });
+  return notifier;
 });

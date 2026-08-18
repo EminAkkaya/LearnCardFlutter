@@ -18,6 +18,15 @@ class $FlashcardEntriesTable extends FlashcardEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _wordMeta = const VerificationMeta('word');
   @override
   late final GeneratedColumn<String> word = GeneratedColumn<String>(
@@ -182,6 +191,7 @@ class $FlashcardEntriesTable extends FlashcardEntries
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    userId,
     word,
     definition,
     trTranslation,
@@ -213,6 +223,12 @@ class $FlashcardEntriesTable extends FlashcardEntries
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
     }
     if (data.containsKey('word')) {
       context.handle(
@@ -335,6 +351,10 @@ class $FlashcardEntriesTable extends FlashcardEntries
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      ),
       word: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}word'],
@@ -402,6 +422,7 @@ class $FlashcardEntriesTable extends FlashcardEntries
 
 class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   final String id;
+  final String? userId;
   final String word;
   final String definition;
   final String trTranslation;
@@ -418,6 +439,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   final String createdAt;
   const FlashcardEntry({
     required this.id,
+    this.userId,
     required this.word,
     required this.definition,
     required this.trTranslation,
@@ -437,6 +459,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     map['word'] = Variable<String>(word);
     map['definition'] = Variable<String>(definition);
     map['tr_translation'] = Variable<String>(trTranslation);
@@ -457,6 +482,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   FlashcardEntriesCompanion toCompanion(bool nullToAbsent) {
     return FlashcardEntriesCompanion(
       id: Value(id),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       word: Value(word),
       definition: Value(definition),
       trTranslation: Value(trTranslation),
@@ -481,6 +509,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return FlashcardEntry(
       id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String?>(json['userId']),
       word: serializer.fromJson<String>(json['word']),
       definition: serializer.fromJson<String>(json['definition']),
       trTranslation: serializer.fromJson<String>(json['trTranslation']),
@@ -502,6 +531,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String?>(userId),
       'word': serializer.toJson<String>(word),
       'definition': serializer.toJson<String>(definition),
       'trTranslation': serializer.toJson<String>(trTranslation),
@@ -521,6 +551,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
 
   FlashcardEntry copyWith({
     String? id,
+    Value<String?> userId = const Value.absent(),
     String? word,
     String? definition,
     String? trTranslation,
@@ -537,6 +568,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     String? createdAt,
   }) => FlashcardEntry(
     id: id ?? this.id,
+    userId: userId.present ? userId.value : this.userId,
     word: word ?? this.word,
     definition: definition ?? this.definition,
     trTranslation: trTranslation ?? this.trTranslation,
@@ -555,6 +587,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   FlashcardEntry copyWithCompanion(FlashcardEntriesCompanion data) {
     return FlashcardEntry(
       id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
       word: data.word.present ? data.word.value : this.word,
       definition: data.definition.present
           ? data.definition.value
@@ -592,6 +625,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   String toString() {
     return (StringBuffer('FlashcardEntry(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('word: $word, ')
           ..write('definition: $definition, ')
           ..write('trTranslation: $trTranslation, ')
@@ -613,6 +647,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   @override
   int get hashCode => Object.hash(
     id,
+    userId,
     word,
     definition,
     trTranslation,
@@ -633,6 +668,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
       identical(this, other) ||
       (other is FlashcardEntry &&
           other.id == this.id &&
+          other.userId == this.userId &&
           other.word == this.word &&
           other.definition == this.definition &&
           other.trTranslation == this.trTranslation &&
@@ -651,6 +687,7 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
 
 class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   final Value<String> id;
+  final Value<String?> userId;
   final Value<String> word;
   final Value<String> definition;
   final Value<String> trTranslation;
@@ -668,6 +705,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   final Value<int> rowid;
   const FlashcardEntriesCompanion({
     this.id = const Value.absent(),
+    this.userId = const Value.absent(),
     this.word = const Value.absent(),
     this.definition = const Value.absent(),
     this.trTranslation = const Value.absent(),
@@ -686,6 +724,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   });
   FlashcardEntriesCompanion.insert({
     required String id,
+    this.userId = const Value.absent(),
     required String word,
     this.definition = const Value.absent(),
     this.trTranslation = const Value.absent(),
@@ -707,6 +746,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
        createdAt = Value(createdAt);
   static Insertable<FlashcardEntry> custom({
     Expression<String>? id,
+    Expression<String>? userId,
     Expression<String>? word,
     Expression<String>? definition,
     Expression<String>? trTranslation,
@@ -725,6 +765,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
       if (word != null) 'word': word,
       if (definition != null) 'definition': definition,
       if (trTranslation != null) 'tr_translation': trTranslation,
@@ -745,6 +786,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
 
   FlashcardEntriesCompanion copyWith({
     Value<String>? id,
+    Value<String?>? userId,
     Value<String>? word,
     Value<String>? definition,
     Value<String>? trTranslation,
@@ -763,6 +805,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   }) {
     return FlashcardEntriesCompanion(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       word: word ?? this.word,
       definition: definition ?? this.definition,
       trTranslation: trTranslation ?? this.trTranslation,
@@ -786,6 +829,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (word.present) {
       map['word'] = Variable<String>(word.value);
@@ -839,6 +885,7 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   String toString() {
     return (StringBuffer('FlashcardEntriesCompanion(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('word: $word, ')
           ..write('definition: $definition, ')
           ..write('trTranslation: $trTranslation, ')
@@ -873,6 +920,15 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
@@ -918,6 +974,7 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    userId,
     title,
     textContent,
     createdAt,
@@ -939,6 +996,12 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -986,6 +1049,10 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -1014,12 +1081,14 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
 class ReadingArticleEntry extends DataClass
     implements Insertable<ReadingArticleEntry> {
   final String id;
+  final String? userId;
   final String title;
   final String textContent;
   final String createdAt;
   final String folder;
   const ReadingArticleEntry({
     required this.id,
+    this.userId,
     required this.title,
     required this.textContent,
     required this.createdAt,
@@ -1029,6 +1098,9 @@ class ReadingArticleEntry extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     map['title'] = Variable<String>(title);
     map['text_content'] = Variable<String>(textContent);
     map['created_at'] = Variable<String>(createdAt);
@@ -1039,6 +1111,9 @@ class ReadingArticleEntry extends DataClass
   ReadingArticleEntriesCompanion toCompanion(bool nullToAbsent) {
     return ReadingArticleEntriesCompanion(
       id: Value(id),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       title: Value(title),
       textContent: Value(textContent),
       createdAt: Value(createdAt),
@@ -1053,6 +1128,7 @@ class ReadingArticleEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ReadingArticleEntry(
       id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String?>(json['userId']),
       title: serializer.fromJson<String>(json['title']),
       textContent: serializer.fromJson<String>(json['textContent']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
@@ -1064,6 +1140,7 @@ class ReadingArticleEntry extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String?>(userId),
       'title': serializer.toJson<String>(title),
       'textContent': serializer.toJson<String>(textContent),
       'createdAt': serializer.toJson<String>(createdAt),
@@ -1073,12 +1150,14 @@ class ReadingArticleEntry extends DataClass
 
   ReadingArticleEntry copyWith({
     String? id,
+    Value<String?> userId = const Value.absent(),
     String? title,
     String? textContent,
     String? createdAt,
     String? folder,
   }) => ReadingArticleEntry(
     id: id ?? this.id,
+    userId: userId.present ? userId.value : this.userId,
     title: title ?? this.title,
     textContent: textContent ?? this.textContent,
     createdAt: createdAt ?? this.createdAt,
@@ -1087,6 +1166,7 @@ class ReadingArticleEntry extends DataClass
   ReadingArticleEntry copyWithCompanion(ReadingArticleEntriesCompanion data) {
     return ReadingArticleEntry(
       id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
       title: data.title.present ? data.title.value : this.title,
       textContent: data.textContent.present
           ? data.textContent.value
@@ -1100,6 +1180,7 @@ class ReadingArticleEntry extends DataClass
   String toString() {
     return (StringBuffer('ReadingArticleEntry(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('title: $title, ')
           ..write('textContent: $textContent, ')
           ..write('createdAt: $createdAt, ')
@@ -1109,12 +1190,14 @@ class ReadingArticleEntry extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, title, textContent, createdAt, folder);
+  int get hashCode =>
+      Object.hash(id, userId, title, textContent, createdAt, folder);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ReadingArticleEntry &&
           other.id == this.id &&
+          other.userId == this.userId &&
           other.title == this.title &&
           other.textContent == this.textContent &&
           other.createdAt == this.createdAt &&
@@ -1124,6 +1207,7 @@ class ReadingArticleEntry extends DataClass
 class ReadingArticleEntriesCompanion
     extends UpdateCompanion<ReadingArticleEntry> {
   final Value<String> id;
+  final Value<String?> userId;
   final Value<String> title;
   final Value<String> textContent;
   final Value<String> createdAt;
@@ -1131,6 +1215,7 @@ class ReadingArticleEntriesCompanion
   final Value<int> rowid;
   const ReadingArticleEntriesCompanion({
     this.id = const Value.absent(),
+    this.userId = const Value.absent(),
     this.title = const Value.absent(),
     this.textContent = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1139,6 +1224,7 @@ class ReadingArticleEntriesCompanion
   });
   ReadingArticleEntriesCompanion.insert({
     required String id,
+    this.userId = const Value.absent(),
     required String title,
     required String textContent,
     required String createdAt,
@@ -1150,6 +1236,7 @@ class ReadingArticleEntriesCompanion
        createdAt = Value(createdAt);
   static Insertable<ReadingArticleEntry> custom({
     Expression<String>? id,
+    Expression<String>? userId,
     Expression<String>? title,
     Expression<String>? textContent,
     Expression<String>? createdAt,
@@ -1158,6 +1245,7 @@ class ReadingArticleEntriesCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
       if (title != null) 'title': title,
       if (textContent != null) 'text_content': textContent,
       if (createdAt != null) 'created_at': createdAt,
@@ -1168,6 +1256,7 @@ class ReadingArticleEntriesCompanion
 
   ReadingArticleEntriesCompanion copyWith({
     Value<String>? id,
+    Value<String?>? userId,
     Value<String>? title,
     Value<String>? textContent,
     Value<String>? createdAt,
@@ -1176,6 +1265,7 @@ class ReadingArticleEntriesCompanion
   }) {
     return ReadingArticleEntriesCompanion(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       title: title ?? this.title,
       textContent: textContent ?? this.textContent,
       createdAt: createdAt ?? this.createdAt,
@@ -1189,6 +1279,9 @@ class ReadingArticleEntriesCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -1212,6 +1305,7 @@ class ReadingArticleEntriesCompanion
   String toString() {
     return (StringBuffer('ReadingArticleEntriesCompanion(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('title: $title, ')
           ..write('textContent: $textContent, ')
           ..write('createdAt: $createdAt, ')
@@ -1465,6 +1559,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$FlashcardEntriesTableCreateCompanionBuilder =
     FlashcardEntriesCompanion Function({
       required String id,
+      Value<String?> userId,
       required String word,
       Value<String> definition,
       Value<String> trTranslation,
@@ -1484,6 +1579,7 @@ typedef $$FlashcardEntriesTableCreateCompanionBuilder =
 typedef $$FlashcardEntriesTableUpdateCompanionBuilder =
     FlashcardEntriesCompanion Function({
       Value<String> id,
+      Value<String?> userId,
       Value<String> word,
       Value<String> definition,
       Value<String> trTranslation,
@@ -1512,6 +1608,11 @@ class $$FlashcardEntriesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1600,6 +1701,11 @@ class $$FlashcardEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get word => $composableBuilder(
     column: $table.word,
     builder: (column) => ColumnOrderings(column),
@@ -1682,6 +1788,9 @@ class $$FlashcardEntriesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get word =>
       $composableBuilder(column: $table.word, builder: (column) => column);
@@ -1780,6 +1889,7 @@ class $$FlashcardEntriesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<String> word = const Value.absent(),
                 Value<String> definition = const Value.absent(),
                 Value<String> trTranslation = const Value.absent(),
@@ -1797,6 +1907,7 @@ class $$FlashcardEntriesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => FlashcardEntriesCompanion(
                 id: id,
+                userId: userId,
                 word: word,
                 definition: definition,
                 trTranslation: trTranslation,
@@ -1816,6 +1927,7 @@ class $$FlashcardEntriesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> userId = const Value.absent(),
                 required String word,
                 Value<String> definition = const Value.absent(),
                 Value<String> trTranslation = const Value.absent(),
@@ -1833,6 +1945,7 @@ class $$FlashcardEntriesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => FlashcardEntriesCompanion.insert(
                 id: id,
+                userId: userId,
                 word: word,
                 definition: definition,
                 trTranslation: trTranslation,
@@ -1877,6 +1990,7 @@ typedef $$FlashcardEntriesTableProcessedTableManager =
 typedef $$ReadingArticleEntriesTableCreateCompanionBuilder =
     ReadingArticleEntriesCompanion Function({
       required String id,
+      Value<String?> userId,
       required String title,
       required String textContent,
       required String createdAt,
@@ -1886,6 +2000,7 @@ typedef $$ReadingArticleEntriesTableCreateCompanionBuilder =
 typedef $$ReadingArticleEntriesTableUpdateCompanionBuilder =
     ReadingArticleEntriesCompanion Function({
       Value<String> id,
+      Value<String?> userId,
       Value<String> title,
       Value<String> textContent,
       Value<String> createdAt,
@@ -1904,6 +2019,11 @@ class $$ReadingArticleEntriesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1942,6 +2062,11 @@ class $$ReadingArticleEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get title => $composableBuilder(
     column: $table.title,
     builder: (column) => ColumnOrderings(column),
@@ -1974,6 +2099,9 @@ class $$ReadingArticleEntriesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
@@ -2037,6 +2165,7 @@ class $$ReadingArticleEntriesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> textContent = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
@@ -2044,6 +2173,7 @@ class $$ReadingArticleEntriesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ReadingArticleEntriesCompanion(
                 id: id,
+                userId: userId,
                 title: title,
                 textContent: textContent,
                 createdAt: createdAt,
@@ -2053,6 +2183,7 @@ class $$ReadingArticleEntriesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> userId = const Value.absent(),
                 required String title,
                 required String textContent,
                 required String createdAt,
@@ -2060,6 +2191,7 @@ class $$ReadingArticleEntriesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ReadingArticleEntriesCompanion.insert(
                 id: id,
+                userId: userId,
                 title: title,
                 textContent: textContent,
                 createdAt: createdAt,
