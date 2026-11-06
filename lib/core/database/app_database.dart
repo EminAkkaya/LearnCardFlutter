@@ -96,6 +96,9 @@ class AppDatabase extends _$AppDatabase {
     final query = select(flashcardEntries);
     if (userId != null && userId.isNotEmpty) {
       query.where((t) => t.userId.equals(userId) | t.userId.isNull());
+    } else {
+      // Misafir modu: yalnız hiçbir hesaba bağlı olmayan yerel veriyi göster.
+      query.where((t) => t.userId.isNull());
     }
     query.orderBy([(t) => OrderingTerm(expression: t.createdAt)]);
     final rows = await query.get();
@@ -126,7 +129,7 @@ class AppDatabase extends _$AppDatabase {
     if (userId != null && userId.isNotEmpty) {
       await (delete(flashcardEntries)..where((t) => t.userId.equals(userId))).go();
     } else {
-      await delete(flashcardEntries).go();
+      await (delete(flashcardEntries)..where((t) => t.userId.isNull())).go();
     }
   }
 
@@ -180,6 +183,9 @@ class AppDatabase extends _$AppDatabase {
     final query = select(readingArticleEntries);
     if (userId != null && userId.isNotEmpty) {
       query.where((t) => t.userId.equals(userId) | t.userId.isNull());
+    } else {
+      // Misafir modu: yalnız hiçbir hesaba bağlı olmayan yerel veriyi göster.
+      query.where((t) => t.userId.isNull());
     }
     query.orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
     final rows = await query.get();
@@ -210,7 +216,7 @@ class AppDatabase extends _$AppDatabase {
     if (userId != null && userId.isNotEmpty) {
       await (delete(readingArticleEntries)..where((t) => t.userId.equals(userId))).go();
     } else {
-      await delete(readingArticleEntries).go();
+      await (delete(readingArticleEntries)..where((t) => t.userId.isNull())).go();
     }
   }
 

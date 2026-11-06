@@ -167,6 +167,29 @@ void main() {
       expect(await db.getAllFlashcards(userId: 'user_111'), isEmpty);
       expect((await db.getAllFlashcards(userId: 'user_222')).length, equals(1));
     });
+
+    test('guest mode only sees and clears cards without a user', () async {
+      await db.upsertFlashcard(FlashcardModel(
+        id: 'card-user-a',
+        userId: 'user_111',
+        word: 'apple',
+        nextReviewDate: '2026-08-14',
+        createdAt: '2026-08-14T10:00:00.000Z',
+      ));
+      await db.upsertFlashcard(FlashcardModel(
+        id: 'card-guest',
+        word: 'pear',
+        nextReviewDate: '2026-08-14',
+        createdAt: '2026-08-14T10:00:00.000Z',
+      ));
+
+      final guestCards = await db.getAllFlashcards();
+      expect(guestCards.map((c) => c.id), ['card-guest']);
+
+      await db.clearAllFlashcards();
+      expect(await db.getAllFlashcards(), isEmpty);
+      expect((await db.getAllFlashcards(userId: 'user_111')).map((c) => c.id), ['card-user-a']);
+    });
   });
 
   group('Drift AppDatabase - Reading Articles Table Tests', () {

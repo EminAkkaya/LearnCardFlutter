@@ -38,7 +38,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 ### P0 — veri kaybı / yayın engeli
 - [ ] **D1 Senkron yereli eziyor:** `supabase_service.dart:124-129, 251-256` bulut boş değilse yerel kartlar `insertOrReplace` ile eziliyor; çevrimdışı çalışılan ilerleme kayboluyor, misafir kartları düşüyor. Çözüm: `updated_at` + yerel `dirty` bayrağı; önce dirty push, sonra satır bazlı last-write-wins pull. Drift şema migrasyonu gerekir (schemaVersion artır, test yaz).
 - [ ] **D2 Misafir → giriş migrasyonu yok:** okuma metinleri (`:230-263`) ve kartlar için girişte misafir verisini (userId null) kullanıcıya bağlayıp buluta bir kez yükle.
-- [ ] **D3 Misafir modunda başka hesabın verisi görünüyor:** `app_database.dart:90-96` userId null iken filtre yok → `userId.isNull()` ekle. (Hızlı, önce bunu yap.)
+- [x] **D3 Misafir modunda başka hesabın verisi görünüyor:** `app_database.dart:90-96` userId null iken filtre yok → `userId.isNull()` ekle. (Hızlı, önce bunu yap.)
 - [ ] **D4 Auth deep link:** Android intent-filter + iOS `CFBundleURLTypes` (`io.supabase.learncard://login-callback`), `resetPasswordForEmail(redirectTo:)`, `passwordRecovery` event'inde yeni şifre ekranı. Supabase panelinde redirect URL kullanıcı ekleyecek.
 - [ ] **S6 iOS PrivacyInfo.xcprivacy** ekle (UserDefaults CA92.1, FileTimestamp C617.1; toplanan veri: e-posta, user id → App Functionality) ve pbxproj'a dahil et.
 - [ ] **S7 iOS Podfile** yok — macOS'ta `flutter build ios` ile üretilecek (kullanıcı, Linux'ta yapılamaz). Not olarak RELEASE.md'ye yaz.
@@ -79,3 +79,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 
 ## İlerleme günlüğü
 - 2026-11-07 00:30 — Plan oluşturuldu, refactor main'e merge edildi (`ee0a127`).
+- 2026-11-07 00:55 — R1 review bitti, S1/S2 kısmi, D3 tamam (misafir yalnız userId=null veriyi görür/siler). Sıradaki: G2.
