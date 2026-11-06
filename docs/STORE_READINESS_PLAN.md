@@ -19,7 +19,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **S1 Android release yapılandırması:** `key.properties` tabanlı release imzası (yoksa debug'a düşer), uygulama adı "LearnCard". applicationId kullanıcı onayı bekliyor (soru 1). Minify/targetSdk → S8.
 - [x] **S2 iOS yapılandırması:** display name "LearnCard", `ITSAppUsesNonExemptEncryption=false`. İzin metni gerekmiyor (kamera/konum yok). Bundle id → soru 1; Podfile/PrivacyInfo → S6/S7.
 - [ ] **S3 Hesap silme:** uygulama içinden hesap + veri silme (Play ve App Store zorunlu kılıyor).
-- [ ] **S4 Gizlilik:** gizlilik politikası sayfası/bağlantısı ayarlar ekranında; Data Safety / Privacy Nutrition için toplanan veri listesi (`docs/`).
+- [~] **S4 Gizlilik:** taslaklar `docs/PRIVACY_POLICY.md`, `docs/DATA_SAFETY.md`, yayın rehberi `docs/RELEASE.md` hazır; kalan: ayarlarda politika linki (URL kullanıcıdan). gizlilik politikası sayfası/bağlantısı ayarlar ekranında; Data Safety / Privacy Nutrition için toplanan veri listesi (`docs/`).
 - [ ] **S5 Supabase config:** `supabase_config.dart` gitignore'da; release/CI için `--dart-define` tabanlı yapı, anahtar yoksa net hata.
 
 ### P1 — Kalite
@@ -40,7 +40,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **D2 Misafir → giriş migrasyonu yok:** okuma metinleri (`:230-263`) ve kartlar için girişte misafir verisini (userId null) kullanıcıya bağlayıp buluta bir kez yükle.
 - [x] **D3 Misafir modunda başka hesabın verisi görünüyor:** `app_database.dart:90-96` userId null iken filtre yok → `userId.isNull()` ekle. (Hızlı, önce bunu yap.)
 - [ ] **D4 Auth deep link:** Android intent-filter + iOS `CFBundleURLTypes` (`io.supabase.learncard://login-callback`), `resetPasswordForEmail(redirectTo:)`, `passwordRecovery` event'inde yeni şifre ekranı. Supabase panelinde redirect URL kullanıcı ekleyecek.
-- [ ] **S6 iOS PrivacyInfo.xcprivacy** ekle (UserDefaults CA92.1, FileTimestamp C617.1; toplanan veri: e-posta, user id → App Functionality) ve pbxproj'a dahil et.
+- [x] **S6 iOS PrivacyInfo.xcprivacy** (dosya eklendi; Xcode'da Runner target'ına eklenmesi macOS'ta kontrol edilecek — RELEASE.md §5) ekle (UserDefaults CA92.1, FileTimestamp C617.1; toplanan veri: e-posta, user id → App Functionality) ve pbxproj'a dahil et.
 - [ ] **S7 iOS Podfile** yok — macOS'ta `flutter build ios` ile üretilecek (kullanıcı, Linux'ta yapılamaz). Not olarak RELEASE.md'ye yaz.
 
 ### P1
@@ -55,6 +55,8 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **S8 Android:** targetSdk açıkça 35+, release'te `isMinifyEnabled/isShrinkResources` (release build ile doğrulanarak), kullanılmayan bağımlılıklar (`path`, `path_provider`?) `flutter pub deps` ile doğrula/temizle.
 - [ ] **S9 google_fonts çevrimdışı:** fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
 - [ ] **SEC1 RLS doğrulama:** anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
+
+- [ ] **SEC2 Resmî olmayan Google Translate uç noktası:** `lib/services/dictionary_service.dart:33` `translate.googleapis.com/translate_a/single?client=gtx` — Google ToS dışı, her an kesilebilir/engellenebilir. MyMemory'yi birincil yap, Google'ı kaldır ya da resmî Cloud Translation API (anahtar sunucu tarafında, Edge Function) kullan.
 
 ### Oyunlar (Q1 alt görevleri; P = lib/providers/games)
 - [ ] **G1 (P0) Oyunlar SRS'i beslemiyor:** yanlış cevaplanan kartı oyun sonunda "tekrar listesi" ile göster, tek dokunuşla `again` olarak işaretle (otomatik zorla değil). Doğru cevaplar SRS'i değiştirmez.
