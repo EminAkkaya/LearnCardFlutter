@@ -24,7 +24,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 
 ### P1 — Kalite
 - [ ] **Q1 Oyun mantığı gözden geçirme:** az kartla (<4) davranış, çeldirici kalitesi, tekrar oynanabilirlik, istatistik kaydı, SRS ile etkileşim.
-- [ ] **Q2 Hata/çevrimdışı davranış:** ağ hatalarında kullanıcıya geri bildirim, sessiz `catch (_) {}` noktalarının gözden geçirilmesi.
+- [x] **Q2 Hata/çevrimdışı davranış:** (ana ekranda senkron/çevrimdışı/kayıt hatası bandı + yeniden dene) ağ hatalarında kullanıcıya geri bildirim, sessiz `catch (_) {}` noktalarının gözden geçirilmesi.
 - [ ] **Q3 Test kapsamı:** SRS, auth, sync, stats için eksik testler.
 - [ ] **Q4 Erişilebilirlik ve küçük ekran:** semantik etiketler, metin ölçekleme, taşma.
 
@@ -44,14 +44,14 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **S7 iOS Podfile** yok — macOS'ta `flutter build ios` ile üretilecek (kullanıcı, Linux'ta yapılamaz). Not olarak RELEASE.md'ye yaz.
 
 ### P1
-- [ ] **D5 Eşzamanlı yükleme yarışı:** `flashcard_provider.dart:73-81, 200-209`, `reading_provider` loadReadings — generation token ile eski yükleme sonucunu yok say.
+- [x] **D5 Eşzamanlı yükleme yarışı:** `flashcard_provider.dart:73-81, 200-209`, `reading_provider` loadReadings — generation token ile eski yükleme sonucunu yok say.
 - [x] **D6 Silme senkronu:** `supabase_service.dart:223` çevrimdışı silme yutuluyor, kart geri geliyor → tombstone/silme kuyruğu (D1 ile birlikte).
 - [x] **D7 learning_step fallback her hatada:** `:164-173, 196-203` yalnız "column not found" hatasında fallback yap.
-- [ ] **D8 Stats:** `stats_provider.dart:8-19` load await edilmeden kayıt state'i sıfırlayabiliyor; istatistikler kullanıcıya göre ayrılmıyor. Yüklenene kadar kayıtları beklet/kuyrukla, anahtarı userId'ye bağla.
-- [ ] **D9 Seed kartlar sabit id** (`seed-1..4`, `:18-85`) → UUID; tüm kartlar silinince seed'i tekrar oluşturma.
-- [ ] **D10 Tarih/saat dilimi:** `srs_service.dart:171` nextReviewDate karışık format → UTC ISO.
-- [ ] **D11 Hata görünürlüğü:** flashcard_provider iyimser güncellemede DB hatası yutuluyor; `bulkAddCards` tüm desteyi upsert ediyor (yalnız yenileri gönder); `main.dart` Supabase init hatası sessiz; `resendVerificationOtp` istemci yoksa başarı dönüyor.
-- [ ] **D12 signUp mevcut e-posta:** `identities` boşsa "bu e-posta kayıtlı" göster.
+- [x] **D8 Stats:** `stats_provider.dart:8-19` load await edilmeden kayıt state'i sıfırlayabiliyor; istatistikler kullanıcıya göre ayrılmıyor. Yüklenene kadar kayıtları beklet/kuyrukla, anahtarı userId'ye bağla.
+- [x] **D9 Seed kartlar sabit id** (`seed-1..4`, `:18-85`) → UUID; tüm kartlar silinince seed'i tekrar oluşturma.
+- [x] **D10 Tarih/saat dilimi:** `srs_service.dart:171` nextReviewDate karışık format → UTC ISO.
+- [x] **D11 Hata görünürlüğü:** flashcard_provider iyimser güncellemede DB hatası yutuluyor; `bulkAddCards` tüm desteyi upsert ediyor (yalnız yenileri gönder); `main.dart` Supabase init hatası sessiz; `resendVerificationOtp` istemci yoksa başarı dönüyor.
+- [x] **D12 signUp mevcut e-posta:** `identities` boşsa "bu e-posta kayıtlı" göster.
 - [ ] **S8 Android:** targetSdk açıkça 35+, release'te `isMinifyEnabled/isShrinkResources` (release build ile doğrulanarak), kullanılmayan bağımlılıklar (`path`, `path_provider`?) `flutter pub deps` ile doğrula/temizle.
 - [~] **S9 google_fonts çevrimdışı:** (font dosyası indirmek kullanıcı onayı ister → soru 8; google_fonts ilk çevrimiçi açılıştan sonra önbellekten çalışır, engel değil) fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
 - [x] **SEC1 RLS doğrulama:** (SQL hazır: `docs/supabase_migrations/002_rls_policies.sql`; çalıştırmak ve eski geniş politikaları kaldırmak kullanıcıda) anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
@@ -98,3 +98,5 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:48 — Uyanış #1. SEC1 SQL hazır. Çekirdek subagent'ı (D5,D8,D10-D12,Q2) ve release APK build'i sürüyor.
 - 01:52 — G10 kısmi (oyun karolarına ekran okuyucu etiketleri + test). S9 kullanıcı kararına (soru 8).
 - 01:48 — G11 kısmi: oyunlar zayıf kartları (yeni/öğreniliyor, düşük ease, kısa aralık) daha sık seçiyor.
+- 01:54 — Çekirdek subagent'ı bitti: D5, D8, D10, D11, D12, Q2 (7 commit, 158 test, analyzer temiz). D9: seed id'leri artık benzersiz (sync commit'i).
+  Riskler: buluttaki eski yerel-saatli tarihler UTC okunursa kartlar ~3 saat geç vadeye girebilir (tek seferlik); `FlashcardState.copyWith` error'ı her değişimde temizlediği için kayıt-hatası bandı kısa görünür; bant gerçek uygulamada denenmedi.
