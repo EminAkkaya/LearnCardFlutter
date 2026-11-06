@@ -18,7 +18,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 **Uygulama sırası:** D3 → G2 → G3 → D1+D6 (+D2) → S3 → D4 → S4/S6 → G4-G9 → D5, D7-D12 → S8/S9 → Q2-Q4 → G10/G11 → P2.
 - [x] **S1 Android release yapılandırması:** `key.properties` tabanlı release imzası (yoksa debug'a düşer), uygulama adı "LearnCard". applicationId kullanıcı onayı bekliyor (soru 1). Minify/targetSdk → S8.
 - [x] **S2 iOS yapılandırması:** display name "LearnCard", `ITSAppUsesNonExemptEncryption=false`. İzin metni gerekmiyor (kamera/konum yok). Bundle id → soru 1; Podfile/PrivacyInfo → S6/S7.
-- [ ] **S3 Hesap silme:** uygulama içinden hesap + veri silme (Play ve App Store zorunlu kılıyor).
+- [x] **S3 Hesap silme:** (Ayarlar → Hesabı Sil, "SİL" yazarak onay; `supabase/functions/delete-account` Edge Function; sunucu silmezse yerel veriye dokunulmaz) uygulama içinden hesap + veri silme (Play ve App Store zorunlu kılıyor).
 - [~] **S4 Gizlilik:** taslaklar `docs/PRIVACY_POLICY.md`, `docs/DATA_SAFETY.md`, yayın rehberi `docs/RELEASE.md` hazır; kalan: ayarlarda politika linki (URL kullanıcıdan). gizlilik politikası sayfası/bağlantısı ayarlar ekranında; Data Safety / Privacy Nutrition için toplanan veri listesi (`docs/`).
 - [ ] **S5 Supabase config:** `supabase_config.dart` gitignore'da; release/CI için `--dart-define` tabanlı yapı, anahtar yoksa net hata.
 
@@ -75,7 +75,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 1. **Nihai paket/bundle id:** şu an Android `com.learncard.learncard_flutter`, iOS `com.learncard.learncardFlutter`. Yayından sonra değiştirilemez. Öneri: ikisinde de aynı, ör. `com.<senin-alan-adın>.learncard`. Onay gelene kadar dokunulmadı.
 2. **Release keystore:** `keytool` ile üretilip `android/key.properties` yazılacak (şablon `docs/RELEASE.md`). Parolayı sen belirle ve yedekle; Play App Signing önerilir.
 3. **Gizlilik politikası + hesap silme web URL'si + destek e-postası** (taslak metni ben hazırlayabilirim, yayınlanacak yer senin).
-4. **Hesap silme yöntemi:** Supabase Edge Function (`auth.admin.deleteUser`, service role) — fonksiyon kodunu ben yazarım, deploy senin.
+4. **Hesap silme:** fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).
 5. **Supabase paneli:** auth redirect URL ekleme, RLS kontrolü.
 6. Play Console (25$) ve Apple Developer (99$/yıl) hesapları.
 7. **Çeviri servisi (SEC2):** şu an birincil çeviri resmî olmayan Google `client=gtx` uç noktası (kalitesi iyi ama ToS dışı, kesilebilir). Seçenekler: (a) olduğu gibi bırak, (b) MyMemory'yi birincil yap (kalite düşer, günlük limit), (c) resmî Google Cloud Translation / DeepL'i bir Supabase Edge Function arkasına koy (anahtar sunucuda, ücretli). Öneri: yayın öncesi (c), o zamana kadar (a).
@@ -92,3 +92,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
   - **D1+D6+D2+D7 senkron subagent'ı** kotayla kesilmiş olabilir: `lib/core/database/app_database.dart`, `lib/models/*`, `lib/models/syncable.dart`, `lib/services/sync/` vb. değişiklikleri incele; yarımsa tamamla (brief: plan D1/D2/D6/D7 maddeleri), `dart run build_runner build --delete-conflicting-outputs`, testler, commit.
 - 01:45 — D1/D2/D6/D7 tamam (`60209f1`, şema v3, `lib/services/sync/`, 120 test). **Kullanıcı:** `docs/supabase_migrations/001_sync_columns.sql`'i Supabase'de çalıştır. Kalan risk: SupabaseRemoteStore gerçek Supabase'e karşı denenmedi; provider'lardaki yeni `syncError` UI'da gösterilmiyor (→ Q2).
 - 01:45 — G1 tamam: oyun sonu "Tekrar etmen gerekenler" kartı, tek dokunuşla SRS `again`. Sıradaki: S3 hesap silme.
+- 01:55 — S3 tamam (hesap silme UI + Edge Function + widget testi, 125 test). Sıradaki: D4 auth deep link.

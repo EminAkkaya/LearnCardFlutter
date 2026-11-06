@@ -108,15 +108,9 @@ class AuthService {
     final client = _client;
     if (client == null) return;
     try {
-      await client.auth.resend(
-        type: OtpType.signup,
-        email: email.trim(),
-      );
+      await client.auth.resend(type: OtpType.signup, email: email.trim());
     } catch (_) {
-      await client.auth.resend(
-        type: OtpType.email,
-        email: email.trim(),
-      );
+      await client.auth.resend(type: OtpType.email, email: email.trim());
     }
   }
 
@@ -131,6 +125,24 @@ class AuthService {
       // Handles uninitialized Supabase client in unit tests
     }
     return false;
+  }
+
+  /// Hesabı ve tüm bulut verisini `delete-account` Edge Function'ı ile siler.
+  /// Başarısız olursa hata fırlatır (hesap silinmemiştir).
+  static Future<void> deleteAccount() async {
+    final client = _client;
+    if (client == null) throw Exception('Sunucuya bağlanılamadı.');
+    final response = await client.functions.invoke(
+      'delete-account',
+      method: HttpMethod.post,
+    );
+    if (response.status != 200) {
+      throw Exception('Hesap silinemedi (kod ${response.status}).');
+    }
+    // Sunucu oturumu zaten geçersiz; yalnız yerel oturumu temizle.
+    try {
+      await client.auth.signOut(scope: SignOutScope.local);
+    } catch (_) {}
   }
 
   /// Signs out the current user

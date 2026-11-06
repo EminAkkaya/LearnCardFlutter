@@ -14,6 +14,9 @@ hazırlık `docs/STORE_READINESS_PLAN.md` içinde takip edilir.
 - `lib/config/supabase_config.dart` gitignore'dadır; `lib/config/supabase_config.template.dart`
   dosyasını kopyalayıp doldur. CI kullanırsan bu dosyayı build adımında secret'lardan üret.
 - `docs/supabase_migrations/` altındaki SQL dosyalarını sırayla Supabase SQL Editor'da çalıştır.
+- **Hesap silme fonksiyonu:** `supabase functions deploy delete-account` (kod: `supabase/functions/delete-account/index.ts`).
+  Service role anahtarı Supabase tarafından fonksiyona otomatik verilir; istemciye hiç gitmez.
+  Deploy edilmezse uygulamadaki "Hesabı Sil" hata mesajı gösterir ve hiçbir veri silinmez.
 - **RLS:** tüm tablolarda Row Level Security açık olmalı ve politikalar `auth.uid() = user_id`
   şeklinde olmalı. Anon key istemcide herkese açıktır; güvenliği RLS sağlar.
 - **Auth redirect:** Supabase → Authentication → URL Configuration → Redirect URLs'e

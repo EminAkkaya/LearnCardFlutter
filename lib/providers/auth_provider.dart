@@ -50,8 +50,8 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
   StreamSubscription<sb.AuthState>? _authSubscription;
 
   AuthNotifier([AppDatabase? database])
-      : _db = database ?? appDatabase,
-        super(AppAuthState(user: AuthService.currentUser)) {
+    : _db = database ?? appDatabase,
+      super(AppAuthState(user: AuthService.currentUser)) {
     _initAuthListener();
     _loadGuestModeStatus();
   }
@@ -67,19 +67,22 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
 
   void _initAuthListener() {
     try {
-      _authSubscription = AuthService.authStateChanges.listen((data) {
-        final user = data.session?.user;
-        if (user != null) {
-          _db.setBool('auth_is_guest_mode', false);
-        }
-        state = state.copyWith(
-          user: user,
-          clearUser: user == null,
-          isGuestMode: user != null ? false : state.isGuestMode,
-        );
-      }, onError: (_) {
-        // Gracefully ignore offline auth token refresh / network errors
-      });
+      _authSubscription = AuthService.authStateChanges.listen(
+        (data) {
+          final user = data.session?.user;
+          if (user != null) {
+            _db.setBool('auth_is_guest_mode', false);
+          }
+          state = state.copyWith(
+            user: user,
+            clearUser: user == null,
+            isGuestMode: user != null ? false : state.isGuestMode,
+          );
+        },
+        onError: (_) {
+          // Gracefully ignore offline auth token refresh / network errors
+        },
+      );
     } catch (_) {}
   }
 
@@ -273,6 +276,35 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
       state = state.copyWith(isLoading: false, error: _parseAuthError(e));
       return false;
     }
+  }
+
+  /// Hesabı sunucudan siler, ardından bu kullanıcının cihazdaki verisini temizler.
+  /// Sunucu silmesi başarısızsa yerel veriye dokunulmaz ve `false` döner.
+  Future<bool> deleteAccount() async {
+    final userId = state.user?.id;
+    if (userId == null) return false;
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await AuthService.deleteAccount();
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return false;
+    }
+    try {
+      await _db.clearAllFlashcards(userId: userId);
+      await _db.clearAllReadingArticles(userId: userId);
+      await _db.setBool('auth_is_guest_mode', false);
+    } catch (_) {}
+    state = state.copyWith(
+      isLoading: false,
+      clearUser: true,
+      clearPendingEmail: true,
+      isGuestMode: false,
+    );
+    return true;
   }
 
   Future<void> signOut() async {
