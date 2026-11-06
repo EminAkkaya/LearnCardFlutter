@@ -69,7 +69,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
 - [~] **G9 (P1) Tekrar ekranı:** (başa sarma hatası + çıkış onayı tamam; kalan: son derecelendirmeyi geri al — flashcard_provider'a `undoLastReview` gerekir, D1 sonrası; ekran için widget testi yok) `flashcard_review_screen.dart:28-33, 56-62` customCards ile gelince bitişte eski due kartlara başa sarma hatası; çıkış onayı (PopScope); son derecelendirmeyi geri al.
 - [~] **G10 (P2) Erişilebilirlik/tema:** (Semantics: eşleştirme ve harf karoları/slotları tamam; kalan: sabit renkleri temaya bağlama) oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
-- [ ] **G11 (P2) Fikirler:** zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
+- [~] **G11 (P2) Fikirler:** (zayıf kartlara ağırlıklı seçim tamam — `practice_order.dart`; kalan: TR→EN yönü) zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
 
 ## Kullanıcıya sorulacaklar
 1. **Nihai paket/bundle id:** şu an Android `com.learncard.learncard_flutter`, iOS `com.learncard.learncardFlutter`. Yayından sonra değiştirilemez. Öneri: ikisinde de aynı, ör. `com.<senin-alan-adın>.learncard`. Onay gelene kadar dokunulmadı.
@@ -97,3 +97,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:45 — D4 tamam (126 test). Gerçek cihazda e-posta bağlantısı denenmedi. Sıradaki: D5, D8-D12, Q2 (syncError UI).
 - 01:48 — Uyanış #1. SEC1 SQL hazır. Çekirdek subagent'ı (D5,D8,D10-D12,Q2) ve release APK build'i sürüyor.
 - 01:52 — G10 kısmi (oyun karolarına ekran okuyucu etiketleri + test). S9 kullanıcı kararına (soru 8).
+- 01:48 — G11 kısmi: oyunlar zayıf kartları (yeni/öğreniliyor, düşük ease, kısa aralık) daha sık seçiyor.

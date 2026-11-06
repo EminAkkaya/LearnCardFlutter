@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../models/games/speed_quiz_question_model.dart';
 import 'game_callbacks.dart';
+import 'practice_order.dart';
 
 const int speedQuizQuestionSeconds = 10;
 const int speedQuizMaxQuestions = 10;
@@ -24,7 +25,7 @@ String _meaningOf(FlashcardModel c) =>
 /// dil farkından doğru cevap anlaşılmaz. En az [speedQuizMinOptions] şık
 /// kurulamayan kart soru olarak kullanılmaz.
 List<SpeedQuizQuestionModel> buildSpeedQuizQuestions(List<FlashcardModel> cards) {
-  final pool = List<FlashcardModel>.from(cards)..shuffle();
+  final pool = practiceOrder(cards);
   final questions = <SpeedQuizQuestionModel>[];
 
   for (final card in pool) {

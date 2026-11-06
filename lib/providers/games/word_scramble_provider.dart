@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../models/games/letter_tile_model.dart';
 import 'game_callbacks.dart';
+import 'practice_order.dart';
 
 const int scrambleMaxWords = 8;
 const int scramblePointsPerWord = 100;
@@ -16,11 +17,8 @@ String normalizeScrambleWord(String word) =>
 
 /// Tek kelimelik kartlardan karışık oyun destesi seçer.
 List<FlashcardModel> pickScrambleCards(List<FlashcardModel> cards) {
-  final valid = cards
-      .where((c) => c.word.trim().isNotEmpty && !c.word.contains(' '))
-      .toList()
-    ..shuffle();
-  return valid.take(scrambleMaxWords).toList();
+  final valid = cards.where((c) => c.word.trim().isNotEmpty && !c.word.contains(' ')).toList();
+  return practiceOrder(valid).take(scrambleMaxWords).toList();
 }
 
 List<LetterTileModel> buildLetterPool(String word) {

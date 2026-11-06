@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../models/games/word_match_tile_model.dart';
 import 'game_callbacks.dart';
+import 'practice_order.dart';
 
 const int wordMatchMaxPairs = 6;
 const int wordMatchPairPoints = 100;
@@ -21,7 +22,7 @@ List<WordMatchTileModel> buildWordMatchTiles(List<FlashcardModel> cards) {
   final seenWords = <String>{};
   final seenMeanings = <String>{};
   final selected = <FlashcardModel>[];
-  for (final card in List<FlashcardModel>.from(cards)..shuffle()) {
+  for (final card in practiceOrder(cards)) {
     if (selected.length >= wordMatchMaxPairs) break;
     final word = card.word.trim().toLowerCase();
     final meaning = _meaningOf(card).toLowerCase();

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../models/games/cloze_question_model.dart';
 import 'game_callbacks.dart';
+import 'practice_order.dart';
 
 const int clozeMaxQuestions = 10;
 const int clozePointsNoHint = 100;
@@ -31,7 +32,7 @@ String _sentenceFor(FlashcardModel card, String target) {
 /// Cümlede kelimesi bulunamayan veya desteden en az [clozeMinOptions] - 1
 /// çeldirici çıkarılamayan kart atlanır; sahte cümle/kelime üretilmez.
 List<ClozeQuestionModel> buildClozeQuestions(List<FlashcardModel> cards) {
-  final pool = List<FlashcardModel>.from(cards)..shuffle();
+  final pool = practiceOrder(cards);
   final allWords = cards
       .map((c) => c.word.trim().toLowerCase())
       .where((w) => w.isNotEmpty)
