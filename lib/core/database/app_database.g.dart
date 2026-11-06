@@ -188,6 +188,47 @@ class $FlashcardEntriesTable extends FlashcardEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -206,6 +247,9 @@ class $FlashcardEntriesTable extends FlashcardEntries
     easeFactor,
     nextReviewDate,
     createdAt,
+    updatedAt,
+    isDirty,
+    isDeleted,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -338,6 +382,24 @@ class $FlashcardEntriesTable extends FlashcardEntries
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
     return context;
   }
 
@@ -411,6 +473,18 @@ class $FlashcardEntriesTable extends FlashcardEntries
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
     );
   }
 
@@ -437,6 +511,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
   final double easeFactor;
   final String nextReviewDate;
   final String createdAt;
+  final String? updatedAt;
+  final bool isDirty;
+  final bool isDeleted;
   const FlashcardEntry({
     required this.id,
     this.userId,
@@ -454,6 +531,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     required this.easeFactor,
     required this.nextReviewDate,
     required this.createdAt,
+    this.updatedAt,
+    required this.isDirty,
+    required this.isDeleted,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -476,6 +556,11 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     map['ease_factor'] = Variable<double>(easeFactor);
     map['next_review_date'] = Variable<String>(nextReviewDate);
     map['created_at'] = Variable<String>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<String>(updatedAt);
+    }
+    map['is_dirty'] = Variable<bool>(isDirty);
+    map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
 
@@ -499,6 +584,11 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
       easeFactor: Value(easeFactor),
       nextReviewDate: Value(nextReviewDate),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isDirty: Value(isDirty),
+      isDeleted: Value(isDeleted),
     );
   }
 
@@ -524,6 +614,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
       easeFactor: serializer.fromJson<double>(json['easeFactor']),
       nextReviewDate: serializer.fromJson<String>(json['nextReviewDate']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String?>(json['updatedAt']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
   @override
@@ -546,6 +639,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
       'easeFactor': serializer.toJson<double>(easeFactor),
       'nextReviewDate': serializer.toJson<String>(nextReviewDate),
       'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String?>(updatedAt),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
 
@@ -566,6 +662,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     double? easeFactor,
     String? nextReviewDate,
     String? createdAt,
+    Value<String?> updatedAt = const Value.absent(),
+    bool? isDirty,
+    bool? isDeleted,
   }) => FlashcardEntry(
     id: id ?? this.id,
     userId: userId.present ? userId.value : this.userId,
@@ -583,6 +682,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     easeFactor: easeFactor ?? this.easeFactor,
     nextReviewDate: nextReviewDate ?? this.nextReviewDate,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isDirty: isDirty ?? this.isDirty,
+    isDeleted: isDeleted ?? this.isDeleted,
   );
   FlashcardEntry copyWithCompanion(FlashcardEntriesCompanion data) {
     return FlashcardEntry(
@@ -618,6 +720,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
           ? data.nextReviewDate.value
           : this.nextReviewDate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
     );
   }
 
@@ -639,7 +744,10 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
           ..write('learningStep: $learningStep, ')
           ..write('easeFactor: $easeFactor, ')
           ..write('nextReviewDate: $nextReviewDate, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('isDeleted: $isDeleted')
           ..write(')'))
         .toString();
   }
@@ -662,6 +770,9 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
     easeFactor,
     nextReviewDate,
     createdAt,
+    updatedAt,
+    isDirty,
+    isDeleted,
   );
   @override
   bool operator ==(Object other) =>
@@ -682,7 +793,10 @@ class FlashcardEntry extends DataClass implements Insertable<FlashcardEntry> {
           other.learningStep == this.learningStep &&
           other.easeFactor == this.easeFactor &&
           other.nextReviewDate == this.nextReviewDate &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDirty == this.isDirty &&
+          other.isDeleted == this.isDeleted);
 }
 
 class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
@@ -702,6 +816,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
   final Value<double> easeFactor;
   final Value<String> nextReviewDate;
   final Value<String> createdAt;
+  final Value<String?> updatedAt;
+  final Value<bool> isDirty;
+  final Value<bool> isDeleted;
   final Value<int> rowid;
   const FlashcardEntriesCompanion({
     this.id = const Value.absent(),
@@ -720,6 +837,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
     this.easeFactor = const Value.absent(),
     this.nextReviewDate = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FlashcardEntriesCompanion.insert({
@@ -739,6 +859,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
     this.easeFactor = const Value.absent(),
     required String nextReviewDate,
     required String createdAt,
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        word = Value(word),
@@ -761,6 +884,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
     Expression<double>? easeFactor,
     Expression<String>? nextReviewDate,
     Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<bool>? isDirty,
+    Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -780,6 +906,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
       if (easeFactor != null) 'ease_factor': easeFactor,
       if (nextReviewDate != null) 'next_review_date': nextReviewDate,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -801,6 +930,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
     Value<double>? easeFactor,
     Value<String>? nextReviewDate,
     Value<String>? createdAt,
+    Value<String?>? updatedAt,
+    Value<bool>? isDirty,
+    Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
     return FlashcardEntriesCompanion(
@@ -820,6 +952,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
       easeFactor: easeFactor ?? this.easeFactor,
       nextReviewDate: nextReviewDate ?? this.nextReviewDate,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -875,6 +1010,15 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -900,6 +1044,9 @@ class FlashcardEntriesCompanion extends UpdateCompanion<FlashcardEntry> {
           ..write('easeFactor: $easeFactor, ')
           ..write('nextReviewDate: $nextReviewDate, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -971,6 +1118,47 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
     requiredDuringInsert: false,
     defaultValue: const Constant('Genel'),
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isDeletedMeta = const VerificationMeta(
+    'isDeleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isDeleted = GeneratedColumn<bool>(
+    'is_deleted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_deleted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -979,6 +1167,9 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
     textContent,
     createdAt,
     folder,
+    updatedAt,
+    isDirty,
+    isDeleted,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1036,6 +1227,24 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
         folder.isAcceptableOrUnknown(data['folder']!, _folderMeta),
       );
     }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('is_deleted')) {
+      context.handle(
+        _isDeletedMeta,
+        isDeleted.isAcceptableOrUnknown(data['is_deleted']!, _isDeletedMeta),
+      );
+    }
     return context;
   }
 
@@ -1069,6 +1278,18 @@ class $ReadingArticleEntriesTable extends ReadingArticleEntries
         DriftSqlType.string,
         data['${effectivePrefix}folder'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      isDeleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_deleted'],
+      )!,
     );
   }
 
@@ -1086,6 +1307,9 @@ class ReadingArticleEntry extends DataClass
   final String textContent;
   final String createdAt;
   final String folder;
+  final String? updatedAt;
+  final bool isDirty;
+  final bool isDeleted;
   const ReadingArticleEntry({
     required this.id,
     this.userId,
@@ -1093,6 +1317,9 @@ class ReadingArticleEntry extends DataClass
     required this.textContent,
     required this.createdAt,
     required this.folder,
+    this.updatedAt,
+    required this.isDirty,
+    required this.isDeleted,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1105,6 +1332,11 @@ class ReadingArticleEntry extends DataClass
     map['text_content'] = Variable<String>(textContent);
     map['created_at'] = Variable<String>(createdAt);
     map['folder'] = Variable<String>(folder);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<String>(updatedAt);
+    }
+    map['is_dirty'] = Variable<bool>(isDirty);
+    map['is_deleted'] = Variable<bool>(isDeleted);
     return map;
   }
 
@@ -1118,6 +1350,11 @@ class ReadingArticleEntry extends DataClass
       textContent: Value(textContent),
       createdAt: Value(createdAt),
       folder: Value(folder),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isDirty: Value(isDirty),
+      isDeleted: Value(isDeleted),
     );
   }
 
@@ -1133,6 +1370,9 @@ class ReadingArticleEntry extends DataClass
       textContent: serializer.fromJson<String>(json['textContent']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
       folder: serializer.fromJson<String>(json['folder']),
+      updatedAt: serializer.fromJson<String?>(json['updatedAt']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      isDeleted: serializer.fromJson<bool>(json['isDeleted']),
     );
   }
   @override
@@ -1145,6 +1385,9 @@ class ReadingArticleEntry extends DataClass
       'textContent': serializer.toJson<String>(textContent),
       'createdAt': serializer.toJson<String>(createdAt),
       'folder': serializer.toJson<String>(folder),
+      'updatedAt': serializer.toJson<String?>(updatedAt),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'isDeleted': serializer.toJson<bool>(isDeleted),
     };
   }
 
@@ -1155,6 +1398,9 @@ class ReadingArticleEntry extends DataClass
     String? textContent,
     String? createdAt,
     String? folder,
+    Value<String?> updatedAt = const Value.absent(),
+    bool? isDirty,
+    bool? isDeleted,
   }) => ReadingArticleEntry(
     id: id ?? this.id,
     userId: userId.present ? userId.value : this.userId,
@@ -1162,6 +1408,9 @@ class ReadingArticleEntry extends DataClass
     textContent: textContent ?? this.textContent,
     createdAt: createdAt ?? this.createdAt,
     folder: folder ?? this.folder,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isDirty: isDirty ?? this.isDirty,
+    isDeleted: isDeleted ?? this.isDeleted,
   );
   ReadingArticleEntry copyWithCompanion(ReadingArticleEntriesCompanion data) {
     return ReadingArticleEntry(
@@ -1173,6 +1422,9 @@ class ReadingArticleEntry extends DataClass
           : this.textContent,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       folder: data.folder.present ? data.folder.value : this.folder,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
     );
   }
 
@@ -1184,14 +1436,26 @@ class ReadingArticleEntry extends DataClass
           ..write('title: $title, ')
           ..write('textContent: $textContent, ')
           ..write('createdAt: $createdAt, ')
-          ..write('folder: $folder')
+          ..write('folder: $folder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('isDeleted: $isDeleted')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, userId, title, textContent, createdAt, folder);
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    title,
+    textContent,
+    createdAt,
+    folder,
+    updatedAt,
+    isDirty,
+    isDeleted,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1201,7 +1465,10 @@ class ReadingArticleEntry extends DataClass
           other.title == this.title &&
           other.textContent == this.textContent &&
           other.createdAt == this.createdAt &&
-          other.folder == this.folder);
+          other.folder == this.folder &&
+          other.updatedAt == this.updatedAt &&
+          other.isDirty == this.isDirty &&
+          other.isDeleted == this.isDeleted);
 }
 
 class ReadingArticleEntriesCompanion
@@ -1212,6 +1479,9 @@ class ReadingArticleEntriesCompanion
   final Value<String> textContent;
   final Value<String> createdAt;
   final Value<String> folder;
+  final Value<String?> updatedAt;
+  final Value<bool> isDirty;
+  final Value<bool> isDeleted;
   final Value<int> rowid;
   const ReadingArticleEntriesCompanion({
     this.id = const Value.absent(),
@@ -1220,6 +1490,9 @@ class ReadingArticleEntriesCompanion
     this.textContent = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.folder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ReadingArticleEntriesCompanion.insert({
@@ -1229,6 +1502,9 @@ class ReadingArticleEntriesCompanion
     required String textContent,
     required String createdAt,
     this.folder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.isDeleted = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -1241,6 +1517,9 @@ class ReadingArticleEntriesCompanion
     Expression<String>? textContent,
     Expression<String>? createdAt,
     Expression<String>? folder,
+    Expression<String>? updatedAt,
+    Expression<bool>? isDirty,
+    Expression<bool>? isDeleted,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1250,6 +1529,9 @@ class ReadingArticleEntriesCompanion
       if (textContent != null) 'text_content': textContent,
       if (createdAt != null) 'created_at': createdAt,
       if (folder != null) 'folder': folder,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (isDeleted != null) 'is_deleted': isDeleted,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1261,6 +1543,9 @@ class ReadingArticleEntriesCompanion
     Value<String>? textContent,
     Value<String>? createdAt,
     Value<String>? folder,
+    Value<String?>? updatedAt,
+    Value<bool>? isDirty,
+    Value<bool>? isDeleted,
     Value<int>? rowid,
   }) {
     return ReadingArticleEntriesCompanion(
@@ -1270,6 +1555,9 @@ class ReadingArticleEntriesCompanion
       textContent: textContent ?? this.textContent,
       createdAt: createdAt ?? this.createdAt,
       folder: folder ?? this.folder,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDirty: isDirty ?? this.isDirty,
+      isDeleted: isDeleted ?? this.isDeleted,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1295,6 +1583,15 @@ class ReadingArticleEntriesCompanion
     if (folder.present) {
       map['folder'] = Variable<String>(folder.value);
     }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (isDeleted.present) {
+      map['is_deleted'] = Variable<bool>(isDeleted.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1310,6 +1607,9 @@ class ReadingArticleEntriesCompanion
           ..write('textContent: $textContent, ')
           ..write('createdAt: $createdAt, ')
           ..write('folder: $folder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('isDeleted: $isDeleted, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1574,6 +1874,9 @@ typedef $$FlashcardEntriesTableCreateCompanionBuilder =
       Value<double> easeFactor,
       required String nextReviewDate,
       required String createdAt,
+      Value<String?> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 typedef $$FlashcardEntriesTableUpdateCompanionBuilder =
@@ -1594,6 +1897,9 @@ typedef $$FlashcardEntriesTableUpdateCompanionBuilder =
       Value<double> easeFactor,
       Value<String> nextReviewDate,
       Value<String> createdAt,
+      Value<String?> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 
@@ -1683,6 +1989,21 @@ class $$FlashcardEntriesTableFilterComposer
 
   ColumnFilters<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1775,6 +2096,21 @@ class $$FlashcardEntriesTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FlashcardEntriesTableAnnotationComposer
@@ -1849,6 +2185,15 @@ class $$FlashcardEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 }
 
 class $$FlashcardEntriesTableTableManager
@@ -1904,6 +2249,9 @@ class $$FlashcardEntriesTableTableManager
                 Value<double> easeFactor = const Value.absent(),
                 Value<String> nextReviewDate = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
+                Value<String?> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FlashcardEntriesCompanion(
                 id: id,
@@ -1922,6 +2270,9 @@ class $$FlashcardEntriesTableTableManager
                 easeFactor: easeFactor,
                 nextReviewDate: nextReviewDate,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1942,6 +2293,9 @@ class $$FlashcardEntriesTableTableManager
                 Value<double> easeFactor = const Value.absent(),
                 required String nextReviewDate,
                 required String createdAt,
+                Value<String?> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FlashcardEntriesCompanion.insert(
                 id: id,
@@ -1960,6 +2314,9 @@ class $$FlashcardEntriesTableTableManager
                 easeFactor: easeFactor,
                 nextReviewDate: nextReviewDate,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1995,6 +2352,9 @@ typedef $$ReadingArticleEntriesTableCreateCompanionBuilder =
       required String textContent,
       required String createdAt,
       Value<String> folder,
+      Value<String?> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 typedef $$ReadingArticleEntriesTableUpdateCompanionBuilder =
@@ -2005,6 +2365,9 @@ typedef $$ReadingArticleEntriesTableUpdateCompanionBuilder =
       Value<String> textContent,
       Value<String> createdAt,
       Value<String> folder,
+      Value<String?> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> isDeleted,
       Value<int> rowid,
     });
 
@@ -2044,6 +2407,21 @@ class $$ReadingArticleEntriesTableFilterComposer
 
   ColumnFilters<String> get folder => $composableBuilder(
     column: $table.folder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2086,6 +2464,21 @@ class $$ReadingArticleEntriesTableOrderingComposer
     column: $table.folder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDeleted => $composableBuilder(
+    column: $table.isDeleted,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ReadingArticleEntriesTableAnnotationComposer
@@ -2116,6 +2509,15 @@ class $$ReadingArticleEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get folder =>
       $composableBuilder(column: $table.folder, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDeleted =>
+      $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 }
 
 class $$ReadingArticleEntriesTableTableManager
@@ -2170,6 +2572,9 @@ class $$ReadingArticleEntriesTableTableManager
                 Value<String> textContent = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
                 Value<String> folder = const Value.absent(),
+                Value<String?> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReadingArticleEntriesCompanion(
                 id: id,
@@ -2178,6 +2583,9 @@ class $$ReadingArticleEntriesTableTableManager
                 textContent: textContent,
                 createdAt: createdAt,
                 folder: folder,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2188,6 +2596,9 @@ class $$ReadingArticleEntriesTableTableManager
                 required String textContent,
                 required String createdAt,
                 Value<String> folder = const Value.absent(),
+                Value<String?> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> isDeleted = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReadingArticleEntriesCompanion.insert(
                 id: id,
@@ -2196,6 +2607,9 @@ class $$ReadingArticleEntriesTableTableManager
                 textContent: textContent,
                 createdAt: createdAt,
                 folder: folder,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                isDeleted: isDeleted,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

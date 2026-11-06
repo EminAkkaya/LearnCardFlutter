@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../models/flashcard_model.dart';
 import '../services/srs_service.dart';
 import '../services/supabase_service.dart';
+import '../services/sync/sync_engine.dart';
 import 'auth_provider.dart';
 import 'stats_provider.dart';
 
@@ -13,12 +14,16 @@ class FlashcardState {
   final String filterStatus; // 'all', 'due', 'new', 'learning', 'mastered'
   final String searchQuery;
 
+  /// Son eşitleme hatası (veri yerelde güvende, sonraki eşitlemede yeniden denenir).
+  final String? syncError;
+
   FlashcardState({
     this.cards = const [],
     this.isLoading = false,
     this.error,
     this.filterStatus = 'all',
     this.searchQuery = '',
+    this.syncError,
   });
 
   FlashcardState copyWith({
@@ -27,6 +32,7 @@ class FlashcardState {
     String? error,
     String? filterStatus,
     String? searchQuery,
+    Object? syncError = _keep,
   }) {
     return FlashcardState(
       cards: cards ?? this.cards,
@@ -34,6 +40,7 @@ class FlashcardState {
       error: error,
       filterStatus: filterStatus ?? this.filterStatus,
       searchQuery: searchQuery ?? this.searchQuery,
+      syncError: syncError == _keep ? this.syncError : syncError as String?,
     );
   }
 
@@ -60,6 +67,8 @@ class FlashcardState {
   List<FlashcardModel> get masteredCards => cards.where((c) => c.status == 'mastered').toList();
 }
 
+const Object _keep = Object();
+
 class FlashcardNotifier extends StateNotifier<FlashcardState> {
   final Ref? _ref;
 
@@ -73,11 +82,20 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
   Future<void> loadCards() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final cards = await SupabaseService.getSavedCards();
-      state = state.copyWith(cards: cards, isLoading: false);
+      final loaded = await SupabaseService.getSavedCards();
+      state = state.copyWith(
+        cards: loaded.items,
+        isLoading: false,
+        syncError: loaded.sync.errorMessage,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
+  }
+
+  void _recordSync(SyncResult result) {
+    if (!mounted) return;
+    state = state.copyWith(syncError: result.errorMessage);
   }
 
   void setFilterStatus(String status) {
@@ -124,7 +142,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
 
     final updated = [...state.cards, newCard];
     state = state.copyWith(cards: updated);
-    await SupabaseService.upsertCard(newCard);
+    _recordSync(await SupabaseService.upsertCard(newCard));
     _ref?.read(statsProvider.notifier).recordCardAdded();
     return true;
   }
@@ -132,13 +150,13 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
   Future<void> updateCard(FlashcardModel updatedCard) async {
     final updatedList = state.cards.map((c) => c.id == updatedCard.id ? updatedCard : c).toList();
     state = state.copyWith(cards: updatedList);
-    await SupabaseService.upsertCard(updatedCard);
+    _recordSync(await SupabaseService.upsertCard(updatedCard));
   }
 
   Future<void> deleteCard(String id) async {
     final updatedList = state.cards.where((c) => c.id != id).toList();
     state = state.copyWith(cards: updatedList);
-    await SupabaseService.deleteCard(id);
+    _recordSync(await SupabaseService.deleteCard(id));
   }
 
   Future<void> reviewCard(String id, ReviewRating rating) async {
@@ -151,7 +169,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
     updatedList[index] = updatedCard;
 
     state = state.copyWith(cards: updatedList);
-    await SupabaseService.upsertCard(updatedCard);
+    _recordSync(await SupabaseService.upsertCard(updatedCard));
     _ref?.read(statsProvider.notifier).recordCardReviewed();
   }
 
@@ -187,7 +205,8 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
     if (addedList.isNotEmpty) {
       final updatedCards = [...state.cards, ...addedList];
       state = state.copyWith(cards: updatedCards);
-      await SupabaseService.saveCardsToSupabase(updatedCards);
+      // Yalnız yeni kartlar yazılır ve gönderilir; tüm deste yeniden yüklenmez.
+      _recordSync(await SupabaseService.saveCardsToSupabase(addedList));
       _ref?.read(statsProvider.notifier).recordCardAdded(addedList.length);
     }
 

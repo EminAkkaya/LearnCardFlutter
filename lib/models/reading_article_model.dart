@@ -1,10 +1,18 @@
-class ReadingArticleModel {
+import 'syncable.dart';
+
+class ReadingArticleModel implements Syncable {
+  @override
   final String id;
+  @override
   final String? userId;
   final String title;
   final String text;
   final String createdAt;
   final String folder;
+
+  /// Son yerel/bulut değişikliğinin zamanı (ISO-8601 UTC); bulutta yoksa null.
+  @override
+  final String? updatedAt;
 
   ReadingArticleModel({
     required this.id,
@@ -13,6 +21,7 @@ class ReadingArticleModel {
     required this.text,
     required this.createdAt,
     this.folder = 'Genel',
+    this.updatedAt,
   });
 
   factory ReadingArticleModel.fromMap(Map<String, dynamic> map) {
@@ -23,6 +32,7 @@ class ReadingArticleModel {
       text: map['text']?.toString() ?? '',
       createdAt: map['created_at']?.toString() ?? map['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
       folder: (map['folder']?.toString().trim().isNotEmpty == true) ? map['folder'].toString().trim() : 'Genel',
+      updatedAt: map['updated_at']?.toString() ?? map['updatedAt']?.toString(),
     );
   }
 
@@ -37,6 +47,9 @@ class ReadingArticleModel {
     if (userId != null && userId!.isNotEmpty) {
       row['user_id'] = userId;
     }
+    if (updatedAt != null) {
+      row['updated_at'] = updatedAt;
+    }
     return row;
   }
 
@@ -49,6 +62,7 @@ class ReadingArticleModel {
     String? text,
     String? createdAt,
     String? folder,
+    String? updatedAt,
   }) {
     return ReadingArticleModel(
       id: id ?? this.id,
@@ -57,6 +71,7 @@ class ReadingArticleModel {
       text: text ?? this.text,
       createdAt: createdAt ?? this.createdAt,
       folder: folder ?? this.folder,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

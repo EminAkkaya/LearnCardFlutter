@@ -1,5 +1,9 @@
-class FlashcardModel {
+import 'syncable.dart';
+
+class FlashcardModel implements Syncable {
+  @override
   final String id;
+  @override
   final String? userId;
   final String word;
   final String definition;
@@ -15,6 +19,11 @@ class FlashcardModel {
   final double easeFactor;
   final String nextReviewDate;
   final String createdAt;
+
+  /// Son yerel/bulut değişikliğinin zamanı (ISO-8601 UTC). Buluttaki
+  /// `updated_at` sütunu henüz yoksa null kalabilir.
+  @override
+  final String? updatedAt;
 
   FlashcardModel({
     required this.id,
@@ -33,6 +42,7 @@ class FlashcardModel {
     this.easeFactor = 2.5,
     required this.nextReviewDate,
     required this.createdAt,
+    this.updatedAt,
   });
 
   /// Factory constructor to map Supabase table row (or Local JSON) to Dart object
@@ -68,6 +78,7 @@ class FlashcardModel {
       easeFactor: parseDouble(map['ease_factor'] ?? map['easeFactor'], 2.5),
       nextReviewDate: map['next_review_date']?.toString() ?? map['nextReviewDate']?.toString() ?? DateTime.now().toIso8601String(),
       createdAt: map['created_at']?.toString() ?? map['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
+      updatedAt: map['updated_at']?.toString() ?? map['updatedAt']?.toString(),
     );
   }
 
@@ -93,6 +104,9 @@ class FlashcardModel {
     if (userId != null && userId!.isNotEmpty) {
       row['user_id'] = userId;
     }
+    if (updatedAt != null) {
+      row['updated_at'] = updatedAt;
+    }
     return row;
   }
 
@@ -115,6 +129,7 @@ class FlashcardModel {
     double? easeFactor,
     String? nextReviewDate,
     String? createdAt,
+    String? updatedAt,
   }) {
     return FlashcardModel(
       id: id ?? this.id,
@@ -133,6 +148,7 @@ class FlashcardModel {
       easeFactor: easeFactor ?? this.easeFactor,
       nextReviewDate: nextReviewDate ?? this.nextReviewDate,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

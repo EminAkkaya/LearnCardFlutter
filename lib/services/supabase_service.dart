@@ -1,8 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../core/database/app_database.dart';
 import '../models/flashcard_model.dart';
 import '../models/reading_article_model.dart';
 import 'auth_service.dart';
+import 'sync/drift_sync_store.dart';
+import 'sync/supabase_remote_store.dart';
+import 'sync/sync_engine.dart';
+import 'sync/sync_stores.dart';
+
+/// Yerel liste ve onu üreten eşitleme turunun sonucu.
+typedef SyncedList<T> = ({List<T> items, SyncResult sync});
 
 class SupabaseService {
   static SupabaseClient? get _client {
@@ -14,6 +23,60 @@ class SupabaseService {
   }
 
   static String? get currentUserId => AuthService.currentUserId;
+
+  static String _nowIso() => DateTime.now().toUtc().toIso8601String();
+
+  static SupabaseClient? _engineClient;
+  static SyncEngine<FlashcardModel>? _cardEngineCache;
+  static SyncEngine<ReadingArticleModel>? _readingEngineCache;
+
+  /// Bulut kullanılamıyorsa (Supabase başlatılmamış) null.
+  static SupabaseClient? _clientForEngines() {
+    final client = _client;
+    if (!identical(client, _engineClient)) {
+      _engineClient = client;
+      _cardEngineCache = null;
+      _readingEngineCache = null;
+    }
+    return client;
+  }
+
+  static SyncEngine<FlashcardModel>? get _cardEngine {
+    final client = _clientForEngines();
+    if (client == null) return null;
+    return _cardEngineCache ??= SyncEngine(
+      local: flashcardSyncStore(appDatabase),
+      remote: SupabaseRemoteStore<FlashcardModel>(
+        client: client,
+        table: 'flashcards',
+        fromRow: FlashcardModel.fromMap,
+        toRow: (card) => card.toSupabaseRow(),
+        optionalColumns: const ['learning_step', 'updated_at'],
+      ),
+    );
+  }
+
+  static SyncEngine<ReadingArticleModel>? get _readingEngine {
+    final client = _clientForEngines();
+    if (client == null) return null;
+    return _readingEngineCache ??= SyncEngine(
+      local: readingSyncStore(appDatabase),
+      remote: SupabaseRemoteStore<ReadingArticleModel>(
+        client: client,
+        table: 'saved_readings',
+        fromRow: ReadingArticleModel.fromMap,
+        toRow: (article) => article.toSupabaseRow(),
+        optionalColumns: const ['updated_at'],
+      ),
+    );
+  }
+
+  static SyncResult _report(String what, SyncResult result) {
+    if (result.hasErrors) {
+      debugPrint('[sync] $what: ${result.errorMessage}');
+    }
+    return result;
+  }
 
   static final List<Map<String, dynamic>> _seedCards = [
     {
@@ -85,221 +148,113 @@ class SupabaseService {
   ];
 
   // ---------------------------------------------------------------------------
-  // FLASHCARDS TABLE OPERATIONS (DRIFT + SUPABASE - OFFLINE FIRST)
+  // FLASHCARDS (DRIFT + SUPABASE - OFFLINE FIRST)
   // ---------------------------------------------------------------------------
 
-  static Future<List<FlashcardModel>> getSavedCards() async {
+  /// Giriş yapılmışsa önce eşitler, sonra yerel kartları döner. Çevrimdışıyken
+  /// veya Supabase yoksa yerel veri olduğu gibi döner.
+  static Future<SyncedList<FlashcardModel>> getSavedCards() async {
     final String? uid = currentUserId;
-    List<FlashcardModel> localCards = await appDatabase.getAllFlashcards(
-      userId: uid,
-    );
-
-    // If local DB is empty (first install / cold run), populate with default seed cards
-    if (localCards.isEmpty) {
-      final seedList = _seedCards
-          .map((c) => FlashcardModel.fromMap(c).copyWith(userId: uid))
-          .toList();
-      await appDatabase.batchUpsertFlashcards(seedList);
-      localCards = seedList;
+    final engine = uid == null ? null : _cardEngine;
+    var result = SyncResult.skipped;
+    if (uid != null && engine != null) {
+      result = _report('flashcards', await engine.sync(uid));
     }
 
-    // If in Guest Mode or not logged in, return local SQLite cards immediately
-    if (uid == null) {
-      return localCards;
+    var cards = await appDatabase.getAllFlashcards(userId: uid);
+    if (cards.isEmpty) {
+      await _insertSeedCards(uid, uploadable: result.pullSucceeded);
+      cards = await appDatabase.getAllFlashcards(userId: uid);
     }
-
-    final client = _client;
-    if (client == null) {
-      return localCards;
-    }
-
-    // Authenticated User: Attempt cloud sync with a 4s timeout
-    try {
-      final response = await client
-          .from('flashcards')
-          .select('*')
-          .order('created_at', ascending: true)
-          .timeout(const Duration(seconds: 4));
-
-      if (response.isNotEmpty) {
-        final cloudCards = response
-            .map((row) => FlashcardModel.fromMap(row))
-            .toList();
-        await appDatabase.batchUpsertFlashcards(cloudCards);
-        return cloudCards;
-      } else if (response.isEmpty) {
-        // Cloud is empty for this user, seed/upload local cards to cloud in background
-        saveCardsToSupabase(localCards).catchError((_) {});
-        return localCards;
-      }
-    } catch (_) {
-      // Offline, network error or timeout -> safely return local SQLite cards
-    }
-
-    return localCards;
+    return (items: cards, sync: result);
   }
 
-  static Future<void> saveCardsToSupabase(List<FlashcardModel> cards) async {
-    final String? uid = currentUserId;
-    final userCards = cards
-        .map(
-          (c) => c.userId == null && uid != null ? c.copyWith(userId: uid) : c,
-        )
-        .toList();
-
-    // 1. Always write to local SQLite database first
-    await appDatabase.batchUpsertFlashcards(userCards);
-    if (uid == null) return;
-
-    final client = _client;
-    if (client == null) return;
-
-    // 2. Sync to Supabase in background with timeout protection
-    try {
-      final rows = userCards.map((c) => c.toSupabaseRow()).toList();
-      await client
-          .from('flashcards')
-          .upsert(rows, onConflict: 'id')
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {
-      try {
-        final rows = userCards
-            .map((c) => c.toSupabaseRow()..remove('learning_step'))
-            .toList();
-        await client
-            .from('flashcards')
-            .upsert(rows, onConflict: 'id')
-            .timeout(const Duration(seconds: 4));
-      } catch (_) {}
+  /// Boş desteye örnek kartları ekler. Hesap için bulutun da boş olduğu
+  /// biliniyorsa ([uploadable]) kartlar yüklenir; aksi halde temiz yazılır ve
+  /// bulutta karşılığı yoksa sonraki eşitlemede kaldırılır.
+  static Future<void> _insertSeedCards(String? uid, {required bool uploadable}) async {
+    final seeds = <FlashcardModel>[
+      for (var i = 0; i < _seedCards.length; i++)
+        FlashcardModel.fromMap(_seedCards[i]).copyWith(
+          id: 'seed-${i + 1}-${const Uuid().v4().substring(0, 8)}',
+          userId: uid,
+        ),
+    ];
+    if (uid != null && uploadable) {
+      await saveCardsToSupabase(seeds);
+      return;
     }
+    await appDatabase.batchUpsertFlashcards([
+      for (final card in seeds)
+        uid == null ? card : card.copyWith(updatedAt: kUnknownSyncTime),
+    ]);
   }
 
-  static Future<void> upsertCard(FlashcardModel card) async {
+  /// Verilen kartları yerel düzenleme olarak yazar ve yalnız kirli satırları
+  /// buluta gönderir (tüm desteyi değil).
+  static Future<SyncResult> saveCardsToSupabase(List<FlashcardModel> cards) async {
+    if (cards.isEmpty) return SyncResult.skipped;
     final String? uid = currentUserId;
-    final targetCard = (card.userId == null && uid != null)
-        ? card.copyWith(userId: uid)
-        : card;
-
-    // 1. Always write to local SQLite database first
-    await appDatabase.upsertFlashcard(targetCard);
-    if (uid == null) return;
-
-    final client = _client;
-    if (client == null) return;
-
-    // 2. Sync to Supabase in background with timeout protection
-    try {
-      await client
-          .from('flashcards')
-          .upsert(targetCard.toSupabaseRow(), onConflict: 'id')
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {
-      try {
-        final row = targetCard.toSupabaseRow()..remove('learning_step');
-        await client
-            .from('flashcards')
-            .upsert(row, onConflict: 'id')
-            .timeout(const Duration(seconds: 4));
-      } catch (_) {}
-    }
+    final now = _nowIso();
+    await appDatabase.saveLocalFlashcardEdits([
+      for (final c in cards) c.copyWith(userId: c.userId ?? uid, updatedAt: now),
+    ]);
+    return _pushCards(uid);
   }
 
-  static Future<void> deleteCard(String cardId) async {
-    // 1. Always delete from local SQLite database first
-    await appDatabase.deleteFlashcard(cardId);
-    final String? uid = currentUserId;
-    if (uid == null) return;
+  static Future<SyncResult> upsertCard(FlashcardModel card) {
+    return saveCardsToSupabase([card]);
+  }
 
-    final client = _client;
-    if (client == null) return;
+  /// Yumuşak siler; bulutta silinince yerelden de kalıcı kaldırılır.
+  static Future<SyncResult> deleteCard(String cardId) async {
+    await appDatabase.markFlashcardDeleted(cardId, _nowIso());
+    return _pushCards(currentUserId);
+  }
 
-    // 2. Sync deletion to Supabase with timeout protection
-    try {
-      await client
-          .from('flashcards')
-          .delete()
-          .eq('id', cardId)
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {}
+  static Future<SyncResult> _pushCards(String? uid) async {
+    final engine = uid == null ? null : _cardEngine;
+    if (uid == null || engine == null) return SyncResult.skipped;
+    return _report('flashcards push', await engine.push(uid));
   }
 
   // ---------------------------------------------------------------------------
-  // SAVED READINGS TABLE OPERATIONS (DRIFT + SUPABASE - OFFLINE FIRST)
+  // SAVED READINGS (DRIFT + SUPABASE - OFFLINE FIRST)
   // ---------------------------------------------------------------------------
 
-  static Future<List<ReadingArticleModel>> getSavedReadings() async {
+  static Future<SyncedList<ReadingArticleModel>> getSavedReadings() async {
     final String? uid = currentUserId;
-    final localReadings = await appDatabase.getAllReadingArticles(userId: uid);
-
-    if (uid == null) {
-      return localReadings;
+    final engine = uid == null ? null : _readingEngine;
+    var result = SyncResult.skipped;
+    if (uid != null && engine != null) {
+      result = _report('readings', await engine.sync(uid));
     }
-
-    final client = _client;
-    if (client == null) {
-      return localReadings;
-    }
-
-    // Authenticated User: Attempt cloud sync with timeout
-    try {
-      final response = await client
-          .from('saved_readings')
-          .select('*')
-          .order('created_at', ascending: false)
-          .timeout(const Duration(seconds: 4));
-
-      if (response.isNotEmpty) {
-        final readings = response
-            .map((row) => ReadingArticleModel.fromMap(row))
-            .toList();
-        await appDatabase.batchUpsertReadingArticles(readings);
-        return readings;
-      }
-    } catch (_) {
-      // Offline, network error or timeout -> safely return local SQLite readings
-    }
-
-    return localReadings;
+    final readings = await appDatabase.getAllReadingArticles(userId: uid);
+    return (items: readings, sync: result);
   }
 
-  static Future<void> saveReadingArticle(ReadingArticleModel article) async {
+  static Future<SyncResult> saveReadingArticles(List<ReadingArticleModel> articles) async {
+    if (articles.isEmpty) return SyncResult.skipped;
     final String? uid = currentUserId;
-    final targetArticle = (article.userId == null && uid != null)
-        ? article.copyWith(userId: uid)
-        : article;
-
-    // 1. Always write to local SQLite database first
-    await appDatabase.upsertReadingArticle(targetArticle);
-    if (uid == null) return;
-
-    final client = _client;
-    if (client == null) return;
-
-    // 2. Sync to Supabase in background with timeout protection
-    try {
-      await client
-          .from('saved_readings')
-          .upsert(targetArticle.toSupabaseRow(), onConflict: 'id')
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {}
+    final now = _nowIso();
+    await appDatabase.saveLocalArticleEdits([
+      for (final a in articles) a.copyWith(userId: a.userId ?? uid, updatedAt: now),
+    ]);
+    return _pushReadings(uid);
   }
 
-  static Future<void> deleteReadingArticle(String articleId) async {
-    // 1. Always delete from local SQLite database first
-    await appDatabase.deleteReadingArticle(articleId);
-    final String? uid = currentUserId;
-    if (uid == null) return;
+  static Future<SyncResult> saveReadingArticle(ReadingArticleModel article) {
+    return saveReadingArticles([article]);
+  }
 
-    final client = _client;
-    if (client == null) return;
+  static Future<SyncResult> deleteReadingArticle(String articleId) async {
+    await appDatabase.markArticleDeleted(articleId, _nowIso());
+    return _pushReadings(currentUserId);
+  }
 
-    // 2. Sync deletion to Supabase with timeout protection
-    try {
-      await client
-          .from('saved_readings')
-          .delete()
-          .eq('id', articleId)
-          .timeout(const Duration(seconds: 4));
-    } catch (_) {}
+  static Future<SyncResult> _pushReadings(String? uid) async {
+    final engine = uid == null ? null : _readingEngine;
+    if (uid == null || engine == null) return SyncResult.skipped;
+    return _report('readings push', await engine.push(uid));
   }
 }

@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../core/database/app_database.dart';
 import '../models/reading_article_model.dart';
 import '../services/supabase_service.dart';
+import '../services/sync/sync_engine.dart';
 import 'auth_provider.dart';
 
 class ReadingState {
@@ -17,6 +18,9 @@ class ReadingState {
   final String selectedFolder;
   final List<String> customFolders;
 
+  /// Son eşitleme hatası (veri yerelde güvende, sonraki eşitlemede yeniden denenir).
+  final String? syncError;
+
   ReadingState({
     this.articles = const [],
     this.selectedArticle,
@@ -25,6 +29,7 @@ class ReadingState {
     String? currentText,
     this.selectedFolder = 'Tümü',
     this.customFolders = const ['Genel', 'Makaleler', 'Hikayeler', 'Haberler'],
+    this.syncError,
   }) : currentText = currentText ?? defaultText;
 
   List<String> get allFolders {
@@ -45,6 +50,7 @@ class ReadingState {
     String? currentText,
     String? selectedFolder,
     List<String>? customFolders,
+    Object? syncError = _sentinel,
   }) {
     return ReadingState(
       articles: articles ?? this.articles,
@@ -56,6 +62,7 @@ class ReadingState {
       currentText: currentText ?? this.currentText,
       selectedFolder: selectedFolder ?? this.selectedFolder,
       customFolders: customFolders ?? this.customFolders,
+      syncError: syncError == _sentinel ? this.syncError : syncError as String?,
     );
   }
 }
@@ -90,7 +97,8 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
   Future<void> loadReadings() async {
     state = state.copyWith(isLoading: true);
     try {
-      final articles = await SupabaseService.getSavedReadings();
+      final loaded = await SupabaseService.getSavedReadings();
+      final articles = loaded.items;
 
       ReadingArticleModel? restoredArticle;
       String restoredText = state.currentText;
@@ -119,10 +127,16 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
         selectedArticle: restoredArticle,
         currentText: restoredText,
         isLoading: false,
+        syncError: loaded.sync.errorMessage,
       );
     } catch (_) {
       state = state.copyWith(isLoading: false);
     }
+  }
+
+  void _recordSync(SyncResult result) {
+    if (!mounted) return;
+    state = state.copyWith(syncError: result.errorMessage);
   }
 
   void toggleFocusMode() {
@@ -165,11 +179,12 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     bool stateChanged = false;
     List<ReadingArticleModel> updatedArticles = state.articles;
 
+    final moved = <ReadingArticleModel>[];
     if (state.articles.any((a) => a.folder == trimmed)) {
       updatedArticles = state.articles.map((a) {
         if (a.folder == trimmed) {
           final updated = a.copyWith(folder: 'Genel');
-          SupabaseService.saveReadingArticle(updated);
+          moved.add(updated);
           return updated;
         }
         return a;
@@ -191,6 +206,9 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
         articles: updatedArticles,
         customFolders: updatedFolders,
       );
+    }
+    if (moved.isNotEmpty) {
+      _recordSync(await SupabaseService.saveReadingArticles(moved));
     }
   }
 
@@ -235,7 +253,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     } catch (_) {}
 
     await addCustomFolder(folderName);
-    await SupabaseService.saveReadingArticle(article);
+    _recordSync(await SupabaseService.saveReadingArticle(article));
     return article;
   }
 
@@ -247,7 +265,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     }
     state = state.copyWith(articles: updatedArticles, selectedArticle: selected);
     await addCustomFolder(article.folder);
-    await SupabaseService.saveReadingArticle(article);
+    _recordSync(await SupabaseService.saveReadingArticle(article));
   }
 
   Future<void> deleteArticle(String id) async {
@@ -263,7 +281,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
         await _db.removeKey('reader_last_article_id');
       } catch (_) {}
     }
-    await SupabaseService.deleteReadingArticle(id);
+    _recordSync(await SupabaseService.deleteReadingArticle(id));
   }
 
   String get currentTextKey {

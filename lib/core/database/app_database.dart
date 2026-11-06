@@ -30,6 +30,11 @@ class FlashcardEntries extends Table {
   TextColumn get nextReviewDate => text()();
   TextColumn get createdAt => text()();
 
+  // Eşitleme meta verisi (bkz. services/sync/sync_engine.dart).
+  TextColumn get updatedAt => text().nullable()();
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -42,6 +47,11 @@ class ReadingArticleEntries extends Table {
   TextColumn get textContent => text()();
   TextColumn get createdAt => text()();
   TextColumn get folder => text().withDefault(const Constant('Genel'))();
+
+  // Eşitleme meta verisi (bkz. services/sync/sync_engine.dart).
+  TextColumn get updatedAt => text().nullable()();
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -67,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -79,6 +89,16 @@ class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           await m.addColumn(flashcardEntries, flashcardEntries.userId);
           await m.addColumn(readingArticleEntries, readingArticleEntries.userId);
+        }
+        if (from < 3) {
+          // Mevcut satırlar updatedAt = null ile kalır: eşitleme motoru bunları
+          // "hiç uzlaştırılmamış" kabul eder ve bulutta yoksa silmek yerine yükler.
+          await m.addColumn(flashcardEntries, flashcardEntries.updatedAt);
+          await m.addColumn(flashcardEntries, flashcardEntries.isDirty);
+          await m.addColumn(flashcardEntries, flashcardEntries.isDeleted);
+          await m.addColumn(readingArticleEntries, readingArticleEntries.updatedAt);
+          await m.addColumn(readingArticleEntries, readingArticleEntries.isDirty);
+          await m.addColumn(readingArticleEntries, readingArticleEntries.isDeleted);
         }
       },
     );
@@ -100,13 +120,14 @@ class AppDatabase extends _$AppDatabase {
       // Misafir modu: yalnız hiçbir hesaba bağlı olmayan yerel veriyi göster.
       query.where((t) => t.userId.isNull());
     }
+    query.where((t) => t.isDeleted.equals(false));
     query.orderBy([(t) => OrderingTerm(expression: t.createdAt)]);
     final rows = await query.get();
-    return rows.map(_mapEntryToFlashcard).toList();
+    return rows.map(flashcardFromEntry).toList();
   }
 
   Future<void> upsertFlashcard(FlashcardModel card) async {
-    await into(flashcardEntries).insertOnConflictUpdate(_mapFlashcardToCompanion(card));
+    await into(flashcardEntries).insertOnConflictUpdate(flashcardCompanion(card));
   }
 
   Future<void> batchUpsertFlashcards(List<FlashcardModel> cards) async {
@@ -114,10 +135,44 @@ class AppDatabase extends _$AppDatabase {
       for (final card in cards) {
         batch.insert(
           flashcardEntries,
-          _mapFlashcardToCompanion(card),
+          flashcardCompanion(card),
           mode: InsertMode.insertOrReplace,
         );
       }
+    });
+  }
+
+  /// Kullanıcının yerel düzenlemesi: satırı yazar ve buluta gönderilmek üzere
+  /// kirli işaretler. Çağıran [FlashcardModel.updatedAt] alanını damgalar.
+  Future<void> saveLocalFlashcardEdits(List<FlashcardModel> cards) async {
+    await batch((batch) {
+      for (final card in cards) {
+        batch.insert(
+          flashcardEntries,
+          flashcardCompanion(card, isDirty: true, isDeleted: false),
+          onConflict: DoUpdate(
+            (_) => flashcardCompanion(card, isDirty: true, isDeleted: false),
+          ),
+        );
+      }
+    });
+  }
+
+  /// Yumuşak silme: bulutta da silinene kadar satır gizli ve kirli kalır.
+  /// Hiçbir hesaba bağlı olmayan (misafir) satır hiç yüklenmediği için
+  /// doğrudan silinir.
+  Future<void> markFlashcardDeleted(String id, String updatedAt) async {
+    await transaction(() async {
+      await (delete(flashcardEntries)
+            ..where((t) => t.id.equals(id) & t.userId.isNull()))
+          .go();
+      await (update(flashcardEntries)..where((t) => t.id.equals(id))).write(
+        FlashcardEntriesCompanion(
+          isDeleted: const Value(true),
+          isDirty: const Value(true),
+          updatedAt: Value(updatedAt),
+        ),
+      );
     });
   }
 
@@ -133,7 +188,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  FlashcardModel _mapEntryToFlashcard(FlashcardEntry row) {
+  FlashcardModel flashcardFromEntry(FlashcardEntry row) {
     return FlashcardModel(
       id: row.id,
       userId: row.userId,
@@ -151,10 +206,17 @@ class AppDatabase extends _$AppDatabase {
       easeFactor: row.easeFactor,
       nextReviewDate: row.nextReviewDate,
       createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
     );
   }
 
-  FlashcardEntriesCompanion _mapFlashcardToCompanion(FlashcardModel card) {
+  /// Satırın tamamını yazar. [isDirty]/[isDeleted] verilmezse mevcut değerler
+  /// (ya da yeni satırda varsayılanlar) korunur.
+  FlashcardEntriesCompanion flashcardCompanion(
+    FlashcardModel card, {
+    bool? isDirty,
+    bool? isDeleted,
+  }) {
     return FlashcardEntriesCompanion(
       id: Value(card.id),
       userId: Value(card.userId),
@@ -172,6 +234,9 @@ class AppDatabase extends _$AppDatabase {
       easeFactor: Value(card.easeFactor),
       nextReviewDate: Value(card.nextReviewDate),
       createdAt: Value(card.createdAt),
+      updatedAt: Value(card.updatedAt),
+      isDirty: isDirty == null ? const Value.absent() : Value(isDirty),
+      isDeleted: isDeleted == null ? const Value.absent() : Value(isDeleted),
     );
   }
 
@@ -187,13 +252,14 @@ class AppDatabase extends _$AppDatabase {
       // Misafir modu: yalnız hiçbir hesaba bağlı olmayan yerel veriyi göster.
       query.where((t) => t.userId.isNull());
     }
+    query.where((t) => t.isDeleted.equals(false));
     query.orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
     final rows = await query.get();
-    return rows.map(_mapEntryToArticle).toList();
+    return rows.map(articleFromEntry).toList();
   }
 
   Future<void> upsertReadingArticle(ReadingArticleModel article) async {
-    await into(readingArticleEntries).insertOnConflictUpdate(_mapArticleToCompanion(article));
+    await into(readingArticleEntries).insertOnConflictUpdate(articleCompanion(article));
   }
 
   Future<void> batchUpsertReadingArticles(List<ReadingArticleModel> articles) async {
@@ -201,10 +267,41 @@ class AppDatabase extends _$AppDatabase {
       for (final article in articles) {
         batch.insert(
           readingArticleEntries,
-          _mapArticleToCompanion(article),
+          articleCompanion(article),
           mode: InsertMode.insertOrReplace,
         );
       }
+    });
+  }
+
+  /// Bkz. [saveLocalFlashcardEdits].
+  Future<void> saveLocalArticleEdits(List<ReadingArticleModel> articles) async {
+    await batch((batch) {
+      for (final article in articles) {
+        batch.insert(
+          readingArticleEntries,
+          articleCompanion(article, isDirty: true, isDeleted: false),
+          onConflict: DoUpdate(
+            (_) => articleCompanion(article, isDirty: true, isDeleted: false),
+          ),
+        );
+      }
+    });
+  }
+
+  /// Bkz. [markFlashcardDeleted].
+  Future<void> markArticleDeleted(String id, String updatedAt) async {
+    await transaction(() async {
+      await (delete(readingArticleEntries)
+            ..where((t) => t.id.equals(id) & t.userId.isNull()))
+          .go();
+      await (update(readingArticleEntries)..where((t) => t.id.equals(id))).write(
+        ReadingArticleEntriesCompanion(
+          isDeleted: const Value(true),
+          isDirty: const Value(true),
+          updatedAt: Value(updatedAt),
+        ),
+      );
     });
   }
 
@@ -220,7 +317,7 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  ReadingArticleModel _mapEntryToArticle(ReadingArticleEntry row) {
+  ReadingArticleModel articleFromEntry(ReadingArticleEntry row) {
     return ReadingArticleModel(
       id: row.id,
       userId: row.userId,
@@ -228,10 +325,15 @@ class AppDatabase extends _$AppDatabase {
       text: row.textContent,
       createdAt: row.createdAt,
       folder: row.folder,
+      updatedAt: row.updatedAt,
     );
   }
 
-  ReadingArticleEntriesCompanion _mapArticleToCompanion(ReadingArticleModel article) {
+  ReadingArticleEntriesCompanion articleCompanion(
+    ReadingArticleModel article, {
+    bool? isDirty,
+    bool? isDeleted,
+  }) {
     return ReadingArticleEntriesCompanion(
       id: Value(article.id),
       userId: Value(article.userId),
@@ -239,6 +341,9 @@ class AppDatabase extends _$AppDatabase {
       textContent: Value(article.text),
       createdAt: Value(article.createdAt),
       folder: Value(article.folder),
+      updatedAt: Value(article.updatedAt),
+      isDirty: isDirty == null ? const Value.absent() : Value(isDirty),
+      isDeleted: isDeleted == null ? const Value.absent() : Value(isDeleted),
     );
   }
 
