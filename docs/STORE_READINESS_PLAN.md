@@ -31,7 +31,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 ### P2 — Olsa iyi olur
 - [x] **N1 Store listing taslağı:** kısa/uzun açıklama (TR/EN), anahtar kelimeler, ekran görüntüsü listesi (`docs/store_listing.md`).
 - [x] **N2 Onboarding / ilk açılış deneyimi.** (3 sayfa, Atla/Devam/Başla; yalnız oturumsuz ilk kullanıcıya; durum DB'de. Not: güncellemeyle gelen mevcut kullanıcılar bir kez görebilir.)
-- [ ] **N3 Çoklu dil altyapısı (intl) değerlendirmesi.**
+- [x] **N3 Çoklu dil altyapısı (intl) değerlendirmesi.** Karar önerisi: v1.0 yalnız Türkçe arayüzle yayınlanır (hedef kitle İngilizce öğrenen Türkçe konuşanlar; mağaza metni TR+EN hazır). Arayüzde ~114+ doğrudan Türkçe `Text('…')` var. İngilizce arayüz istenirse: `flutter_localizations` + `intl` + `l10n.yaml`, metinleri `lib/l10n/app_tr.arb` / `app_en.arb`'ye taşıma (tahmini 1 oturum, subagent işi). Ayrıca `MaterialApp`'e `locale: Locale('tr')` + `supportedLocales` eklenmeli ki tarih/sistem diyalogları Türkçe olsun → soru 9.
 
 ## Review bulguları (R1, 2026-11-07) → görevler
 
@@ -78,6 +78,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 4. **Hesap silme:** fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).
 5. **Supabase paneli:** `001_sync_columns.sql` ve `002_rls_policies.sql`'i çalıştır, redirect URL `io.learncard.app://login-callback` ekle, `delete-account` fonksiyonunu deploy et.
 6. Play Console (25$) ve Apple Developer (99$/yıl) hesapları.
+9. **Arayüz dili (N3):** v1.0 yalnız Türkçe mi, yoksa İngilizce arayüz de olsun mu? (Varsayılan: yalnız Türkçe.)
 8. **Yazı tipi (S9):** Plus Jakarta Sans TTF'lerini (OFL lisanslı) `assets/fonts/`'a indirip pakete gömeyim mi? Çevrimdışı ilk açılışta da doğru font olur, ~500 KB ekler.
 7. **Çeviri servisi (SEC2):** şu an birincil çeviri resmî olmayan Google `client=gtx` uç noktası (kalitesi iyi ama ToS dışı, kesilebilir). Seçenekler: (a) olduğu gibi bırak, (b) MyMemory'yi birincil yap (kalite düşer, günlük limit), (c) resmî Google Cloud Translation / DeepL'i bir Supabase Edge Function arkasına koy (anahtar sunucuda, ücretli). Öneri: yayın öncesi (c), o zamana kadar (a).
 
@@ -104,3 +105,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 02:00 — S8 tamam, release build doğrulandı. Tema renkleri + küçük ekran (G10/Q4) subagent'ta.
 - 02:01 — S4 tamam (uygulama içi gizlilik ekranı + test). Q1 kapandı.
 - 02:02 — N2 tamam (onboarding + test; yükleme/tamamlama yarışı yakalanıp düzeltildi).
+- 02:02 — N3 değerlendirildi (soru 9).
