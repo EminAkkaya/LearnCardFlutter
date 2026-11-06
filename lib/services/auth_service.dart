@@ -112,12 +112,20 @@ class AuthService {
   /// Resends the 6-digit verification code to the specified email
   static Future<void> resendVerificationOtp({required String email}) async {
     final client = _client;
-    if (client == null) return;
+    if (client == null) throw Exception('Supabase client not initialized');
     try {
       await client.auth.resend(type: OtpType.signup, email: email.trim());
     } catch (_) {
       await client.auth.resend(type: OtpType.email, email: email.trim());
     }
+  }
+
+  /// Zaten kayıtlı bir e-postayla kayıt olunduğunda Supabase hata vermek yerine
+  /// `identities` listesi boş bir kullanıcı döner (e-posta numaralandırma
+  /// koruması). Bu durumda yeni hesap açılmamıştır ve OTP gönderilmez.
+  static bool isExistingAccountSignUp(User? user) {
+    final identities = user?.identities;
+    return identities != null && identities.isEmpty;
   }
 
   /// Checks if the user's email has been verified

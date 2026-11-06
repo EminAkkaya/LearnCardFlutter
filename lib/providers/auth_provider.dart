@@ -131,6 +131,9 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
     state = state.copyWith(isGuestMode: false);
   }
 
+  static const String existingAccountError =
+      'Bu e-posta ile zaten bir hesap var. Giriş yapmayı dene.';
+
   String _parseAuthError(dynamic e) {
     final message = e is sb.AuthException ? e.message : e.toString();
     final lower = message.toLowerCase();
@@ -212,6 +215,10 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
         password: password,
         fullName: fullName,
       );
+      if (AuthService.isExistingAccountSignUp(response.user)) {
+        state = state.copyWith(isLoading: false, error: existingAccountError);
+        return false;
+      }
       try {
         await _db.setBool('auth_is_guest_mode', false);
       } catch (_) {}
