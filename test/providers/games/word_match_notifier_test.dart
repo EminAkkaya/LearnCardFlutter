@@ -94,4 +94,11 @@ void main() {
     expect(many.state.score, 100 + 200 + 300 + 300 + 300);
     many.dispose();
   });
+
+  test('hatalı eşleşmede ilk seçilen kart tekrar listesine girer', () async {
+    n.tapTile('c1_en');
+    n.tapTile('c2_tr');
+    expect(n.state.missedCards.map((c) => c.id), ['c1']);
+    await flushTimers();
+  });
 }

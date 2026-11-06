@@ -67,6 +67,8 @@ List<ClozeQuestionModel> buildClozeQuestions(List<FlashcardModel> cards) {
 
 @immutable
 class ContextClozeState {
+  /// Yanlış bilinen / atlanan kartların id'leri (oyun sonu tekrar listesi).
+  final List<String> missedIds;
   final List<ClozeQuestionModel> questions;
   final int currentIndex;
   final String? selectedOption;
@@ -83,11 +85,17 @@ class ContextClozeState {
     this.showHint = false,
     this.score = 0,
     this.correctCount = 0,
+    this.missedIds = const [],
   });
+
 
   bool get isFinished => currentIndex >= questions.length;
   bool get hasNext => currentIndex + 1 < questions.length;
   ClozeQuestionModel get currentQuestion => questions[currentIndex];
+
+  List<FlashcardModel> get missedCards => [
+        for (final id in missedIds) questions.map((q) => q.card).firstWhere((c) => c.id == id),
+      ];
 
   ContextClozeState copyWith({
     int? currentIndex,
@@ -96,7 +104,9 @@ class ContextClozeState {
     bool? showHint,
     int? score,
     int? correctCount,
+    List<String>? missedIds,
   }) {
+
     return ContextClozeState(
       questions: questions,
       currentIndex: currentIndex ?? this.currentIndex,
@@ -105,6 +115,7 @@ class ContextClozeState {
       showHint: showHint ?? this.showHint,
       score: score ?? this.score,
       correctCount: correctCount ?? this.correctCount,
+      missedIds: missedIds ?? this.missedIds,
     );
   }
 }
@@ -141,7 +152,11 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
     final isCorrect = option.toLowerCase() == q.correctWord.toLowerCase();
 
     if (!isCorrect) {
-      state = state.copyWith(selectedOption: () => option, isAnswered: true);
+      state = state.copyWith(
+        selectedOption: () => option,
+        isAnswered: true,
+        missedIds: _withMissed(q.card.id),
+      );
       _recordIfLast();
       return;
     }
@@ -155,6 +170,9 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
     );
     _recordIfLast();
   }
+
+  List<String> _withMissed(String cardId) =>
+      state.missedIds.contains(cardId) ? state.missedIds : [...state.missedIds, cardId];
 
   void _recordIfLast() {
     if (_recorded || state.hasNext) return;

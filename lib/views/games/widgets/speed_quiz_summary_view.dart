@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../models/flashcard_model.dart';
+import 'game_mistakes_card.dart';
 
 class SpeedQuizSummaryView extends StatelessWidget {
   final int totalQuestions;
@@ -6,6 +8,7 @@ class SpeedQuizSummaryView extends StatelessWidget {
   final int score;
   final int maxStreak;
   final VoidCallback onRestart;
+  final List<FlashcardModel> missedCards;
 
   static const Color emerald = Color(0xFF10B981);
   static const Color amberColor = Color(0xFFF59E0B);
@@ -17,6 +20,7 @@ class SpeedQuizSummaryView extends StatelessWidget {
     required this.score,
     required this.maxStreak,
     required this.onRestart,
+    this.missedCards = const [],
   });
 
   @override
@@ -99,6 +103,10 @@ class SpeedQuizSummaryView extends StatelessWidget {
                   ),
                 ),
               ),
+              if (missedCards.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                GameMistakesCard(cards: missedCards),
+              ],
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,

@@ -35,6 +35,7 @@ class ContextClozeGameScreen extends ConsumerWidget {
         correctCount: s.correctCount,
         score: s.score,
         onRestart: notifier.restart,
+        missedCards: s.missedCards,
       );
     }
 

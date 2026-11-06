@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../models/flashcard_model.dart';
+import 'game_mistakes_card.dart';
 
 class WordMatchGameOverView extends StatelessWidget {
   final int totalPairs;
   final int score;
   final int mistakes;
   final VoidCallback onPlayAgain;
+  final List<FlashcardModel> missedCards;
 
   static const Color emerald = Color(0xFF10B981);
 
@@ -14,6 +17,7 @@ class WordMatchGameOverView extends StatelessWidget {
     required this.score,
     required this.mistakes,
     required this.onPlayAgain,
+    this.missedCards = const [],
   });
 
   @override
@@ -91,6 +95,10 @@ class WordMatchGameOverView extends StatelessWidget {
                   ),
                 ),
               ),
+              if (missedCards.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                GameMistakesCard(cards: missedCards),
+              ],
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,

@@ -82,4 +82,14 @@ void main() {
     n.next();
     expect(n.state.isFinished, isTrue);
   });
+
+  test('atlanan ve ipucu kullanılan kelimeler tekrar listesine girer', () {
+    final first = n.state.currentCard.id;
+    n.hint();
+    placeWord(n.state.targetWord.substring(1));
+    n.next();
+    final second = n.state.currentCard.id;
+    n.skip();
+    expect(n.state.missedIds, [first, second]);
+  });
 }

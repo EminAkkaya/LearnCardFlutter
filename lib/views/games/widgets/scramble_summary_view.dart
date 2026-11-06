@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../models/flashcard_model.dart';
+import 'game_mistakes_card.dart';
 
 class ScrambleSummaryView extends StatelessWidget {
   final int totalQuestions;
   final int correctCount;
   final int score;
   final VoidCallback onRestart;
+  final List<FlashcardModel> missedCards;
 
   static const Color emerald = Color(0xFF10B981);
   static const Color indigoColor = Color(0xFF6366F1);
@@ -15,6 +18,7 @@ class ScrambleSummaryView extends StatelessWidget {
     required this.correctCount,
     required this.score,
     required this.onRestart,
+    this.missedCards = const [],
   });
 
   @override
@@ -87,6 +91,10 @@ class ScrambleSummaryView extends StatelessWidget {
                   ),
                 ),
               ),
+              if (missedCards.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                GameMistakesCard(cards: missedCards),
+              ],
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,

@@ -30,6 +30,7 @@ class WordMatchGameScreen extends ConsumerWidget {
         score: s.score,
         mistakes: s.mistakes,
         onPlayAgain: notifier.restart,
+        missedCards: s.missedCards,
       );
     }
 

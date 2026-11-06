@@ -56,4 +56,10 @@ void main() {
     }
     expect(recorded, [0]);
   });
+
+  test('yanlış cevaplanan kart tekrar listesine girer', () {
+    final card = n.state.currentQuestion.card;
+    n.selectOption('yanlış');
+    expect(n.state.missedCards.single.id, card.id);
+  });
 }

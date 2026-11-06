@@ -36,6 +36,7 @@ class SpeedQuizGameScreen extends ConsumerWidget {
         score: s.score,
         maxStreak: s.maxStreak,
         onRestart: notifier.restart,
+        missedCards: s.missedCards,
       );
     }
 

@@ -31,6 +31,8 @@ List<LetterTileModel> buildLetterPool(String word) {
 
 @immutable
 class WordScrambleState {
+  /// Yanlış bilinen / atlanan kartların id'leri (oyun sonu tekrar listesi).
+  final List<String> missedIds;
   final List<FlashcardModel> cards;
   final int currentIndex;
   final List<LetterTileModel> pool;
@@ -57,7 +59,9 @@ class WordScrambleState {
     this.correctCount = 0,
     this.skippedCount = 0,
     this.wordPenalty = 0,
+    this.missedIds = const [],
   });
+
 
   bool get isFinished => currentIndex >= cards.length;
   bool get hasNext => currentIndex + 1 < cards.length;
@@ -67,6 +71,10 @@ class WordScrambleState {
 
   List<LetterTileModel> get placedLetters =>
       [for (final id in placedIds) pool.firstWhere((t) => t.id == id)];
+
+  List<FlashcardModel> get missedCards => [
+        for (final id in missedIds) cards.firstWhere((c) => c.id == id),
+      ];
 
   WordScrambleState copyWith({
     int? currentIndex,
@@ -78,7 +86,9 @@ class WordScrambleState {
     int? correctCount,
     int? skippedCount,
     int? wordPenalty,
+    List<String>? missedIds,
   }) {
+
     return WordScrambleState(
       cards: cards,
       currentIndex: currentIndex ?? this.currentIndex,
@@ -90,6 +100,7 @@ class WordScrambleState {
       correctCount: correctCount ?? this.correctCount,
       skippedCount: skippedCount ?? this.skippedCount,
       wordPenalty: wordPenalty ?? this.wordPenalty,
+      missedIds: missedIds ?? this.missedIds,
     );
   }
 }
@@ -175,6 +186,7 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
     final candidate = free.firstWhere((t) => t.char == letters[nextSlot], orElse: () => free.first);
     state = state.copyWith(
       wordPenalty: (state.wordPenalty + scrambleHintPenalty).clamp(0, scramblePointsPerWord),
+      missedIds: _withMissed(state.currentCard.id),
     );
     placeTile(candidate);
   }
@@ -182,7 +194,10 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
   /// Kelimeyi puansız geçer.
   void skip() {
     if (state.isFinished || state.isCompleted) return;
-    state = state.copyWith(skippedCount: state.skippedCount + 1);
+    state = state.copyWith(
+      skippedCount: state.skippedCount + 1,
+      missedIds: _withMissed(state.currentCard.id),
+    );
     _recordIfLast();
     _setupWord(state.currentIndex + 1);
   }
@@ -202,6 +217,9 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
     );
     _recordIfLast();
   }
+
+  List<String> _withMissed(String cardId) =>
+      state.missedIds.contains(cardId) ? state.missedIds : [...state.missedIds, cardId];
 
   void _recordIfLast() {
     if (_recorded || state.hasNext) return;

@@ -54,6 +54,8 @@ List<WordMatchTileModel> buildWordMatchTiles(List<FlashcardModel> cards) {
 
 @immutable
 class WordMatchState {
+  /// Yanlış bilinen / atlanan kartların id'leri (oyun sonu tekrar listesi).
+  final List<String> missedIds;
   final List<WordMatchTileModel> tiles;
   final String? firstSelectedId;
   final bool isLocked;
@@ -72,9 +74,15 @@ class WordMatchState {
     this.mistakes = 0,
     this.matchedPairs = 0,
     this.isGameOver = false,
+    this.missedIds = const [],
   });
 
+
   int get totalPairs => tiles.length ~/ 2;
+
+  List<FlashcardModel> get missedCards => [
+        for (final id in missedIds) tiles.map((t) => t.card).firstWhere((c) => c.id == id),
+      ];
 
   WordMatchState copyWith({
     List<WordMatchTileModel>? tiles,
@@ -85,7 +93,9 @@ class WordMatchState {
     int? mistakes,
     int? matchedPairs,
     bool? isGameOver,
+    List<String>? missedIds,
   }) {
+
     return WordMatchState(
       tiles: tiles ?? this.tiles,
       firstSelectedId: firstSelectedId != null ? firstSelectedId() : this.firstSelectedId,
@@ -95,6 +105,7 @@ class WordMatchState {
       mistakes: mistakes ?? this.mistakes,
       matchedPairs: matchedPairs ?? this.matchedPairs,
       isGameOver: isGameOver ?? this.isGameOver,
+      missedIds: missedIds ?? this.missedIds,
     );
   }
 }
@@ -148,7 +159,7 @@ class WordMatchNotifier extends StateNotifier<WordMatchState> {
     final first = state.tiles.firstWhere((t) => t.id == firstId);
     final ids = {firstId, tileId};
     final isMatch = first.cardId == tile.cardId && first.isEnglish != tile.isEnglish;
-    isMatch ? _onMatch(first, tile, ids) : _onMismatch(ids);
+    isMatch ? _onMatch(first, tile, ids) : _onMismatch(ids, first.cardId);
   }
 
   void _onMatch(WordMatchTileModel first, WordMatchTileModel second, Set<String> ids) {
@@ -170,8 +181,10 @@ class WordMatchNotifier extends StateNotifier<WordMatchState> {
     }
   }
 
-  void _onMismatch(Set<String> ids) {
+  /// [missedCardId]: kullanıcının eşini bulamadığı ilk seçilen kart.
+  void _onMismatch(Set<String> ids, String missedCardId) {
     state = state.copyWith(
+      missedIds: _withMissed(missedCardId),
       tiles: _update(ids, (t) => t.copyWith(isSelected: true, isError: true)),
       isLocked: true,
       mistakes: state.mistakes + 1,
@@ -187,6 +200,9 @@ class WordMatchNotifier extends StateNotifier<WordMatchState> {
       );
     });
   }
+
+  List<String> _withMissed(String cardId) =>
+      state.missedIds.contains(cardId) ? state.missedIds : [...state.missedIds, cardId];
 
   @override
   void dispose() {

@@ -109,4 +109,19 @@ void main() {
     expect(buildSpeedQuizQuestions(gameTestCards.take(2).toList()), isEmpty);
     expect(buildSpeedQuizQuestions(gameTestCards.take(3).toList()), hasLength(3));
   });
+
+  test('yanlış ve süresi dolan sorular tekrar listesine girer', () {
+    final first = n.state.currentQuestion.card;
+    n.selectOption(wrongOption());
+    n.next();
+    final second = n.state.currentQuestion.card;
+    for (var i = 0; i < speedQuizQuestionSeconds; i++) {
+      n.tick();
+    }
+    n.next();
+    n.selectOption(n.state.currentQuestion.correctAnswer);
+    expect(n.state.missedCards.map((c) => c.id), [first.id, second.id]);
+    n.restart();
+    expect(n.state.missedIds, isEmpty);
+  });
 }

@@ -55,6 +55,8 @@ List<SpeedQuizQuestionModel> buildSpeedQuizQuestions(List<FlashcardModel> cards)
 
 @immutable
 class SpeedQuizState {
+  /// Yanlış bilinen / atlanan kartların id'leri (oyun sonu tekrar listesi).
+  final List<String> missedIds;
   final List<SpeedQuizQuestionModel> questions;
   final int currentIndex;
   final int secondsRemaining;
@@ -75,11 +77,17 @@ class SpeedQuizState {
     this.streak = 0,
     this.maxStreak = 0,
     this.correctCount = 0,
+    this.missedIds = const [],
   });
+
 
   bool get isFinished => currentIndex >= questions.length;
   bool get hasNext => currentIndex + 1 < questions.length;
   SpeedQuizQuestionModel get currentQuestion => questions[currentIndex];
+
+  List<FlashcardModel> get missedCards => [
+        for (final id in missedIds) questions.map((q) => q.card).firstWhere((c) => c.id == id),
+      ];
 
   SpeedQuizState copyWith({
     int? currentIndex,
@@ -90,7 +98,9 @@ class SpeedQuizState {
     int? streak,
     int? maxStreak,
     int? correctCount,
+    List<String>? missedIds,
   }) {
+
     return SpeedQuizState(
       questions: questions,
       currentIndex: currentIndex ?? this.currentIndex,
@@ -101,6 +111,7 @@ class SpeedQuizState {
       streak: streak ?? this.streak,
       maxStreak: maxStreak ?? this.maxStreak,
       correctCount: correctCount ?? this.correctCount,
+      missedIds: missedIds ?? this.missedIds,
     );
   }
 }
@@ -150,10 +161,14 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
         isAnswered: true,
         selectedOption: () => null,
         streak: 0,
+        missedIds: _withMissed(state.currentQuestion.card.id),
       );
       _recordIfLast();
     }
   }
+
+  List<String> _withMissed(String cardId) =>
+      state.missedIds.contains(cardId) ? state.missedIds : [...state.missedIds, cardId];
 
   /// Son soru cevaplandığı anda skoru bir kez kaydeder; kullanıcı özet
   /// ekranına geçmeden çıksa bile oyun sayılır.
@@ -169,7 +184,12 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
     final q = state.currentQuestion;
 
     if (option != q.correctAnswer) {
-      state = state.copyWith(selectedOption: () => option, isAnswered: true, streak: 0);
+      state = state.copyWith(
+        selectedOption: () => option,
+        isAnswered: true,
+        streak: 0,
+        missedIds: _withMissed(q.card.id),
+      );
       _recordIfLast();
       return;
     }

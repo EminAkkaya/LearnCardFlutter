@@ -36,8 +36,8 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 ## Review bulguları (R1, 2026-11-07) → görevler
 
 ### P0 — veri kaybı / yayın engeli
-- [ ] **D1 Senkron yereli eziyor:** `supabase_service.dart:124-129, 251-256` bulut boş değilse yerel kartlar `insertOrReplace` ile eziliyor; çevrimdışı çalışılan ilerleme kayboluyor, misafir kartları düşüyor. Çözüm: `updated_at` + yerel `dirty` bayrağı; önce dirty push, sonra satır bazlı last-write-wins pull. Drift şema migrasyonu gerekir (schemaVersion artır, test yaz).
-- [ ] **D2 Misafir → giriş migrasyonu yok:** okuma metinleri (`:230-263`) ve kartlar için girişte misafir verisini (userId null) kullanıcıya bağlayıp buluta bir kez yükle.
+- [x] **D1 Senkron yereli eziyor:** `supabase_service.dart:124-129, 251-256` bulut boş değilse yerel kartlar `insertOrReplace` ile eziliyor; çevrimdışı çalışılan ilerleme kayboluyor, misafir kartları düşüyor. Çözüm: `updated_at` + yerel `dirty` bayrağı; önce dirty push, sonra satır bazlı last-write-wins pull. Drift şema migrasyonu gerekir (schemaVersion artır, test yaz).
+- [x] **D2 Misafir → giriş migrasyonu yok:** okuma metinleri (`:230-263`) ve kartlar için girişte misafir verisini (userId null) kullanıcıya bağlayıp buluta bir kez yükle.
 - [x] **D3 Misafir modunda başka hesabın verisi görünüyor:** `app_database.dart:90-96` userId null iken filtre yok → `userId.isNull()` ekle. (Hızlı, önce bunu yap.)
 - [ ] **D4 Auth deep link:** Android intent-filter + iOS `CFBundleURLTypes` (`io.supabase.learncard://login-callback`), `resetPasswordForEmail(redirectTo:)`, `passwordRecovery` event'inde yeni şifre ekranı. Supabase panelinde redirect URL kullanıcı ekleyecek.
 - [x] **S6 iOS PrivacyInfo.xcprivacy** (dosya eklendi; Xcode'da Runner target'ına eklenmesi macOS'ta kontrol edilecek — RELEASE.md §5) ekle (UserDefaults CA92.1, FileTimestamp C617.1; toplanan veri: e-posta, user id → App Functionality) ve pbxproj'a dahil et.
@@ -45,8 +45,8 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 
 ### P1
 - [ ] **D5 Eşzamanlı yükleme yarışı:** `flashcard_provider.dart:73-81, 200-209`, `reading_provider` loadReadings — generation token ile eski yükleme sonucunu yok say.
-- [ ] **D6 Silme senkronu:** `supabase_service.dart:223` çevrimdışı silme yutuluyor, kart geri geliyor → tombstone/silme kuyruğu (D1 ile birlikte).
-- [ ] **D7 learning_step fallback her hatada:** `:164-173, 196-203` yalnız "column not found" hatasında fallback yap.
+- [x] **D6 Silme senkronu:** `supabase_service.dart:223` çevrimdışı silme yutuluyor, kart geri geliyor → tombstone/silme kuyruğu (D1 ile birlikte).
+- [x] **D7 learning_step fallback her hatada:** `:164-173, 196-203` yalnız "column not found" hatasında fallback yap.
 - [ ] **D8 Stats:** `stats_provider.dart:8-19` load await edilmeden kayıt state'i sıfırlayabiliyor; istatistikler kullanıcıya göre ayrılmıyor. Yüklenene kadar kayıtları beklet/kuyrukla, anahtarı userId'ye bağla.
 - [ ] **D9 Seed kartlar sabit id** (`seed-1..4`, `:18-85`) → UUID; tüm kartlar silinince seed'i tekrar oluşturma.
 - [ ] **D10 Tarih/saat dilimi:** `srs_service.dart:171` nextReviewDate karışık format → UTC ISO.
@@ -59,7 +59,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **SEC2 Resmî olmayan Google Translate uç noktası:** `lib/services/dictionary_service.dart:33` `translate.googleapis.com/translate_a/single?client=gtx` — Google ToS dışı, her an kesilebilir/engellenebilir. MyMemory'yi birincil yap, Google'ı kaldır ya da resmî Cloud Translation API (anahtar sunucu tarafında, Edge Function) kullan.
 
 ### Oyunlar (Q1 alt görevleri; P = lib/providers/games)
-- [ ] **G1 (P0) Oyunlar SRS'i beslemiyor:** yanlış cevaplanan kartı oyun sonunda "tekrar listesi" ile göster, tek dokunuşla `again` olarak işaretle (otomatik zorla değil). Doğru cevaplar SRS'i değiştirmez.
+- [x] **G1 (P0) Oyunlar SRS'i beslemiyor:** yanlış cevaplanan kartı oyun sonunda "tekrar listesi" ile göster, tek dokunuşla `again` olarak işaretle (otomatik zorla değil). Doğru cevaplar SRS'i değiştirmez.
 - [x] **G2 (P0) Skor yalnız son "İleri"de kaydediliyor:** son cevapta kaydet; yarıda bırakılan oyunu kaydetme ama çift kaydı bayrakla engelle. Word match: game-over gecikmesinde restart → çift kayıt (`word_match_provider.dart` restart'ta `_recorded` bayrağı).
 - [x] **G3 (P0) Hızlı Karar çeldiricileri:** sabit Türkçe fallback cümlelerini kaldır; yeterli çeldirici yoksa (destede <4 farklı anlam) soru sayısını düşür / şık sayısını 3'e indir; TR yoksa definition kullanan kartlar yalnız aynı dildeki anlamlarla eşlensin.
 - [x] **G4 (P1) Cloze:** regex eşleşmeyen kartı atla (sahte şablon yok), eki boşluğun dışında bırak ("walk|ed"); sabit fallback kelimeleri kaldır, <2 soru üretilirse "yetersiz kart" göster.
@@ -86,4 +86,9 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 00:36 — G2 (skor son cevapta, tek sefer) ve G3 (sabit çeldiriciler kaldırıldı, aynı tür şıklar) tamam. Sıradaki: D1+D6+D2 senkron.
 - 00:38 — G4 (cloze: ek dışarıda, sahte şablon/kelime yok) ve G7 (Geç butonu, ipucu cezası kelime bazlı, İ düzeltmesi) tamam. D1 senkron subagent'ta.
 - 00:40 — G5 (eşleştirme tekil anlam, TANIM etiketi, çarpan sınırı, hata cezası), G6 (hub boş kategoriye düşmüyor, oyun başına oynanabilir içerik sayılıyor), G8 (seri bonusu ≤100) tamam.
-- 00:47 — G9 kısmi (oturum sabit, bitişte başa sarmıyor; yarıda çıkış onayı). SEC2 kullanıcı kararına bırakıldı (soru 7).
+- 00:41 — G9 kısmi (oturum sabit, bitişte başa sarmıyor; yarıda çıkış onayı). SEC2 kullanıcı kararına bırakıldı (soru 7).
+- 00:45 — KOTA BİTTİ. Yarım kalanlar (commit'lenmedi, `git status` ile bak):
+  - **G1 yarım (benim):** `lib/views/games/widgets/game_mistakes_card.dart` yeni; 4 summary view'a `missedCards` parametresi, 4 oyun state'ine `missedIds` + `missedCards` eklendi. KALAN: notifier'larda missedIds'i doldur (speed quiz: yanlış/süre doldu; cloze: yanlış; scramble: skip veya ipucu kullanılan kelime; word match: hatalı ilk kutucuğun kartı; restart'ta sıfırla), 4 ekranda summary'ye `missedCards: s.missedCards` geç, test yaz, commit.
+  - **D1+D6+D2+D7 senkron subagent'ı** kotayla kesilmiş olabilir: `lib/core/database/app_database.dart`, `lib/models/*`, `lib/models/syncable.dart`, `lib/services/sync/` vb. değişiklikleri incele; yarımsa tamamla (brief: plan D1/D2/D6/D7 maddeleri), `dart run build_runner build --delete-conflicting-outputs`, testler, commit.
+- 01:45 — D1/D2/D6/D7 tamam (`60209f1`, şema v3, `lib/services/sync/`, 120 test). **Kullanıcı:** `docs/supabase_migrations/001_sync_columns.sql`'i Supabase'de çalıştır. Kalan risk: SupabaseRemoteStore gerçek Supabase'e karşı denenmedi; provider'lardaki yeni `syncError` UI'da gösterilmiyor (→ Q2).
+- 01:45 — G1 tamam: oyun sonu "Tekrar etmen gerekenler" kartı, tek dokunuşla SRS `again`. Sıradaki: S3 hesap silme.
