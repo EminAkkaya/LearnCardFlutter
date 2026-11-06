@@ -20,7 +20,8 @@ hazırlık `docs/STORE_READINESS_PLAN.md` içinde takip edilir.
 - **RLS:** tüm tablolarda Row Level Security açık olmalı ve politikalar `auth.uid() = user_id`
   şeklinde olmalı. Anon key istemcide herkese açıktır; güvenliği RLS sağlar.
 - **Auth redirect:** Supabase → Authentication → URL Configuration → Redirect URLs'e
-  uygulamanın deep link şemasını ekle (deep link görevi D4 tamamlanınca şema burada yazacak).
+  `io.learncard.app://login-callback` adresini ekle. Bu adres `AuthService.authRedirectUrl`,
+  AndroidManifest intent-filter'ı ve iOS `CFBundleURLTypes` ile aynıdır; birini değiştirirsen hepsini değiştir.
 
 ## 2. Android imza anahtarı
 ```bash

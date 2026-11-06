@@ -14,6 +14,19 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>LearnCard</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>io.learncard.app.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>io.learncard.app</string>
+			</array>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>CFBundlePackageType</key>

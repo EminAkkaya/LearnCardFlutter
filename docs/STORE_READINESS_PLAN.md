@@ -39,7 +39,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **D1 Senkron yereli eziyor:** `supabase_service.dart:124-129, 251-256` bulut boş değilse yerel kartlar `insertOrReplace` ile eziliyor; çevrimdışı çalışılan ilerleme kayboluyor, misafir kartları düşüyor. Çözüm: `updated_at` + yerel `dirty` bayrağı; önce dirty push, sonra satır bazlı last-write-wins pull. Drift şema migrasyonu gerekir (schemaVersion artır, test yaz).
 - [x] **D2 Misafir → giriş migrasyonu yok:** okuma metinleri (`:230-263`) ve kartlar için girişte misafir verisini (userId null) kullanıcıya bağlayıp buluta bir kez yükle.
 - [x] **D3 Misafir modunda başka hesabın verisi görünüyor:** `app_database.dart:90-96` userId null iken filtre yok → `userId.isNull()` ekle. (Hızlı, önce bunu yap.)
-- [ ] **D4 Auth deep link:** Android intent-filter + iOS `CFBundleURLTypes` (`io.supabase.learncard://login-callback`), `resetPasswordForEmail(redirectTo:)`, `passwordRecovery` event'inde yeni şifre ekranı. Supabase panelinde redirect URL kullanıcı ekleyecek.
+- [x] **D4 Auth deep link:** (`io.learncard.app://login-callback`; şifre sıfırlama bağlantısı → Yeni Şifre ekranı; Supabase paneline URL eklemek kullanıcıda) Android intent-filter + iOS `CFBundleURLTypes` (`io.supabase.learncard://login-callback`), `resetPasswordForEmail(redirectTo:)`, `passwordRecovery` event'inde yeni şifre ekranı. Supabase panelinde redirect URL kullanıcı ekleyecek.
 - [x] **S6 iOS PrivacyInfo.xcprivacy** (dosya eklendi; Xcode'da Runner target'ına eklenmesi macOS'ta kontrol edilecek — RELEASE.md §5) ekle (UserDefaults CA92.1, FileTimestamp C617.1; toplanan veri: e-posta, user id → App Functionality) ve pbxproj'a dahil et.
 - [ ] **S7 iOS Podfile** yok — macOS'ta `flutter build ios` ile üretilecek (kullanıcı, Linux'ta yapılamaz). Not olarak RELEASE.md'ye yaz.
 
@@ -92,4 +92,5 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
   - **D1+D6+D2+D7 senkron subagent'ı** kotayla kesilmiş olabilir: `lib/core/database/app_database.dart`, `lib/models/*`, `lib/models/syncable.dart`, `lib/services/sync/` vb. değişiklikleri incele; yarımsa tamamla (brief: plan D1/D2/D6/D7 maddeleri), `dart run build_runner build --delete-conflicting-outputs`, testler, commit.
 - 01:45 — D1/D2/D6/D7 tamam (`60209f1`, şema v3, `lib/services/sync/`, 120 test). **Kullanıcı:** `docs/supabase_migrations/001_sync_columns.sql`'i Supabase'de çalıştır. Kalan risk: SupabaseRemoteStore gerçek Supabase'e karşı denenmedi; provider'lardaki yeni `syncError` UI'da gösterilmiyor (→ Q2).
 - 01:45 — G1 tamam: oyun sonu "Tekrar etmen gerekenler" kartı, tek dokunuşla SRS `again`. Sıradaki: S3 hesap silme.
-- 01:55 — S3 tamam (hesap silme UI + Edge Function + widget testi, 125 test). Sıradaki: D4 auth deep link.
+- 01:44 — S3 tamam (hesap silme UI + Edge Function + widget testi, 125 test). Sıradaki: D4 auth deep link.
+- 01:50 — D4 tamam (126 test). Gerçek cihazda e-posta bağlantısı denenmedi. Sıradaki: D5, D8-D12, Q2 (syncError UI).

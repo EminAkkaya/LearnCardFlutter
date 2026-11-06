@@ -1,6 +1,11 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
+  /// E-posta doğrulama ve şifre sıfırlama bağlantılarının uygulamaya dönüş
+  /// adresi. AndroidManifest intent-filter'ı, iOS CFBundleURLTypes ve Supabase
+  /// panelindeki Redirect URLs listesiyle aynı olmalıdır.
+  static const String authRedirectUrl = 'io.learncard.app://login-callback';
+
   static SupabaseClient? get _client {
     try {
       return Supabase.instance.client;
@@ -70,6 +75,7 @@ class AuthService {
       email: email.trim(),
       password: password,
       data: data.isNotEmpty ? data : null,
+      emailRedirectTo: authRedirectUrl,
     );
   }
 
@@ -77,7 +83,7 @@ class AuthService {
   static Future<void> resetPassword(String email) async {
     final client = _client;
     if (client == null) return;
-    await client.auth.resetPasswordForEmail(email.trim());
+    await client.auth.resetPasswordForEmail(email.trim(), redirectTo: authRedirectUrl);
   }
 
   /// Verifies a 6-digit OTP code for email confirmation
@@ -125,6 +131,13 @@ class AuthService {
       // Handles uninitialized Supabase client in unit tests
     }
     return false;
+  }
+
+  /// Oturumdaki kullanıcının şifresini değiştirir (şifre sıfırlama akışı).
+  static Future<void> updatePassword(String newPassword) async {
+    final client = _client;
+    if (client == null) throw Exception('Sunucuya bağlanılamadı.');
+    await client.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   /// Hesabı ve tüm bulut verisini `delete-account` Edge Function'ı ile siler.

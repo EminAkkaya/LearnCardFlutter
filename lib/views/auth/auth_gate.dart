@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../home_screen.dart';
 import 'email_verification_screen.dart';
 import 'login_screen.dart';
+import 'reset_password_screen.dart';
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
@@ -11,6 +12,10 @@ class AuthGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+
+    if (authState.isPasswordRecovery && authState.isAuthenticated) {
+      return const ResetPasswordScreen();
+    }
 
     if (authState.isAuthenticated) {
       if (authState.isEmailConfirmed) {

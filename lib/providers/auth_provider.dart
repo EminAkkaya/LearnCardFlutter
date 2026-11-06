@@ -11,12 +11,17 @@ class AppAuthState {
   final String? pendingEmail;
   final bool isGuestMode;
 
+  /// Şifre sıfırlama e-postasındaki bağlantıyla uygulamaya dönüldü;
+  /// kullanıcı yeni şifre belirleyene kadar sıfırlama ekranı gösterilir.
+  final bool isPasswordRecovery;
+
   const AppAuthState({
     this.user,
     this.isLoading = false,
     this.error,
     this.pendingEmail,
     this.isGuestMode = false,
+    this.isPasswordRecovery = false,
   });
 
   bool get isAuthenticated => user != null;
@@ -30,6 +35,7 @@ class AppAuthState {
     String? error,
     String? pendingEmail,
     bool? isGuestMode,
+    bool? isPasswordRecovery,
     bool clearUser = false,
     bool clearPendingEmail = false,
   }) {
@@ -41,6 +47,7 @@ class AppAuthState {
           ? null
           : (pendingEmail ?? this.pendingEmail),
       isGuestMode: isGuestMode ?? this.isGuestMode,
+      isPasswordRecovery: isPasswordRecovery ?? this.isPasswordRecovery,
     );
   }
 }
@@ -77,6 +84,9 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
             user: user,
             clearUser: user == null,
             isGuestMode: user != null ? false : state.isGuestMode,
+            isPasswordRecovery: data.event == sb.AuthChangeEvent.passwordRecovery
+                ? true
+                : (user == null ? false : null),
           );
         },
         onError: (_) {
@@ -272,6 +282,19 @@ class AuthNotifier extends StateNotifier<AppAuthState> {
     } on sb.AuthException catch (e) {
       state = state.copyWith(isLoading: false, error: _parseAuthError(e));
       return false;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: _parseAuthError(e));
+      return false;
+    }
+  }
+
+  /// Şifre sıfırlama bağlantısıyla gelen kullanıcının yeni şifresini kaydeder.
+  Future<bool> updatePassword(String newPassword) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await AuthService.updatePassword(newPassword);
+      state = state.copyWith(isLoading: false, isPasswordRecovery: false);
+      return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _parseAuthError(e));
       return false;

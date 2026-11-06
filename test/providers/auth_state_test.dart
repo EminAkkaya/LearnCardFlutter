@@ -129,4 +129,12 @@ void main() {
       expect(state.user, isNull);
     });
   });
+
+  test('isPasswordRecovery defaults to false and is kept by copyWith', () {
+    const initial = AppAuthState();
+    expect(initial.isPasswordRecovery, isFalse);
+    final recovering = initial.copyWith(isPasswordRecovery: true);
+    expect(recovering.isPasswordRecovery, isTrue);
+    expect(recovering.copyWith(isLoading: true).isPasswordRecovery, isTrue);
+  });
 }
