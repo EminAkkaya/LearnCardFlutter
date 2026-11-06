@@ -54,7 +54,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **D12 signUp mevcut e-posta:** `identities` boşsa "bu e-posta kayıtlı" göster.
 - [ ] **S8 Android:** targetSdk açıkça 35+, release'te `isMinifyEnabled/isShrinkResources` (release build ile doğrulanarak), kullanılmayan bağımlılıklar (`path`, `path_provider`?) `flutter pub deps` ile doğrula/temizle.
 - [ ] **S9 google_fonts çevrimdışı:** fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
-- [ ] **SEC1 RLS doğrulama:** anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
+- [x] **SEC1 RLS doğrulama:** (SQL hazır: `docs/supabase_migrations/002_rls_policies.sql`; çalıştırmak ve eski geniş politikaları kaldırmak kullanıcıda) anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
 
 - [ ] **SEC2 Resmî olmayan Google Translate uç noktası:** `lib/services/dictionary_service.dart:33` `translate.googleapis.com/translate_a/single?client=gtx` — Google ToS dışı, her an kesilebilir/engellenebilir. MyMemory'yi birincil yap, Google'ı kaldır ya da resmî Cloud Translation API (anahtar sunucu tarafında, Edge Function) kullan.
 
@@ -76,7 +76,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 2. **Release keystore:** `keytool` ile üretilip `android/key.properties` yazılacak (şablon `docs/RELEASE.md`). Parolayı sen belirle ve yedekle; Play App Signing önerilir.
 3. **Gizlilik politikası + hesap silme web URL'si + destek e-postası** (taslak metni ben hazırlayabilirim, yayınlanacak yer senin).
 4. **Hesap silme:** fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).
-5. **Supabase paneli:** auth redirect URL ekleme, RLS kontrolü.
+5. **Supabase paneli:** `001_sync_columns.sql` ve `002_rls_policies.sql`'i çalıştır, redirect URL `io.learncard.app://login-callback` ekle, `delete-account` fonksiyonunu deploy et.
 6. Play Console (25$) ve Apple Developer (99$/yıl) hesapları.
 7. **Çeviri servisi (SEC2):** şu an birincil çeviri resmî olmayan Google `client=gtx` uç noktası (kalitesi iyi ama ToS dışı, kesilebilir). Seçenekler: (a) olduğu gibi bırak, (b) MyMemory'yi birincil yap (kalite düşer, günlük limit), (c) resmî Google Cloud Translation / DeepL'i bir Supabase Edge Function arkasına koy (anahtar sunucuda, ücretli). Öneri: yayın öncesi (c), o zamana kadar (a).
 
@@ -94,3 +94,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:45 — G1 tamam: oyun sonu "Tekrar etmen gerekenler" kartı, tek dokunuşla SRS `again`. Sıradaki: S3 hesap silme.
 - 01:44 — S3 tamam (hesap silme UI + Edge Function + widget testi, 125 test). Sıradaki: D4 auth deep link.
 - 01:45 — D4 tamam (126 test). Gerçek cihazda e-posta bağlantısı denenmedi. Sıradaki: D5, D8-D12, Q2 (syncError UI).
+- 01:48 — Uyanış #1. SEC1 SQL hazır. Çekirdek subagent'ı (D5,D8,D10-D12,Q2) ve release APK build'i sürüyor.
