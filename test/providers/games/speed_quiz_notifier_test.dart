@@ -95,7 +95,7 @@ void main() {
     ];
     final qs = buildSpeedQuizQuestions(mixed);
     final trMeanings = gameTestCards.map((c) => c.trTranslation).toSet();
-    for (final q in qs) {
+    for (final q in qs.where((q) => !q.isReverse)) {
       final isTrQuestion = trMeanings.contains(q.correctAnswer);
       for (final o in q.options) {
         expect(trMeanings.contains(o), isTrQuestion, reason: 'karışık tür: ${q.options}');
@@ -123,5 +123,18 @@ void main() {
     expect(n.state.missedCards.map((c) => c.id), [first.id, second.id]);
     n.restart();
     expect(n.state.missedIds, isEmpty);
+  });
+
+  test('TR karşılığı olan kartlarda sorular dönüşümlü ters yönde sorulur', () {
+    final qs = buildSpeedQuizQuestions(gameTestCards);
+    final reverse = qs.where((q) => q.isReverse).toList();
+    expect(reverse, isNotEmpty);
+    for (final q in reverse) {
+      expect(q.targetWord, q.card.trTranslation);
+      expect(q.correctAnswer, q.card.word);
+      expect(q.options, contains(q.card.word));
+      expect(q.options.toSet(), hasLength(q.options.length));
+      expect(gameTestCards.map((c) => c.word), containsAll(q.options));
+    }
   });
 }

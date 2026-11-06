@@ -24,12 +24,22 @@ String _meaningOf(FlashcardModel c) =>
 /// türden (Türkçe karşılık ↔ Türkçe karşılık, tanım ↔ tanım) seçilir; böylece
 /// dil farkından doğru cevap anlaşılmaz. En az [speedQuizMinOptions] şık
 /// kurulamayan kart soru olarak kullanılmaz.
+///
+/// Türkçe karşılığı olan kartlarda sorular dönüşümlü olarak ters yönde
+/// (TR → EN) sorulur; aktif hatırlama iki yönde de çalışır.
 List<SpeedQuizQuestionModel> buildSpeedQuizQuestions(List<FlashcardModel> cards) {
   final pool = practiceOrder(cards);
   final questions = <SpeedQuizQuestionModel>[];
 
   for (final card in pool) {
     if (questions.length >= speedQuizMaxQuestions) break;
+    if (_hasTr(card) && questions.length.isOdd) {
+      final reverse = _reverseQuestion(card, cards);
+      if (reverse != null) {
+        questions.add(reverse);
+        continue;
+      }
+    }
     final correct = _meaningOf(card);
     if (correct.isEmpty) continue;
 
@@ -52,6 +62,24 @@ List<SpeedQuizQuestionModel> buildSpeedQuizQuestions(List<FlashcardModel> cards)
     ));
   }
   return questions;
+}
+
+SpeedQuizQuestionModel? _reverseQuestion(FlashcardModel card, List<FlashcardModel> cards) {
+  final word = card.word.trim();
+  final distractors = cards
+      .map((c) => c.word.trim())
+      .where((w) => w.isNotEmpty && w.toLowerCase() != word.toLowerCase())
+      .toSet()
+      .toList()
+    ..shuffle();
+  if (word.isEmpty || distractors.length < speedQuizMinOptions - 1) return null;
+  return SpeedQuizQuestionModel(
+    card: card,
+    targetWord: card.trTranslation.trim(),
+    correctAnswer: word,
+    options: [word, ...distractors.take(speedQuizMaxOptions - 1)]..shuffle(),
+    isReverse: true,
+  );
 }
 
 @immutable

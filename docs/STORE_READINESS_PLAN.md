@@ -69,7 +69,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
 - [x] **G9 (P1) Tekrar ekranı:** başa sarma düzeltildi, yarıda çıkış onayı, son derecelendirmeyi geri al (AppBar ↶, `undoLastReview`).
 - [x] **G10 (P2) Erişilebilirlik/tema:** Semantics etiketleri + `FeedbackColors` ThemeExtension (açık/koyu temada metin kontrastı ≥5:1), sabit renkler temaya bağlandı.
-- [~] **G11 (P2) Fikirler:** (zayıf kartlara ağırlıklı seçim tamam — `practice_order.dart`; kalan: TR→EN yönü) zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
+- [x] **G11 (P2) Fikirler:** zayıf kartlara ağırlıklı seçim (`practice_order.dart`), Hızlı Karar'da dönüşümlü TR→EN soruları, oyun sonu kaçırılan kartlar listesi (G1).
 
 ## Kullanıcıya sorulacaklar
 1. **Nihai paket/bundle id:** şu an Android `com.learncard.learncard_flutter`, iOS `com.learncard.learncardFlutter`. Yayından sonra değiştirilemez. Öneri: ikisinde de aynı, ör. `com.<senin-alan-adın>.learncard`. Onay gelene kadar dokunulmadı.
@@ -107,3 +107,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 02:02 — N2 tamam (onboarding + test; yükleme/tamamlama yarışı yakalanıp düzeltildi).
 - 02:02 — N3 değerlendirildi (soru 9).
 - 02:05 — G10/Q4 tamam (`a0d63d2`), Q3 kapandı. 177 test, analyzer temiz.
+- 02:06 — G11 tamam. Kod tarafında açık görev kalmadı; kalanlar kullanıcı kararı/aksiyonu (S7, S9, SEC2 ve 'Kullanıcıya sorulacaklar').

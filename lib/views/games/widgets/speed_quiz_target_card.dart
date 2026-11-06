@@ -41,7 +41,7 @@ class SpeedQuizTargetCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'HEDEF KELİME',
+                  question.isReverse ? 'İNGİLİZCESİ NEDİR?' : 'HEDEF KELİME',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
@@ -64,7 +64,7 @@ class SpeedQuizTargetCard extends StatelessWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            if (question.card.phonetic.isNotEmpty) ...[
+            if (question.card.phonetic.isNotEmpty && (!question.isReverse || isAnswered)) ...[
               const SizedBox(height: 4),
               Text(
                 question.card.phonetic,
