@@ -25,8 +25,8 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 ### P1 — Kalite
 - [x] **Q1 Oyun mantığı gözden geçirme:** review yapıldı, G1–G9 uygulandı (aşağıda).
 - [x] **Q2 Hata/çevrimdışı davranış:** (ana ekranda senkron/çevrimdışı/kayıt hatası bandı + yeniden dene) ağ hatalarında kullanıcıya geri bildirim, sessiz `catch (_) {}` noktalarının gözden geçirilmesi.
-- [ ] **Q3 Test kapsamı:** SRS, auth, sync, stats için eksik testler.
-- [ ] **Q4 Erişilebilirlik ve küçük ekran:** semantik etiketler, metin ölçekleme, taşma.
+- [x] **Q3 Test kapsamı:** 72 → 177 test (sync engine, migrasyon, yükleme yarışı, stats, SRS tarihleri, auth, oyun notifier'ları, küçük ekran, hesap silme, onboarding). Eksik: SupabaseRemoteStore gerçek sunucuya karşı entegrasyon testi. SRS, auth, sync, stats için eksik testler.
+- [x] **Q4 Erişilebilirlik ve küçük ekran:** (320×568 + 1.5x yazı, açık/koyu: oyunlar ve kart tekrarı taşmasız; karolar ≥48dp; 16 test) semantik etiketler, metin ölçekleme, taşma.
 
 ### P2 — Olsa iyi olur
 - [x] **N1 Store listing taslağı:** kısa/uzun açıklama (TR/EN), anahtar kelimeler, ekran görüntüsü listesi (`docs/store_listing.md`).
@@ -68,7 +68,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G7 (P1) Harf Sihirbazı:** "Geç" butonu; ipucu cezası yalnız o kelimenin puanından (önceki kelimeleri silmesin); İ/ı için `toLowerCase` yerine güvenli normalizasyon (Türkçe karakterler tek karo).
 - [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
 - [x] **G9 (P1) Tekrar ekranı:** başa sarma düzeltildi, yarıda çıkış onayı, son derecelendirmeyi geri al (AppBar ↶, `undoLastReview`).
-- [~] **G10 (P2) Erişilebilirlik/tema:** (Semantics: eşleştirme ve harf karoları/slotları tamam; kalan: sabit renkleri temaya bağlama) oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
+- [x] **G10 (P2) Erişilebilirlik/tema:** Semantics etiketleri + `FeedbackColors` ThemeExtension (açık/koyu temada metin kontrastı ≥5:1), sabit renkler temaya bağlandı.
 - [~] **G11 (P2) Fikirler:** (zayıf kartlara ağırlıklı seçim tamam — `practice_order.dart`; kalan: TR→EN yönü) zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
 
 ## Kullanıcıya sorulacaklar
@@ -106,3 +106,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 02:01 — S4 tamam (uygulama içi gizlilik ekranı + test). Q1 kapandı.
 - 02:02 — N2 tamam (onboarding + test; yükleme/tamamlama yarışı yakalanıp düzeltildi).
 - 02:02 — N3 değerlendirildi (soru 9).
+- 02:05 — G10/Q4 tamam (`a0d63d2`), Q3 kapandı. 177 test, analyzer temiz.
