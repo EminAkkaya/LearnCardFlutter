@@ -81,6 +81,7 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
   final List<FlashcardModel> _cards;
   final PlayAudio _playAudio;
   final RecordScore _recordScore;
+  bool _recorded = false;
 
   WordScrambleNotifier(
     this._cards, {
@@ -93,6 +94,7 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
   }
 
   void restart() {
+    _recorded = false;
     final cards = pickScrambleCards(_cards);
     state = WordScrambleState(cards: cards);
     _setupWord(0);
@@ -164,11 +166,17 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
       correctCount: state.correctCount + 1,
       score: state.score + scramblePointsPerWord,
     );
+    _recordIfLast();
+  }
+
+  void _recordIfLast() {
+    if (_recorded || state.hasNext) return;
+    _recorded = true;
+    _recordScore(state.score);
   }
 
   void next() {
     if (state.isFinished) return;
-    if (!state.hasNext) _recordScore(state.score);
     _setupWord(state.currentIndex + 1);
   }
 }

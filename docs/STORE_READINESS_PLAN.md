@@ -58,8 +58,8 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 
 ### Oyunlar (Q1 alt görevleri; P = lib/providers/games)
 - [ ] **G1 (P0) Oyunlar SRS'i beslemiyor:** yanlış cevaplanan kartı oyun sonunda "tekrar listesi" ile göster, tek dokunuşla `again` olarak işaretle (otomatik zorla değil). Doğru cevaplar SRS'i değiştirmez.
-- [ ] **G2 (P0) Skor yalnız son "İleri"de kaydediliyor:** son cevapta kaydet; yarıda bırakılan oyunu kaydetme ama çift kaydı bayrakla engelle. Word match: game-over gecikmesinde restart → çift kayıt (`word_match_provider.dart` restart'ta `_recorded` bayrağı).
-- [ ] **G3 (P0) Hızlı Karar çeldiricileri:** sabit Türkçe fallback cümlelerini kaldır; yeterli çeldirici yoksa (destede <4 farklı anlam) soru sayısını düşür / şık sayısını 3'e indir; TR yoksa definition kullanan kartlar yalnız aynı dildeki anlamlarla eşlensin.
+- [x] **G2 (P0) Skor yalnız son "İleri"de kaydediliyor:** son cevapta kaydet; yarıda bırakılan oyunu kaydetme ama çift kaydı bayrakla engelle. Word match: game-over gecikmesinde restart → çift kayıt (`word_match_provider.dart` restart'ta `_recorded` bayrağı).
+- [x] **G3 (P0) Hızlı Karar çeldiricileri:** sabit Türkçe fallback cümlelerini kaldır; yeterli çeldirici yoksa (destede <4 farklı anlam) soru sayısını düşür / şık sayısını 3'e indir; TR yoksa definition kullanan kartlar yalnız aynı dildeki anlamlarla eşlensin.
 - [ ] **G4 (P1) Cloze:** regex eşleşmeyen kartı atla (sahte şablon yok), eki boşluğun dışında bırak ("walk|ed"); sabit fallback kelimeleri kaldır, <2 soru üretilirse "yetersiz kart" göster.
 - [ ] **G5 (P1) Eşleştirme:** aynı TR metnine sahip kartları tek oyunda kullanma; definition kullanılıyorsa etiket "TANIM"; hata sayısı skordan düşsün; streak çarpanını sınırla.
 - [ ] **G6 (P1) Hub:** kategori boşsa sessizce tüm desteye düşme → uyarı/disabled; oyun başına geçerli kart sayısını kontrol et (scramble tek kelimelik kart sayısı).
@@ -80,3 +80,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 ## İlerleme günlüğü
 - 2026-11-07 00:30 — Plan oluşturuldu, refactor main'e merge edildi (`ee0a127`).
 - 2026-11-07 00:55 — R1 review bitti, S1/S2 kısmi, D3 tamam (misafir yalnız userId=null veriyi görür/siler). Sıradaki: G2.
+- 00:36 — G2 (skor son cevapta, tek sefer) ve G3 (sabit çeldiriciler kaldırıldı, aynı tür şıklar) tamam. Sıradaki: D1+D6+D2 senkron.

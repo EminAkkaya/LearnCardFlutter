@@ -72,4 +72,41 @@ void main() {
     n.next();
     expect(recorded, hasLength(1));
   });
+
+  test('skor son cevap anında kaydedilir (özet ekranına geçmeden çıkılsa da)', () {
+    for (var i = 0; i < 4; i++) {
+      n.selectOption(n.state.currentQuestion.correctAnswer);
+      if (i < 3) n.next();
+    }
+    expect(n.state.isFinished, isFalse);
+    expect(recorded, hasLength(1));
+  });
+
+  test('cevaplanmadan sonraki soruya geçilmez', () {
+    n.next();
+    expect(n.state.currentIndex, 0);
+  });
+
+  test('çeldiriciler yalnız desteden ve aynı türden gelir', () {
+    final mixed = [
+      ...gameTestCards,
+      testCard('d1', 'alpha', ''),
+      testCard('d2', 'beta', ''),
+    ];
+    final qs = buildSpeedQuizQuestions(mixed);
+    final trMeanings = gameTestCards.map((c) => c.trTranslation).toSet();
+    for (final q in qs) {
+      final isTrQuestion = trMeanings.contains(q.correctAnswer);
+      for (final o in q.options) {
+        expect(trMeanings.contains(o), isTrQuestion, reason: 'karışık tür: ${q.options}');
+      }
+    }
+    // tanım kartları için yalnız 1 çeldirici var → soru üretilmez
+    expect(qs.any((q) => q.correctAnswer.startsWith('def of')), isFalse);
+  });
+
+  test('yeterli çeldirici yoksa soru üretilmez', () {
+    expect(buildSpeedQuizQuestions(gameTestCards.take(2).toList()), isEmpty);
+    expect(buildSpeedQuizQuestions(gameTestCards.take(3).toList()), hasLength(3));
+  });
 }

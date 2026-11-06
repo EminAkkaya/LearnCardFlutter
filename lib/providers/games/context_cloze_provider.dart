@@ -117,6 +117,7 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
   final List<FlashcardModel> _cards;
   final PlayAudio _playAudio;
   final RecordScore _recordScore;
+  bool _recorded = false;
 
   ContextClozeNotifier(
     this._cards, {
@@ -129,6 +130,7 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
   }
 
   void restart() {
+    _recorded = false;
     state = ContextClozeState(questions: buildClozeQuestions(_cards));
   }
 
@@ -144,6 +146,7 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
 
     if (!isCorrect) {
       state = state.copyWith(selectedOption: () => option, isAnswered: true);
+      _recordIfLast();
       return;
     }
 
@@ -154,11 +157,17 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
       correctCount: state.correctCount + 1,
       score: state.score + (state.showHint ? clozePointsWithHint : clozePointsNoHint),
     );
+    _recordIfLast();
+  }
+
+  void _recordIfLast() {
+    if (_recorded || state.hasNext) return;
+    _recorded = true;
+    _recordScore(state.score);
   }
 
   void next() {
-    if (state.isFinished) return;
-    if (!state.hasNext) _recordScore(state.score);
+    if (state.isFinished || !state.isAnswered) return;
     state = state.copyWith(
       currentIndex: state.currentIndex + 1,
       selectedOption: () => null,

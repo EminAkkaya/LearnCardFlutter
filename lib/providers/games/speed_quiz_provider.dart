@@ -8,36 +8,39 @@ import 'game_callbacks.dart';
 const int speedQuizQuestionSeconds = 10;
 const int speedQuizMaxQuestions = 10;
 
-const _fallbackMeanings = [
-  'Gözlemlemek, dikkat etmek',
-  'Geçici, kısa süreli',
-  'Etkileyici, büyüleyici',
-  'Temel, vazgeçilmez',
-  'Öngörülemez, belirsiz',
-];
+const int speedQuizMaxOptions = 4;
+const int speedQuizMinOptions = 3;
+
+bool _hasTr(FlashcardModel c) => c.trTranslation.trim().isNotEmpty;
 
 String _meaningOf(FlashcardModel c) =>
-    c.trTranslation.isNotEmpty ? c.trTranslation : c.definition;
+    (_hasTr(c) ? c.trTranslation : c.definition).trim();
 
-/// Kartlardan en fazla [speedQuizMaxQuestions] adet 4 şıklı soru üretir.
+/// Kartlardan en fazla [speedQuizMaxQuestions] soru üretir.
+///
+/// Çeldiriciler yalnız kullanıcının kendi destesinden ve doğru cevapla aynı
+/// türden (Türkçe karşılık ↔ Türkçe karşılık, tanım ↔ tanım) seçilir; böylece
+/// dil farkından doğru cevap anlaşılmaz. En az [speedQuizMinOptions] şık
+/// kurulamayan kart soru olarak kullanılmaz.
 List<SpeedQuizQuestionModel> buildSpeedQuizQuestions(List<FlashcardModel> cards) {
   final pool = List<FlashcardModel>.from(cards)..shuffle();
-  final allMeanings =
-      cards.map(_meaningOf).where((t) => t.trim().isNotEmpty).toSet().toList();
   final questions = <SpeedQuizQuestionModel>[];
 
   for (final card in pool) {
     if (questions.length >= speedQuizMaxQuestions) break;
     final correct = _meaningOf(card);
-    if (correct.trim().isEmpty) continue;
+    if (correct.isEmpty) continue;
 
-    final options = <String>[correct];
-    final distractors = allMeanings.where((m) => m != correct).toList()..shuffle();
-    for (final d in [...distractors, ..._fallbackMeanings]) {
-      if (options.length >= 4) break;
-      if (!options.contains(d)) options.add(d);
-    }
-    options.shuffle();
+    final distractors = cards
+        .where((c) => _hasTr(c) == _hasTr(card))
+        .map(_meaningOf)
+        .where((m) => m.isNotEmpty && m.toLowerCase() != correct.toLowerCase())
+        .toSet()
+        .toList()
+      ..shuffle();
+    if (distractors.length < speedQuizMinOptions - 1) continue;
+
+    final options = [correct, ...distractors.take(speedQuizMaxOptions - 1)]..shuffle();
 
     questions.add(SpeedQuizQuestionModel(
       card: card,
@@ -107,6 +110,7 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
   final RecordScore _recordScore;
   final bool _useTimer;
   Timer? _timer;
+  bool _recorded = false;
 
   SpeedQuizNotifier(
     this._cards, {
@@ -121,6 +125,7 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
   }
 
   void restart() {
+    _recorded = false;
     state = SpeedQuizState(questions: buildSpeedQuizQuestions(_cards));
     if (state.questions.isNotEmpty) _startTimer();
   }
@@ -145,7 +150,16 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
         selectedOption: () => null,
         streak: 0,
       );
+      _recordIfLast();
     }
+  }
+
+  /// Son soru cevaplandığı anda skoru bir kez kaydeder; kullanıcı özet
+  /// ekranına geçmeden çıksa bile oyun sayılır.
+  void _recordIfLast() {
+    if (_recorded || state.hasNext) return;
+    _recorded = true;
+    _recordScore(state.score);
   }
 
   void selectOption(String option) {
@@ -155,6 +169,7 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
 
     if (option != q.correctAnswer) {
       state = state.copyWith(selectedOption: () => option, isAnswered: true, streak: 0);
+      _recordIfLast();
       return;
     }
 
@@ -169,11 +184,11 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
       maxStreak: streak > state.maxStreak ? streak : state.maxStreak,
       score: state.score + points,
     );
+    _recordIfLast();
   }
 
   void next() {
-    if (state.isFinished) return;
-    if (!state.hasNext) _recordScore(state.score);
+    if (state.isFinished || !state.isAnswered) return;
     state = state.copyWith(
       currentIndex: state.currentIndex + 1,
       secondsRemaining: speedQuizQuestionSeconds,
