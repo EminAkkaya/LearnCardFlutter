@@ -29,7 +29,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **Q4 Erişilebilirlik ve küçük ekran:** semantik etiketler, metin ölçekleme, taşma.
 
 ### P2 — Olsa iyi olur
-- [ ] **N1 Store listing taslağı:** kısa/uzun açıklama (TR/EN), anahtar kelimeler, ekran görüntüsü listesi (`docs/store_listing.md`).
+- [x] **N1 Store listing taslağı:** kısa/uzun açıklama (TR/EN), anahtar kelimeler, ekran görüntüsü listesi (`docs/store_listing.md`).
 - [ ] **N2 Onboarding / ilk açılış deneyimi.**
 - [ ] **N3 Çoklu dil altyapısı (intl) değerlendirmesi.**
 
