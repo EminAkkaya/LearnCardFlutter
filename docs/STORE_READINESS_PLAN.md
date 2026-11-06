@@ -67,7 +67,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G6 (P1) Hub:** kategori boşsa sessizce tüm desteye düşme → uyarı/disabled; oyun başına geçerli kart sayısını kontrol et (scramble tek kelimelik kart sayısı).
 - [x] **G7 (P1) Harf Sihirbazı:** "Geç" butonu; ipucu cezası yalnız o kelimenin puanından (önceki kelimeleri silmesin); İ/ı için `toLowerCase` yerine güvenli normalizasyon (Türkçe karakterler tek karo).
 - [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
-- [ ] **G9 (P1) Tekrar ekranı:** `flashcard_review_screen.dart:28-33, 56-62` customCards ile gelince bitişte eski due kartlara başa sarma hatası; çıkış onayı (PopScope); son derecelendirmeyi geri al.
+- [~] **G9 (P1) Tekrar ekranı:** (başa sarma hatası + çıkış onayı tamam; kalan: son derecelendirmeyi geri al — flashcard_provider'a `undoLastReview` gerekir, D1 sonrası; ekran için widget testi yok) `flashcard_review_screen.dart:28-33, 56-62` customCards ile gelince bitişte eski due kartlara başa sarma hatası; çıkış onayı (PopScope); son derecelendirmeyi geri al.
 - [ ] **G10 (P2) Erişilebilirlik/tema:** oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
 - [ ] **G11 (P2) Fikirler:** zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
 
@@ -78,6 +78,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 4. **Hesap silme yöntemi:** Supabase Edge Function (`auth.admin.deleteUser`, service role) — fonksiyon kodunu ben yazarım, deploy senin.
 5. **Supabase paneli:** auth redirect URL ekleme, RLS kontrolü.
 6. Play Console (25$) ve Apple Developer (99$/yıl) hesapları.
+7. **Çeviri servisi (SEC2):** şu an birincil çeviri resmî olmayan Google `client=gtx` uç noktası (kalitesi iyi ama ToS dışı, kesilebilir). Seçenekler: (a) olduğu gibi bırak, (b) MyMemory'yi birincil yap (kalite düşer, günlük limit), (c) resmî Google Cloud Translation / DeepL'i bir Supabase Edge Function arkasına koy (anahtar sunucuda, ücretli). Öneri: yayın öncesi (c), o zamana kadar (a).
 
 ## İlerleme günlüğü
 - 2026-11-07 00:30 — Plan oluşturuldu, refactor main'e merge edildi (`ee0a127`).
@@ -85,3 +86,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 00:36 — G2 (skor son cevapta, tek sefer) ve G3 (sabit çeldiriciler kaldırıldı, aynı tür şıklar) tamam. Sıradaki: D1+D6+D2 senkron.
 - 00:38 — G4 (cloze: ek dışarıda, sahte şablon/kelime yok) ve G7 (Geç butonu, ipucu cezası kelime bazlı, İ düzeltmesi) tamam. D1 senkron subagent'ta.
 - 00:40 — G5 (eşleştirme tekil anlam, TANIM etiketi, çarpan sınırı, hata cezası), G6 (hub boş kategoriye düşmüyor, oyun başına oynanabilir içerik sayılıyor), G8 (seri bonusu ≤100) tamam.
+- 00:47 — G9 kısmi (oturum sabit, bitişte başa sarmıyor; yarıda çıkış onayı). SEC2 kullanıcı kararına bırakıldı (soru 7).

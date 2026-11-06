@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../services/srs_service.dart';
+import 'dialogs/exit_review_dialog.dart';
 import 'widgets/flashcard_item_view.dart';
 import 'widgets/review_completion_view.dart';
 
@@ -53,15 +54,12 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!widget.isCustomStudy) {
-      if (_sessionCards == null ||
-          (_sessionCards!.isEmpty && cardState.dueCards.isNotEmpty) ||
-          (_currentIndex >= _sessionCards!.length && cardState.dueCards.isNotEmpty)) {
-        _sessionCards = widget.customCards ?? cardState.dueCards;
-        if (_currentIndex >= _sessionCards!.length) _currentIndex = 0;
-      }
-    } else {
-      _sessionCards ??= widget.customCards ?? cardState.dueCards;
+    // Oturum kartları bir kez sabitlenir. Yalnız oturum hiç başlamamışken ve
+    // kartlar sonradan yüklendiyse yeniden alınır; bitişte otomatik başa sarılmaz
+    // (yeni vadesi gelenler için tamamlama ekranındaki "tekrar başlat" kullanılır).
+    final notStarted = _currentIndex == 0 && (_sessionCards?.isEmpty ?? true);
+    if (notStarted) {
+      _sessionCards = widget.customCards ?? cardState.dueCards;
     }
     final dueCards = _sessionCards ?? [];
 
@@ -75,54 +73,72 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
     final card = dueCards[_currentIndex];
     final previews = SRSService.getNextIntervalPreviews(card);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.isCustomStudy ? 'Özel Çalışma Modu' : 'Kart Tekrarı (SRS)'),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${_currentIndex + 1} / ${dueCards.length}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onPrimaryContainer,
+    return PopScope(
+      canPop: _currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await ExitReviewDialog.confirm(
+          context,
+          remaining: dueCards.length - _currentIndex,
+        )) {
+          navigator.pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.isCustomStudy ? 'Özel Çalışma Modu' : 'Kart Tekrarı (SRS)',
+          ),
+          centerTitle: true,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_currentIndex + 1} / ${dueCards.length}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            LinearProgressIndicator(
-              value: (_currentIndex + 1) / dueCards.length,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              color: theme.colorScheme.primary,
-              minHeight: 6,
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: FlashcardItemView(
-                  key: ValueKey<String>('${card.id}_$_currentIndex'),
-                  card: card,
-                  previews: previews,
-                  onRating: (rating) => _handleRating(card, rating),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              LinearProgressIndicator(
+                value: (_currentIndex + 1) / dueCards.length,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                color: theme.colorScheme.primary,
+                minHeight: 6,
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: FlashcardItemView(
+                    key: ValueKey<String>('${card.id}_$_currentIndex'),
+                    card: card,
+                    previews: previews,
+                    onRating: (rating) => _handleRating(card, rating),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
