@@ -168,23 +168,31 @@ class SRSService {
       interval: interval,
       repetitions: repetitions,
       learningStep: learningStep,
-      nextReviewDate: nextDate.toIso8601String(),
+      nextReviewDate: formatReviewDate(nextDate),
       status: status,
     );
   }
 
-  /// Helper to parse date strings (including Supabase timestamptz with +00 offset) as local device time
-  static DateTime _parseAsLocal(String dateStr) {
-    if (dateStr.isEmpty) return DateTime.now();
-    try {
-      final cleanStr = dateStr
-          .replaceAll('Z', '')
-          .replaceAll(RegExp(r'[\+\-]\d{2}(:\d{2})?$'), '')
-          .replaceAll(' ', 'T');
-      return DateTime.parse(cleanStr);
-    } catch (_) {
-      return DateTime.tryParse(dateStr) ?? DateTime.now();
+  /// Yeni tekrar tarihleri her zaman UTC ISO-8601 olarak saklanır
+  /// (ör. `2026-11-07T09:30:00.000Z`).
+  static String formatReviewDate(DateTime date) => date.toUtc().toIso8601String();
+
+  static final RegExp _dateOnly = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
+  /// Saklanan tekrar tarihini ayrıştırır; eski kayıtlarla geriye uyumludur:
+  /// - `YYYY-MM-DD` (eski, yalnız tarih): o günün yerel gece yarısı.
+  /// - Ofsetsiz tarih-saat (eski, yerel saat): yerel saat olarak.
+  /// - `Z` veya `+03:00` / `+00` ofsetli (yeni ve Supabase timestamptz):
+  ///   ofset korunarak gerçek an olarak.
+  /// Ayrıştırılamazsa null döner.
+  static DateTime? parseReviewDate(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    if (_dateOnly.hasMatch(trimmed)) {
+      final parts = trimmed.split('-').map(int.parse).toList();
+      return DateTime(parts[0], parts[1], parts[2]);
     }
+    return DateTime.tryParse(trimmed);
   }
 
   /// Calculates next review interval preview in string format for each rating
@@ -193,7 +201,7 @@ class SRSService {
     final DateTime now = DateTime.now();
     for (final rating in ReviewRating.values) {
       final updated = calculateSRS(card, rating);
-      final DateTime nextDate = _parseAsLocal(updated.nextReviewDate);
+      final DateTime nextDate = parseReviewDate(updated.nextReviewDate) ?? now;
       final Duration diff = nextDate.difference(now);
 
       if (diff.inMinutes < 60) {
@@ -209,20 +217,10 @@ class SRSService {
   }
 
   /// Checks if card is due for review (its exact scheduled date/time has arrived or passed)
-  static bool isCardDue(FlashcardModel card) {
+  static bool isCardDue(FlashcardModel card, {DateTime? now}) {
     if (card.status == 'new') return true;
-    if (card.nextReviewDate.isEmpty) return true;
-
-    final DateTime now = DateTime.now();
-
-    try {
-      final DateTime reviewDate = _parseAsLocal(card.nextReviewDate);
-      return reviewDate.isBefore(now) || reviewDate.isAtSameMomentAs(now);
-    } catch (e) {
-      // Fallback for YYYY-MM-DD string comparisons
-      final String todayStr = now.toIso8601String().split('T')[0];
-      final String cardDateStr = card.nextReviewDate.split('T')[0].split(' ')[0];
-      return cardDateStr.compareTo(todayStr) <= 0;
-    }
+    final reviewDate = parseReviewDate(card.nextReviewDate);
+    if (reviewDate == null) return true;
+    return !reviewDate.isAfter(now ?? DateTime.now());
   }
 }

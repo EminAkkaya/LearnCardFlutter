@@ -5,6 +5,7 @@ import '../core/database/app_database.dart';
 import '../models/flashcard_model.dart';
 import '../models/reading_article_model.dart';
 import 'auth_service.dart';
+import 'srs_service.dart';
 import 'sync/drift_sync_store.dart';
 import 'sync/supabase_remote_store.dart';
 import 'sync/sync_engine.dart';
@@ -93,7 +94,7 @@ class SupabaseService {
       'interval': 0,
       'repetitions': 0,
       'ease_factor': 2.5,
-      'next_review_date': DateTime.now().toIso8601String().split('T')[0],
+      'next_review_date': SRSService.formatReviewDate(DateTime.now()),
       'created_at': DateTime.now().toIso8601String(),
     },
     {
@@ -109,7 +110,7 @@ class SupabaseService {
       'interval': 0,
       'repetitions': 0,
       'ease_factor': 2.5,
-      'next_review_date': DateTime.now().toIso8601String().split('T')[0],
+      'next_review_date': SRSService.formatReviewDate(DateTime.now()),
       'created_at': DateTime.now().toIso8601String(),
     },
     {
@@ -126,7 +127,7 @@ class SupabaseService {
       'interval': 0,
       'repetitions': 0,
       'ease_factor': 2.5,
-      'next_review_date': DateTime.now().toIso8601String().split('T')[0],
+      'next_review_date': SRSService.formatReviewDate(DateTime.now()),
       'created_at': DateTime.now().toIso8601String(),
     },
     {
@@ -142,7 +143,7 @@ class SupabaseService {
       'interval': 0,
       'repetitions': 0,
       'ease_factor': 2.5,
-      'next_review_date': DateTime.now().toIso8601String().split('T')[0],
+      'next_review_date': SRSService.formatReviewDate(DateTime.now()),
       'created_at': DateTime.now().toIso8601String(),
     },
   ];
