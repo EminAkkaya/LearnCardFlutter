@@ -53,7 +53,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [ ] **D11 Hata görünürlüğü:** flashcard_provider iyimser güncellemede DB hatası yutuluyor; `bulkAddCards` tüm desteyi upsert ediyor (yalnız yenileri gönder); `main.dart` Supabase init hatası sessiz; `resendVerificationOtp` istemci yoksa başarı dönüyor.
 - [ ] **D12 signUp mevcut e-posta:** `identities` boşsa "bu e-posta kayıtlı" göster.
 - [ ] **S8 Android:** targetSdk açıkça 35+, release'te `isMinifyEnabled/isShrinkResources` (release build ile doğrulanarak), kullanılmayan bağımlılıklar (`path`, `path_provider`?) `flutter pub deps` ile doğrula/temizle.
-- [ ] **S9 google_fonts çevrimdışı:** fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
+- [~] **S9 google_fonts çevrimdışı:** (font dosyası indirmek kullanıcı onayı ister → soru 8; google_fonts ilk çevrimiçi açılıştan sonra önbellekten çalışır, engel değil) fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
 - [x] **SEC1 RLS doğrulama:** (SQL hazır: `docs/supabase_migrations/002_rls_policies.sql`; çalıştırmak ve eski geniş politikaları kaldırmak kullanıcıda) anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
 
 - [ ] **SEC2 Resmî olmayan Google Translate uç noktası:** `lib/services/dictionary_service.dart:33` `translate.googleapis.com/translate_a/single?client=gtx` — Google ToS dışı, her an kesilebilir/engellenebilir. MyMemory'yi birincil yap, Google'ı kaldır ya da resmî Cloud Translation API (anahtar sunucu tarafında, Edge Function) kullan.
@@ -68,7 +68,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G7 (P1) Harf Sihirbazı:** "Geç" butonu; ipucu cezası yalnız o kelimenin puanından (önceki kelimeleri silmesin); İ/ı için `toLowerCase` yerine güvenli normalizasyon (Türkçe karakterler tek karo).
 - [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
 - [~] **G9 (P1) Tekrar ekranı:** (başa sarma hatası + çıkış onayı tamam; kalan: son derecelendirmeyi geri al — flashcard_provider'a `undoLastReview` gerekir, D1 sonrası; ekran için widget testi yok) `flashcard_review_screen.dart:28-33, 56-62` customCards ile gelince bitişte eski due kartlara başa sarma hatası; çıkış onayı (PopScope); son derecelendirmeyi geri al.
-- [ ] **G10 (P2) Erişilebilirlik/tema:** oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
+- [~] **G10 (P2) Erişilebilirlik/tema:** (Semantics: eşleştirme ve harf karoları/slotları tamam; kalan: sabit renkleri temaya bağlama) oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
 - [ ] **G11 (P2) Fikirler:** zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
 
 ## Kullanıcıya sorulacaklar
@@ -78,6 +78,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 4. **Hesap silme:** fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).
 5. **Supabase paneli:** `001_sync_columns.sql` ve `002_rls_policies.sql`'i çalıştır, redirect URL `io.learncard.app://login-callback` ekle, `delete-account` fonksiyonunu deploy et.
 6. Play Console (25$) ve Apple Developer (99$/yıl) hesapları.
+8. **Yazı tipi (S9):** Plus Jakarta Sans TTF'lerini (OFL lisanslı) `assets/fonts/`'a indirip pakete gömeyim mi? Çevrimdışı ilk açılışta da doğru font olur, ~500 KB ekler.
 7. **Çeviri servisi (SEC2):** şu an birincil çeviri resmî olmayan Google `client=gtx` uç noktası (kalitesi iyi ama ToS dışı, kesilebilir). Seçenekler: (a) olduğu gibi bırak, (b) MyMemory'yi birincil yap (kalite düşer, günlük limit), (c) resmî Google Cloud Translation / DeepL'i bir Supabase Edge Function arkasına koy (anahtar sunucuda, ücretli). Öneri: yayın öncesi (c), o zamana kadar (a).
 
 ## İlerleme günlüğü
@@ -95,3 +96,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:44 — S3 tamam (hesap silme UI + Edge Function + widget testi, 125 test). Sıradaki: D4 auth deep link.
 - 01:45 — D4 tamam (126 test). Gerçek cihazda e-posta bağlantısı denenmedi. Sıradaki: D5, D8-D12, Q2 (syncError UI).
 - 01:48 — Uyanış #1. SEC1 SQL hazır. Çekirdek subagent'ı (D5,D8,D10-D12,Q2) ve release APK build'i sürüyor.
+- 01:52 — G10 kısmi (oyun karolarına ekran okuyucu etiketleri + test). S9 kullanıcı kararına (soru 8).

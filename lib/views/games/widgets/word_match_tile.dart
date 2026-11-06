@@ -7,11 +7,7 @@ class WordMatchTile extends StatelessWidget {
 
   static const Color emerald = Color(0xFF10B981);
 
-  const WordMatchTile({
-    super.key,
-    required this.tile,
-    required this.onTap,
-  });
+  const WordMatchTile({super.key, required this.tile, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -35,49 +31,70 @@ class WordMatchTile extends StatelessWidget {
       textColor = theme.colorScheme.primary;
     }
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 300),
-      opacity: tile.isMatched ? 0.35 : 1.0,
-      child: Card(
-        elevation: tile.isSelected ? 4 : 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: borderColor, width: tile.isSelected ? 2 : 1),
-        ),
-        color: bgColor,
-        child: InkWell(
-          onTap: (tile.isMatched || tile.isError) ? null : onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (tile.isMatched)
-                  const Icon(Icons.check_circle_rounded, color: emerald, size: 16)
-                else
-                  Text(
-                    tile.label,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: textColor.withValues(alpha: 0.6),
+    final status = tile.isMatched
+        ? 'eşleşti'
+        : tile.isError
+        ? 'yanlış eşleşme'
+        : tile.isSelected
+        ? 'seçili'
+        : '';
+    return Semantics(
+      button: true,
+      selected: tile.isSelected,
+      enabled: !(tile.isMatched || tile.isError),
+      label: '${tile.label}: ${tile.text}${status.isEmpty ? '' : ', $status'}',
+      excludeSemantics: true,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        opacity: tile.isMatched ? 0.35 : 1.0,
+        child: Card(
+          elevation: tile.isSelected ? 4 : 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color: borderColor,
+              width: tile.isSelected ? 2 : 1,
+            ),
+          ),
+          color: bgColor,
+          child: InkWell(
+            onTap: (tile.isMatched || tile.isError) ? null : onTap,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (tile.isMatched)
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: emerald,
+                      size: 16,
+                    )
+                  else
+                    Text(
+                      tile.label,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: textColor.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      tile.text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: tile.isEnglish ? 15 : 14,
+                        color: textColor,
+                      ),
                     ),
                   ),
-                const SizedBox(height: 4),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    tile.text,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: tile.isEnglish ? 15 : 14,
-                      color: textColor,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

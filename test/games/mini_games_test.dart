@@ -104,6 +104,10 @@ void main() {
 
       // Verify at least some cards appear
       expect(find.byType(GridView), findsOneWidget);
+
+      // Ekran okuyucu etiketleri: dil etiketi + metin
+      expect(find.bySemanticsLabel(RegExp(r'^EN: ')), findsWidgets);
+      expect(find.bySemanticsLabel(RegExp(r'^TR: ')), findsWidgets);
     });
   });
 

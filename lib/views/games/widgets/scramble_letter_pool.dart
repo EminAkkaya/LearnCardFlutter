@@ -24,34 +24,42 @@ class ScrambleLetterPool extends StatelessWidget {
       runSpacing: 10,
       alignment: WrapAlignment.center,
       children: pool.map((tile) {
-        return AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
-          opacity: tile.isPlaced ? 0.0 : 1.0,
-          child: InkWell(
-            onTap: (tile.isPlaced || isCompleted) ? null : () => onTileTapped(tile),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              width: 50,
-              height: 52,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: indigoColor.withValues(alpha: 0.4)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
+        return Semantics(
+          button: true,
+          enabled: !(tile.isPlaced || isCompleted),
+          label: 'Harf ${tile.char.toUpperCase()}',
+          excludeSemantics: true,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: tile.isPlaced ? 0.0 : 1.0,
+            child: InkWell(
+              onTap: (tile.isPlaced || isCompleted)
+                  ? null
+                  : () => onTileTapped(tile),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 50,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: indigoColor.withValues(alpha: 0.4)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  tile.char.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
                   ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                tile.char.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

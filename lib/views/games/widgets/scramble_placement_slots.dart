@@ -50,25 +50,37 @@ class ScramblePlacementSlots extends StatelessWidget {
           textColor = indigoColor;
         }
 
-        return InkWell(
-          onTap: (hasLetter && !isCompleted) ? () => onSlotTapped(index) : null,
-          borderRadius: BorderRadius.circular(12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 44,
-            height: 48,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor, width: hasLetter ? 2 : 1),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              char.toUpperCase(),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: textColor,
+        return Semantics(
+          button: hasLetter && !isCompleted,
+          label: hasLetter
+              ? '${index + 1}. harf ${char.toUpperCase()}, kaldırmak için dokun'
+              : '${index + 1}. harf boş',
+          excludeSemantics: true,
+          child: InkWell(
+            onTap: (hasLetter && !isCompleted)
+                ? () => onSlotTapped(index)
+                : null,
+            borderRadius: BorderRadius.circular(12),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 44,
+              height: 48,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: borderColor,
+                  width: hasLetter ? 2 : 1,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                char.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
               ),
             ),
           ),
