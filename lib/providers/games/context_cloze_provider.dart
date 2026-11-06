@@ -8,16 +8,14 @@ const int clozeMaxQuestions = 10;
 const int clozePointsNoHint = 100;
 const int clozePointsWithHint = 60;
 
-const _fallbackWords = [
-  'resilient',
-  'ephemeral',
-  'serendipity',
-  'ubiquitous',
-  'pragmatic',
-  'meticulous',
-  'authentic',
-  'innovative',
-];
+const int clozeMaxOptions = 4;
+const int clozeMinOptions = 3;
+
+/// Kelimenin çekimli hâllerini yakalar; ek boşluğun dışında kalır ("walk|ed").
+RegExp _wordPattern(String target) => RegExp(
+      r'\b(' + RegExp.escape(target) + r')(s|es|ed|d|ing|ly|er|est)?\b',
+      caseSensitive: false,
+    );
 
 String _sentenceFor(FlashcardModel card, String target) {
   final s = card.exampleSentence.trim();
@@ -29,6 +27,9 @@ String _sentenceFor(FlashcardModel card, String target) {
 }
 
 /// Kartların örnek cümlelerinden boşluk doldurma soruları üretir.
+///
+/// Cümlede kelimesi bulunamayan veya desteden en az [clozeMinOptions] - 1
+/// çeldirici çıkarılamayan kart atlanır; sahte cümle/kelime üretilmez.
 List<ClozeQuestionModel> buildClozeQuestions(List<FlashcardModel> cards) {
   final pool = List<FlashcardModel>.from(cards)..shuffle();
   final allWords = cards
@@ -43,20 +44,15 @@ List<ClozeQuestionModel> buildClozeQuestions(List<FlashcardModel> cards) {
     final target = card.word.trim();
     final sentence = _sentenceFor(card, target);
 
-    final match = RegExp(
-      r'\b' + RegExp.escape(target) + r'(s|ed|ing|ly)?\b',
-      caseSensitive: false,
-    ).firstMatch(sentence);
-    final before = match != null ? sentence.substring(0, match.start) : 'In modern contexts, ';
-    final after = match != null ? sentence.substring(match.end) : ' plays a vital and noteworthy role.';
+    if (target.isEmpty) continue;
+    final match = _wordPattern(target).firstMatch(sentence);
+    if (match == null) continue;
+    final before = sentence.substring(0, match.start);
+    final after = (match.group(2) ?? '') + sentence.substring(match.end);
 
-    final options = <String>[target];
     final distractors = allWords.where((w) => w != target.toLowerCase()).toList()..shuffle();
-    for (final d in [...distractors, ..._fallbackWords]) {
-      if (options.length >= 4) break;
-      if (!options.any((o) => o.toLowerCase() == d.toLowerCase())) options.add(d);
-    }
-    options.shuffle();
+    if (distractors.length < clozeMinOptions - 1) continue;
+    final options = [target, ...distractors.take(clozeMaxOptions - 1)]..shuffle();
 
     questions.add(ClozeQuestionModel(
       card: card,

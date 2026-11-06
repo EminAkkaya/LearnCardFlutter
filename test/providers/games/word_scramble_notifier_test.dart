@@ -42,10 +42,29 @@ void main() {
     expect(n.state.pool.where((t) => t.isPlaced), hasLength(2));
   });
 
-  test('ipucu sıradaki doğru harfi koyar, puanı 0 altına düşürmez', () {
+  test('ipucu cezası yalnız o kelimenin ödülünden düşer', () {
+    placeWord(n.state.targetWord);
+    n.next();
+    expect(n.state.score, 100);
     n.hint();
     expect(n.state.placedLetters.single.char, n.state.targetWord[0]);
-    expect(n.state.score, 0);
+    expect(n.state.score, 100);
+    placeWord(n.state.targetWord.substring(1));
+    expect(n.state.score, 100 + scramblePointsPerWord - scrambleHintPenalty);
+  });
+
+  test('geç butonu puansız sonraki kelimeye geçer, sonda skor kaydedilir', () {
+    n.skip();
+    expect(n.state.currentIndex, 1);
+    expect(n.state.skippedCount, 1);
+    n.skip();
+    expect(n.state.isFinished, isTrue);
+    expect(recorded, [0]);
+  });
+
+  test('Türkçe İ tek harf karosu olur', () {
+    expect(normalizeScrambleWord('İnci'), 'inci');
+    expect(buildLetterPool(normalizeScrambleWord('İnci')), hasLength(4));
   });
 
   test('temizle tüm harfleri havuza geri koyar', () {
@@ -59,8 +78,8 @@ void main() {
     placeWord(n.state.targetWord);
     n.next();
     placeWord(n.state.targetWord);
+    expect(recorded, [200]);
     n.next();
     expect(n.state.isFinished, isTrue);
-    expect(recorded, [200]);
   });
 }

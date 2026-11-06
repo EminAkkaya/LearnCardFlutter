@@ -11,12 +11,22 @@ void main() {
     n = ContextClozeNotifier(gameTestCards, playAudio: (_) {}, recordScore: recorded.add);
   });
 
-  test('cümledeki kelime boşluğa çevrilir', () {
-    final q = buildClozeQuestions([gameTestCards.first]).single;
-    expect(q.sentenceBefore, 'She is ');
-    expect(q.sentenceAfter, ' today.');
+  test('cümledeki kelime boşluğa çevrilir, ek dışarıda kalır', () {
+    final cards = [
+      testCard('w', 'walk', 'yürümek', sentence: 'We walked home.'),
+      ...gameTestCards,
+    ];
+    final q = buildClozeQuestions(cards).firstWhere((q) => q.card.id == 'w');
+    expect(q.sentenceBefore, 'We ');
+    expect(q.sentenceAfter, 'ed home.');
     expect(q.options, hasLength(4));
-    expect(q.options, contains('resilient'));
+    expect(q.options, contains('walk'));
+  });
+
+  test('kelimesi cümlede geçmeyen kart ve az çeldirici atlanır', () {
+    final cards = [testCard('x', 'run', 'koşmak', sentence: 'He ran fast.'), ...gameTestCards];
+    expect(buildClozeQuestions(cards).any((q) => q.card.id == 'x'), isFalse);
+    expect(buildClozeQuestions(gameTestCards.take(2).toList()), isEmpty);
   });
 
   test('ipucusuz doğru cevap 100, ipuçlu 60 puan', () {

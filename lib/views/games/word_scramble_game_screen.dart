@@ -49,12 +49,12 @@ class WordScrambleGameScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
             children: [
-              ScrambleHudRow(score: s.score, wordLength: s.targetWord.length),
+              ScrambleHudRow(score: s.score, wordLength: s.targetLetters.length),
               const SizedBox(height: 16),
               ScrambleClueCard(card: s.currentCard),
               const SizedBox(height: 28),
               ScramblePlacementSlots(
-                targetLength: s.targetWord.length,
+                targetLength: s.targetLetters.length,
                 placedLetters: s.placedLetters,
                 isCompleted: s.isCompleted,
                 hasError: s.hasError,
@@ -74,6 +74,7 @@ class WordScrambleGameScreen extends ConsumerWidget {
                   onClear: notifier.clearSlots,
                   onHint: notifier.hint,
                   onShuffle: notifier.shufflePool,
+                  onSkip: notifier.skip,
                 ),
               ] else ...[
                 const SizedBox(height: 16),

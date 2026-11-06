@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../models/games/letter_tile_model.dart';
@@ -7,6 +8,11 @@ import 'game_callbacks.dart';
 const int scrambleMaxWords = 8;
 const int scramblePointsPerWord = 100;
 const int scrambleHintPenalty = 20;
+
+/// Türkçe büyük 'İ' Dart'ta küçültülünce iki karaktere bölündüğü için önce
+/// düzeltilir; harfler grapheme bazında ayrılır.
+String normalizeScrambleWord(String word) =>
+    word.trim().replaceAll('İ', 'i').toLowerCase();
 
 /// Tek kelimelik kartlardan karışık oyun destesi seçer.
 List<FlashcardModel> pickScrambleCards(List<FlashcardModel> cards) {
@@ -18,7 +24,7 @@ List<FlashcardModel> pickScrambleCards(List<FlashcardModel> cards) {
 }
 
 List<LetterTileModel> buildLetterPool(String word) {
-  final chars = word.split('');
+  final chars = word.characters.toList();
   return [for (int i = 0; i < chars.length; i++) LetterTileModel(id: i, char: chars[i])]
     ..shuffle();
 }
@@ -35,6 +41,10 @@ class WordScrambleState {
   final bool hasError;
   final int score;
   final int correctCount;
+  final int skippedCount;
+
+  /// Bu kelimede ipucu nedeniyle düşülecek puan; önceki kelimeleri etkilemez.
+  final int wordPenalty;
 
   const WordScrambleState({
     this.cards = const [],
@@ -45,12 +55,15 @@ class WordScrambleState {
     this.hasError = false,
     this.score = 0,
     this.correctCount = 0,
+    this.skippedCount = 0,
+    this.wordPenalty = 0,
   });
 
   bool get isFinished => currentIndex >= cards.length;
   bool get hasNext => currentIndex + 1 < cards.length;
   FlashcardModel get currentCard => cards[currentIndex];
-  String get targetWord => isFinished ? '' : currentCard.word.trim().toLowerCase();
+  String get targetWord => isFinished ? '' : normalizeScrambleWord(currentCard.word);
+  List<String> get targetLetters => targetWord.characters.toList();
 
   List<LetterTileModel> get placedLetters =>
       [for (final id in placedIds) pool.firstWhere((t) => t.id == id)];
@@ -63,6 +76,8 @@ class WordScrambleState {
     bool? hasError,
     int? score,
     int? correctCount,
+    int? skippedCount,
+    int? wordPenalty,
   }) {
     return WordScrambleState(
       cards: cards,
@@ -73,6 +88,8 @@ class WordScrambleState {
       hasError: hasError ?? this.hasError,
       score: score ?? this.score,
       correctCount: correctCount ?? this.correctCount,
+      skippedCount: skippedCount ?? this.skippedCount,
+      wordPenalty: wordPenalty ?? this.wordPenalty,
     );
   }
 }
@@ -101,7 +118,13 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
   }
 
   void _setupWord(int index) {
-    final base = state.copyWith(currentIndex: index, placedIds: const [], isCompleted: false, hasError: false);
+    final base = state.copyWith(
+      currentIndex: index,
+      placedIds: const [],
+      isCompleted: false,
+      hasError: false,
+      wordPenalty: 0,
+    );
     state = base.isFinished ? base.copyWith(pool: const []) : base.copyWith(pool: buildLetterPool(base.targetWord));
   }
 
@@ -114,7 +137,7 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
     if (current.isPlaced) return;
 
     state = state.copyWith(pool: _withPlaced(tile.id, true), placedIds: [...state.placedIds, tile.id]);
-    if (state.placedIds.length == state.targetWord.length) _checkAnswer();
+    if (state.placedIds.length == state.targetLetters.length) _checkAnswer();
   }
 
   void removeAt(int slotIndex) {
@@ -140,17 +163,28 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
     state = state.copyWith(pool: [...state.pool]..shuffle());
   }
 
-  /// Sıradaki doğru harfi yerleştirir, [scrambleHintPenalty] puan düşer.
+  /// Sıradaki doğru harfi yerleştirir. Bu kelimenin ödülünden
+  /// [scrambleHintPenalty] düşer; önceki kelimelerin puanı korunur.
   void hint() {
     if (state.isCompleted || state.isFinished) return;
+    final letters = state.targetLetters;
     final nextSlot = state.placedIds.length;
-    if (nextSlot >= state.targetWord.length) return;
+    if (nextSlot >= letters.length) return;
 
-    final expected = state.targetWord[nextSlot];
     final free = state.pool.where((t) => !t.isPlaced);
-    final candidate = free.firstWhere((t) => t.char == expected, orElse: () => free.first);
+    final candidate = free.firstWhere((t) => t.char == letters[nextSlot], orElse: () => free.first);
+    state = state.copyWith(
+      wordPenalty: (state.wordPenalty + scrambleHintPenalty).clamp(0, scramblePointsPerWord),
+    );
     placeTile(candidate);
-    state = state.copyWith(score: (state.score - scrambleHintPenalty).clamp(0, 99999));
+  }
+
+  /// Kelimeyi puansız geçer.
+  void skip() {
+    if (state.isFinished || state.isCompleted) return;
+    state = state.copyWith(skippedCount: state.skippedCount + 1);
+    _recordIfLast();
+    _setupWord(state.currentIndex + 1);
   }
 
   void _checkAnswer() {
@@ -164,7 +198,7 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
       isCompleted: true,
       hasError: false,
       correctCount: state.correctCount + 1,
-      score: state.score + scramblePointsPerWord,
+      score: state.score + scramblePointsPerWord - state.wordPenalty,
     );
     _recordIfLast();
   }
