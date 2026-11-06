@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/flashcard_model.dart';
 import 'game_mistakes_card.dart';
 
@@ -9,8 +10,9 @@ class ScrambleSummaryView extends StatelessWidget {
   final VoidCallback onRestart;
   final List<FlashcardModel> missedCards;
 
-  static const Color emerald = Color(0xFF10B981);
   static const Color indigoColor = Color(0xFF6366F1);
+  // indigo-600: beyaz buton metniyle 6.3:1 (indigo-500 yalnız 4.47:1).
+  static const Color indigoFill = Color(0xFF4F46E5);
 
   const ScrambleSummaryView({
     super.key,
@@ -24,7 +26,10 @@ class ScrambleSummaryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final double accuracy = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+    final fb = FeedbackColors.of(context);
+    final double accuracy = totalQuestions > 0
+        ? (correctCount / totalQuestions) * 100
+        : 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Alıştırma Tamamlandı')),
@@ -61,33 +66,61 @@ class ScrambleSummaryView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          const Text('Toplam Puan', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$score',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.amber),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('Başarı Oranı', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '%${accuracy.toStringAsFixed(0)}',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: emerald),
-                          ),
-                        ],
-                      ),
-                    ],
+                  // Wrap: dar ekran / büyük yazıda istatistikler alt satıra iner.
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      spacing: 16,
+                      runSpacing: 12,
+                      children: [
+                        Column(
+                          children: [
+                            const Text(
+                              'Toplam Puan',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$score',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: fb.warning,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Başarı Oranı',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '%${accuracy.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: fb.success,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -104,7 +137,7 @@ class ScrambleSummaryView extends StatelessWidget {
                   icon: const Icon(Icons.replay_rounded),
                   label: const Text('Tekrar Oyna'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: indigoColor,
+                    backgroundColor: indigoFill,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),

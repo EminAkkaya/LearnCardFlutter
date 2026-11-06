@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class GameCardItem extends StatelessWidget {
   final String title;
@@ -27,6 +28,7 @@ class GameCardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
     final bool canPlay = currentCardsCount >= minCardsRequired;
 
     return Card(
@@ -64,15 +66,17 @@ class GameCardItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    // Wrap: dar ekran / büyük yazıda rozet başlığın altına iner.
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         Container(
@@ -112,9 +116,9 @@ class GameCardItem extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         'Bu kategoride oynamaya yetecek kart yok',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Colors.redAccent,
+                          color: fb.danger,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

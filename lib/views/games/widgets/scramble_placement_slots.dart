@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/games/letter_tile_model.dart';
 
 class ScramblePlacementSlots extends StatelessWidget {
@@ -9,7 +10,6 @@ class ScramblePlacementSlots extends StatelessWidget {
   final ValueChanged<int> onSlotTapped;
 
   static const Color indigoColor = Color(0xFF6366F1);
-  static const Color emerald = Color(0xFF10B981);
 
   const ScramblePlacementSlots({
     super.key,
@@ -23,6 +23,7 @@ class ScramblePlacementSlots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
 
     return Wrap(
       spacing: 8,
@@ -37,13 +38,13 @@ class ScramblePlacementSlots extends StatelessWidget {
         Color textColor = theme.colorScheme.onSurface;
 
         if (isCompleted) {
-          borderColor = emerald;
-          bgColor = emerald.withValues(alpha: 0.15);
-          textColor = emerald;
+          borderColor = fb.success;
+          bgColor = fb.success.withValues(alpha: 0.15);
+          textColor = fb.success;
         } else if (hasError && hasLetter) {
-          borderColor = Colors.redAccent;
-          bgColor = Colors.redAccent.withValues(alpha: 0.15);
-          textColor = Colors.redAccent;
+          borderColor = fb.danger;
+          bgColor = fb.danger.withValues(alpha: 0.15);
+          textColor = fb.danger;
         } else if (hasLetter) {
           borderColor = indigoColor;
           bgColor = indigoColor.withValues(alpha: 0.1);
@@ -63,7 +64,7 @@ class ScramblePlacementSlots extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 44,
+              width: 48,
               height: 48,
               decoration: BoxDecoration(
                 color: bgColor,

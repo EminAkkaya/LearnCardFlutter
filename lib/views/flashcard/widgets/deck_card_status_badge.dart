@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class DeckCardStatusBadge extends StatelessWidget {
   final String status;
-
-  static const Color emerald = Color(0xFF10B981);
 
   const DeckCardStatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     Color color = Colors.grey;
     if (status == 'new') color = Colors.blue;
-    if (status == 'learning') color = Colors.orange;
-    if (status == 'mastered') color = emerald;
+    if (status == 'learning') color = fb.warning;
+    if (status == 'mastered') color = fb.success;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

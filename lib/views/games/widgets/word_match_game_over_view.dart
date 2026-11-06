@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/flashcard_model.dart';
 import 'game_mistakes_card.dart';
 
@@ -8,8 +9,6 @@ class WordMatchGameOverView extends StatelessWidget {
   final int mistakes;
   final VoidCallback onPlayAgain;
   final List<FlashcardModel> missedCards;
-
-  static const Color emerald = Color(0xFF10B981);
 
   const WordMatchGameOverView({
     super.key,
@@ -23,6 +22,7 @@ class WordMatchGameOverView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
     final double accuracy = (totalPairs + mistakes > 0)
         ? (totalPairs / (totalPairs + mistakes)) * 100
         : 0;
@@ -38,13 +38,13 @@ class WordMatchGameOverView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: emerald.withValues(alpha: 0.15),
+                  color: fb.success.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.emoji_events_rounded,
                   size: 72,
-                  color: emerald,
+                  color: fb.success,
                 ),
               ),
               const SizedBox(height: 20),
@@ -58,40 +58,89 @@ class WordMatchGameOverView extends StatelessWidget {
               Text(
                 'Tüm kelime çiftlerini başarıyla eşleştirdiniz.',
                 style: TextStyle(
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(
+                    alpha: 0.7,
+                  ),
                   fontSize: 14,
                 ),
               ),
               const SizedBox(height: 24),
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          const Text('Toplam Puan', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text('$score', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amber)),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('Hata Sayısı', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text('$mistakes', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.redAccent)),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('İsabet Oranı', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text('%${accuracy.toStringAsFixed(0)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: emerald)),
-                        ],
-                      ),
-                    ],
+                  // Wrap: dar ekran / büyük yazıda istatistikler alt satıra iner.
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      spacing: 16,
+                      runSpacing: 12,
+                      children: [
+                        Column(
+                          children: [
+                            const Text(
+                              'Toplam Puan',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$score',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: fb.warning,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Hata Sayısı',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$mistakes',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: fb.danger,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'İsabet Oranı',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '%${accuracy.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: fb.success,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -108,8 +157,8 @@ class WordMatchGameOverView extends StatelessWidget {
                   icon: const Icon(Icons.replay_rounded),
                   label: const Text('Tekrar Oyna'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: emerald,
-                    foregroundColor: Colors.white,
+                    backgroundColor: fb.success,
+                    foregroundColor: fb.onAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

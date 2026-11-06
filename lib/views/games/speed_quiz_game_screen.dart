@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/feedback_colors.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/games/speed_quiz_provider.dart';
 import 'widgets/game_next_button.dart';
@@ -12,12 +13,11 @@ import 'widgets/speed_quiz_target_card.dart';
 class SpeedQuizGameScreen extends ConsumerWidget {
   final List<FlashcardModel> cards;
 
-  static const Color amberColor = Color(0xFFF59E0B);
-
   const SpeedQuizGameScreen({super.key, required this.cards});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final fb = FeedbackColors.of(context);
     final provider = speedQuizProvider(cards);
     final s = ref.watch(provider);
     final notifier = ref.read(provider.notifier);
@@ -54,7 +54,7 @@ class SpeedQuizGameScreen extends ConsumerWidget {
           children: [
             LinearProgressIndicator(
               value: s.secondsRemaining / speedQuizQuestionSeconds,
-              color: timeLow ? Colors.redAccent : amberColor,
+              color: timeLow ? fb.danger : fb.warning,
               backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               minHeight: 5,
             ),
@@ -79,7 +79,7 @@ class SpeedQuizGameScreen extends ConsumerWidget {
                     ),
                     if (s.isAnswered) ...[
                       const SizedBox(height: 12),
-                      GameNextButton(hasNext: s.hasNext, color: amberColor, onPressed: notifier.next),
+                      GameNextButton(hasNext: s.hasNext, color: fb.warning, onPressed: notifier.next),
                     ],
                   ],
                 ),

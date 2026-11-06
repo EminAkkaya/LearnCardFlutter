@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 /// Cevaptan sonra çıkan "Sonraki Soru / Sonuçları Gör" butonu.
+/// [color] bir [FeedbackColors] dolgusu olmalı; metin [FeedbackColors.onAccent].
 class GameNextButton extends StatelessWidget {
   final bool hasNext;
   final Color color;
@@ -27,7 +29,7 @@ class GameNextButton extends StatelessWidget {
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          foregroundColor: Colors.white,
+          foregroundColor: FeedbackColors.of(context).onAccent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),

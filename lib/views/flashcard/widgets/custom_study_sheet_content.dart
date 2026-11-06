@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../flashcard_review_screen.dart';
@@ -18,7 +19,6 @@ class CustomStudySheetContent extends StatefulWidget {
 }
 
 class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
-  static const Color emerald = Color(0xFF10B981);
   late String _selectedStatus;
   int _countOption = 10;
   bool _shuffle = true;
@@ -58,6 +58,7 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     final matching = _getMatchingCards();
     final availableCount = matching.length;
     final actualCount = (_countOption == 0 || _countOption > availableCount)
@@ -88,7 +89,7 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
           const SizedBox(height: 16),
           Row(
             children: [
-              const Icon(Icons.school_rounded, color: emerald, size: 28),
+              Icon(Icons.school_rounded, color: fb.success, size: 28),
               const SizedBox(width: 10),
               Text(
                 'Özel Çalışma Ayarları',
@@ -193,8 +194,8 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
               icon: const Icon(Icons.play_arrow_rounded),
               label: const Text('Çalışmayı Başlat', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: emerald,
-                foregroundColor: Colors.white,
+                backgroundColor: fb.success,
+                foregroundColor: fb.onAccent,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),

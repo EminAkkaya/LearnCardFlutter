@@ -4,6 +4,7 @@ import '../../../models/flashcard_model.dart';
 import '../../../services/srs_service.dart';
 import 'flashcard_back_view.dart';
 import 'flashcard_front_view.dart';
+import 'fill_or_scroll.dart';
 
 class FlashcardItemView extends StatefulWidget {
   final FlashcardModel card;
@@ -92,23 +93,27 @@ class _FlashcardItemViewState extends State<FlashcardItemView>
                           ]
                         : [
                             theme.colorScheme.surface,
-                            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                            theme.colorScheme.primaryContainer.withValues(
+                              alpha: 0.3,
+                            ),
                           ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                 ),
-                child: isBackVisible
-                    ? Transform(
-                        transform: Matrix4.identity()..rotateY(pi),
-                        alignment: Alignment.center,
-                        child: FlashcardBackView(
-                          card: card,
-                          previews: widget.previews,
-                          onRating: widget.onRating,
-                        ),
-                      )
-                    : FlashcardFrontView(card: card),
+                child: FillOrScroll(
+                  child: isBackVisible
+                      ? Transform(
+                          transform: Matrix4.identity()..rotateY(pi),
+                          alignment: Alignment.center,
+                          child: FlashcardBackView(
+                            card: card,
+                            previews: widget.previews,
+                            onRating: widget.onRating,
+                          ),
+                        )
+                      : FlashcardFrontView(card: card),
+                ),
               ),
             ),
           );

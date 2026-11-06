@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class ScrambleControlButtons extends StatelessWidget {
   final bool isCompleted;
@@ -20,6 +21,7 @@ class ScrambleControlButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     if (isCompleted) return const SizedBox.shrink();
 
     return Wrap(
@@ -39,7 +41,7 @@ class ScrambleControlButtons extends StatelessWidget {
         ),
         OutlinedButton.icon(
           onPressed: onHint,
-          icon: const Icon(Icons.lightbulb_outline_rounded, size: 18, color: Colors.amber),
+          icon: Icon(Icons.lightbulb_outline_rounded, size: 18, color: fb.warning),
           label: const Text('İpucu'),
         ),
         TextButton.icon(

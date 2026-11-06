@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class WordMatchHudBar extends StatelessWidget {
   final int matchedPairs;
@@ -6,8 +7,6 @@ class WordMatchHudBar extends StatelessWidget {
   final int score;
   final int mistakes;
   final int streak;
-
-  static const Color emerald = Color(0xFF10B981);
 
   const WordMatchHudBar({
     super.key,
@@ -20,15 +19,19 @@ class WordMatchHudBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: emerald.withValues(alpha: 0.1),
+        color: fb.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: emerald.withValues(alpha: 0.3)),
+        border: Border.all(color: fb.success.withValues(alpha: 0.3)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      // Wrap: dar ekran / büyük yazıda istatistikler alt satıra iner.
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        spacing: 12,
+        runSpacing: 8,
         children: [
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -37,7 +40,7 @@ class WordMatchHudBar extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '$matchedPairs/$totalPairs',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: emerald),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: fb.success),
               ),
             ],
           ),
@@ -48,7 +51,7 @@ class WordMatchHudBar extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '$score',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.amber),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: fb.warning),
               ),
             ],
           ),
@@ -62,7 +65,7 @@ class WordMatchHudBar extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
-                  color: streak > 1 ? Colors.orangeAccent : Colors.grey,
+                  color: streak > 1 ? fb.warning : Colors.grey,
                 ),
               ),
             ],

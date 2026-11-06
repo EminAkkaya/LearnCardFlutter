@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/games/cloze_question_model.dart';
 
@@ -6,9 +7,6 @@ class ClozeSentenceCard extends StatelessWidget {
   final ClozeQuestionModel question;
   final bool isAnswered;
   final String? selectedOption;
-
-  static const Color emerald = Color(0xFF10B981);
-  static const Color pinkAccent = Color(0xFFEC4899);
 
   const ClozeSentenceCard({
     super.key,
@@ -20,7 +18,9 @@ class ClozeSentenceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isCorrect = selectedOption?.toLowerCase() == question.correctWord.toLowerCase();
+    final fb = FeedbackColors.of(context);
+    final isCorrect =
+        selectedOption?.toLowerCase() == question.correctWord.toLowerCase();
 
     return Card(
       elevation: 3,
@@ -45,18 +45,21 @@ class ClozeSentenceCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'CÜMLE BAĞLAMI',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    color: pinkAccent,
+                Flexible(
+                  child: Text(
+                    'CÜMLE BAĞLAMI',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      color: fb.highlight,
+                    ),
                   ),
                 ),
                 if (isAnswered && question.card.audioUrl.isNotEmpty)
                   IconButton.filledTonal(
-                    onPressed: () => AudioHelper.playAudio(question.card.audioUrl),
+                    onPressed: () =>
+                        AudioHelper.playAudio(question.card.audioUrl),
                     icon: const Icon(Icons.volume_up_rounded, size: 20),
                   ),
               ],
@@ -74,16 +77,21 @@ class ClozeSentenceCard extends StatelessWidget {
                     alignment: PlaceholderAlignment.middle,
                     child: Container(
                       margin: const EdgeInsets.symmetric(horizontal: 4),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: isAnswered
-                            ? (isCorrect ? emerald.withValues(alpha: 0.25) : Colors.redAccent.withValues(alpha: 0.25))
-                            : pinkAccent.withValues(alpha: 0.15),
+                            ? (isCorrect
+                                  ? fb.success.withValues(alpha: 0.25)
+                                  : fb.danger.withValues(alpha: 0.25))
+                            : fb.highlight.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: isAnswered
-                              ? (isCorrect ? emerald : Colors.redAccent)
-                              : pinkAccent,
+                              ? (isCorrect ? fb.success : fb.danger)
+                              : fb.highlight,
                           width: 1.5,
                         ),
                       ),
@@ -93,8 +101,8 @@ class ClozeSentenceCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                           color: isAnswered
-                              ? (isCorrect ? emerald : Colors.redAccent)
-                              : pinkAccent,
+                              ? (isCorrect ? fb.success : fb.danger)
+                              : fb.highlight,
                         ),
                       ),
                     ),

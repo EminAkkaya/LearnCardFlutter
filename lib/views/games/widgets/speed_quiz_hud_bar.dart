@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class SpeedQuizHudBar extends StatelessWidget {
   final int score;
   final int streak;
   final int secondsRemaining;
-
-  static const Color amberColor = Color(0xFFF59E0B);
 
   const SpeedQuizHudBar({
     super.key,
@@ -16,12 +15,18 @@ class SpeedQuizHudBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final fb = FeedbackColors.of(context);
+    // Wrap: dar ekran / büyük yazıda göstergeler alt satıra iner.
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 8,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.stars_rounded, color: Colors.amber, size: 22),
+            Icon(Icons.stars_rounded, color: fb.warning, size: 22),
             const SizedBox(width: 6),
             Text(
               'Puan: $score',
@@ -30,10 +35,11 @@ class SpeedQuizHudBar extends StatelessWidget {
           ],
         ),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.local_fire_department_rounded,
-              color: streak > 1 ? Colors.orangeAccent : Colors.grey,
+              color: streak > 1 ? fb.warning : Colors.grey,
               size: 22,
             ),
             const SizedBox(width: 4),
@@ -42,7 +48,7 @@ class SpeedQuizHudBar extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                color: streak > 1 ? Colors.orangeAccent : Colors.grey,
+                color: streak > 1 ? fb.warning : Colors.grey,
               ),
             ),
           ],
@@ -50,19 +56,22 @@ class SpeedQuizHudBar extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: (secondsRemaining <= 3 ? Colors.redAccent : amberColor).withValues(alpha: 0.15),
+            color: (secondsRemaining <= 3 ? fb.danger : fb.warning).withValues(
+              alpha: 0.15,
+            ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: secondsRemaining <= 3 ? Colors.redAccent : amberColor,
+              color: secondsRemaining <= 3 ? fb.danger : fb.warning,
               width: 1.5,
             ),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.timer_outlined,
                 size: 16,
-                color: secondsRemaining <= 3 ? Colors.redAccent : amberColor,
+                color: secondsRemaining <= 3 ? fb.danger : fb.warning,
               ),
               const SizedBox(width: 4),
               Text(
@@ -70,7 +79,7 @@ class SpeedQuizHudBar extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
-                  color: secondsRemaining <= 3 ? Colors.redAccent : amberColor,
+                  color: secondsRemaining <= 3 ? fb.danger : fb.warning,
                 ),
               ),
             ],

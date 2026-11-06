@@ -21,31 +21,46 @@ class ScrambleClueCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.translate_rounded, color: indigoColor, size: 20),
+                const Icon(
+                  Icons.translate_rounded,
+                  color: indigoColor,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
-                Text(
-                  'TÜRKÇE ANLAMI',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.1,
-                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                Flexible(
+                  child: Text(
+                    'TÜRKÇE ANLAMI',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(
+                        alpha: 0.6,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 6),
             Text(
-              card.trTranslation.isNotEmpty ? card.trTranslation : card.definition,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              card.trTranslation.isNotEmpty
+                  ? card.trTranslation
+                  : card.definition,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            if (card.definition.isNotEmpty && card.trTranslation.isNotEmpty) ...[
+            if (card.definition.isNotEmpty &&
+                card.trTranslation.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
                 card.definition,
                 style: TextStyle(
                   fontSize: 13,
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                  color: theme.textTheme.bodyMedium?.color?.withValues(
+                    alpha: 0.7,
+                  ),
                 ),
               ),
             ],

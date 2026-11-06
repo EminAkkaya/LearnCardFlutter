@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/flashcard_model.dart';
 import 'game_mistakes_card.dart';
 
@@ -8,9 +9,6 @@ class ClozeSummaryView extends StatelessWidget {
   final int score;
   final VoidCallback onRestart;
   final List<FlashcardModel> missedCards;
-
-  static const Color emerald = Color(0xFF10B981);
-  static const Color pinkAccent = Color(0xFFEC4899);
 
   const ClozeSummaryView({
     super.key,
@@ -24,7 +22,10 @@ class ClozeSummaryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final double accuracy = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+    final fb = FeedbackColors.of(context);
+    final double accuracy = totalQuestions > 0
+        ? (correctCount / totalQuestions) * 100
+        : 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Alıştırma Tamamlandı')),
@@ -37,13 +38,13 @@ class ClozeSummaryView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: pinkAccent.withValues(alpha: 0.15),
+                  color: fb.highlight.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.auto_stories_rounded,
                   size: 72,
-                  color: pinkAccent,
+                  color: fb.highlight,
                 ),
               ),
               const SizedBox(height: 20),
@@ -61,33 +62,61 @@ class ClozeSummaryView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          const Text('Toplam Puan', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$score',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.amber),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('Başarı Oranı', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '%${accuracy.toStringAsFixed(0)}',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: emerald),
-                          ),
-                        ],
-                      ),
-                    ],
+                  // Wrap: dar ekran / büyük yazıda istatistikler alt satıra iner.
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      spacing: 16,
+                      runSpacing: 12,
+                      children: [
+                        Column(
+                          children: [
+                            const Text(
+                              'Toplam Puan',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$score',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: fb.warning,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Başarı Oranı',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '%${accuracy.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: fb.success,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -104,8 +133,8 @@ class ClozeSummaryView extends StatelessWidget {
                   icon: const Icon(Icons.replay_rounded),
                   label: const Text('Yeni Cümlelerle Tekrar Et'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: pinkAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: fb.highlight,
+                    foregroundColor: fb.onAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

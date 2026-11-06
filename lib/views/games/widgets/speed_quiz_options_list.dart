@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/games/speed_quiz_question_model.dart';
 
 class SpeedQuizOptionsList extends StatelessWidget {
@@ -6,8 +7,6 @@ class SpeedQuizOptionsList extends StatelessWidget {
   final String? selectedOption;
   final bool isAnswered;
   final ValueChanged<String> onOptionSelected;
-
-  static const Color emerald = Color(0xFF10B981);
 
   const SpeedQuizOptionsList({
     super.key,
@@ -20,6 +19,7 @@ class SpeedQuizOptionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
 
     return Column(
       children: question.options.map((option) {
@@ -29,13 +29,13 @@ class SpeedQuizOptionsList extends StatelessWidget {
 
         if (isAnswered) {
           if (option == question.correctAnswer) {
-            btnColor = emerald.withValues(alpha: 0.2);
-            borderColor = emerald;
-            textColor = emerald;
+            btnColor = fb.success.withValues(alpha: 0.2);
+            borderColor = fb.success;
+            textColor = fb.success;
           } else if (option == selectedOption) {
-            btnColor = Colors.redAccent.withValues(alpha: 0.2);
-            borderColor = Colors.redAccent;
-            textColor = Colors.redAccent;
+            btnColor = fb.danger.withValues(alpha: 0.2);
+            borderColor = fb.danger;
+            textColor = fb.danger;
           }
         }
 
@@ -72,9 +72,9 @@ class SpeedQuizOptionsList extends StatelessWidget {
                     ),
                   ),
                   if (isAnswered && option == question.correctAnswer)
-                    const Icon(Icons.check_circle_rounded, color: emerald, size: 20)
+                    Icon(Icons.check_circle_rounded, color: fb.success, size: 20)
                   else if (isAnswered && option == selectedOption)
-                    const Icon(Icons.cancel_rounded, color: Colors.redAccent, size: 20),
+                    Icon(Icons.cancel_rounded, color: fb.danger, size: 20),
                 ],
               ),
             ),

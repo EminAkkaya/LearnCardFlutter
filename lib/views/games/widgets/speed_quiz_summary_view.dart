@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../models/flashcard_model.dart';
 import 'game_mistakes_card.dart';
 
@@ -9,9 +10,6 @@ class SpeedQuizSummaryView extends StatelessWidget {
   final int maxStreak;
   final VoidCallback onRestart;
   final List<FlashcardModel> missedCards;
-
-  static const Color emerald = Color(0xFF10B981);
-  static const Color amberColor = Color(0xFFF59E0B);
 
   const SpeedQuizSummaryView({
     super.key,
@@ -26,7 +24,10 @@ class SpeedQuizSummaryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final double accuracy = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+    final fb = FeedbackColors.of(context);
+    final double accuracy = totalQuestions > 0
+        ? (correctCount / totalQuestions) * 100
+        : 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Test Tamamlandı')),
@@ -39,14 +40,10 @@ class SpeedQuizSummaryView extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: amberColor.withValues(alpha: 0.15),
+                  color: fb.warning.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.timer_rounded,
-                  size: 72,
-                  color: amberColor,
-                ),
+                child: Icon(Icons.timer_rounded, size: 72, color: fb.warning),
               ),
               const SizedBox(height: 20),
               Text(
@@ -63,43 +60,81 @@ class SpeedQuizSummaryView extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          const Text('Toplam Puan', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$score',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amber),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('En Yüksek Kombo', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            'x$maxStreak',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orangeAccent),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('İsabet Oranı', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '%${accuracy.toStringAsFixed(0)}',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: emerald),
-                          ),
-                        ],
-                      ),
-                    ],
+                  // Wrap: dar ekran / büyük yazıda istatistikler alt satıra iner.
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      spacing: 16,
+                      runSpacing: 12,
+                      children: [
+                        Column(
+                          children: [
+                            const Text(
+                              'Toplam Puan',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$score',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: fb.warning,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'En Yüksek Kombo',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'x$maxStreak',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: fb.warning,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'İsabet Oranı',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '%${accuracy.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: fb.success,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -116,8 +151,8 @@ class SpeedQuizSummaryView extends StatelessWidget {
                   icon: const Icon(Icons.replay_rounded),
                   label: const Text('Tekrar Oyna'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: amberColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: fb.warning,
+                    foregroundColor: fb.onAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

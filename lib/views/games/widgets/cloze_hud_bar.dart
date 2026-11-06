@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class ClozeHudBar extends StatelessWidget {
   final int score;
@@ -16,14 +17,18 @@ class ClozeHudBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+                Icon(Icons.stars_rounded, color: fb.warning, size: 20),
                 const SizedBox(width: 6),
                 Text(
                   'Puan: $score',
@@ -36,7 +41,7 @@ class ClozeHudBar extends StatelessWidget {
               icon: Icon(
                 showHint ? Icons.visibility_off_outlined : Icons.lightbulb_outline_rounded,
                 size: 18,
-                color: Colors.amber,
+                color: fb.warning,
               ),
               label: Text(
                 showHint ? 'İpucunu Gizle' : 'İpucu Gör',
@@ -51,16 +56,16 @@ class ClozeHudBar extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.12),
+              color: fb.warning.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
+              border: Border.all(color: fb.warning.withValues(alpha: 0.4)),
             ),
             child: Text(
               'Türkçe Anlamı: $hintText',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.amber,
+                color: fb.warning,
               ),
             ),
           ),

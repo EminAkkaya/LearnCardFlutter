@@ -36,6 +36,7 @@ class FlashcardFrontView extends StatelessWidget {
         const Spacer(),
         Text(
           card.word,
+          softWrap: true,
           style: theme.textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.primary,
@@ -81,9 +82,11 @@ class FlashcardFrontView extends StatelessWidget {
           children: [
             Icon(Icons.touch_app_rounded, size: 18, color: Colors.grey),
             SizedBox(width: 6),
-            Text(
-              'Cevap için karta dokunun',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+            Flexible(
+              child: Text(
+                'Cevap için karta dokunun',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
             ),
           ],
         ),

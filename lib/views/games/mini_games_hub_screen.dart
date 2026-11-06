@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/feedback_colors.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../providers/games/context_cloze_provider.dart';
@@ -46,6 +47,8 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final cardState = ref.watch(flashcardProvider);
     final currentPool = _getCategoryCards(cardState);
     // Her oyun için gerçekten oynanabilir içerik sayısı (ör. tek kelimelik kart,
@@ -86,7 +89,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               subtitle:
                   'Algoritmadan bağımsız, özelleştirilmiş seans ile kartları çalışın',
               badge: 'Serbest Tekrar',
-              badgeColor: const Color(0xFF10B981),
+              badgeColor: fb.success,
               icon: Icons.style_rounded,
               gradientColors: const [Color(0xFF059669), Color(0xFF10B981)],
               minCardsRequired: 1,
@@ -103,7 +106,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               subtitle:
                   'İngilizce kelimeler ile Türkçe karşılıklarını eşleştirin',
               badge: 'Çift Kodlama',
-              badgeColor: const Color(0xFF10B981),
+              badgeColor: fb.success,
               icon: Icons.grid_view_rounded,
               gradientColors: const [Color(0xFF059669), Color(0xFF10B981)],
               minCardsRequired: 3,
@@ -120,7 +123,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               title: '3. Harf Sihirbazı (Yazım)',
               subtitle: 'Karışık harflerden doğru İngilizce kelimeyi oluşturun',
               badge: 'İmlasal Bellek',
-              badgeColor: const Color(0xFF6366F1),
+              badgeColor: isDark ? const Color(0xFF818CF8) : const Color(0xFF4338CA),
               icon: Icons.spellcheck_rounded,
               gradientColors: const [Color(0xFF4F46E5), Color(0xFF6366F1)],
               minCardsRequired: 1,
@@ -138,7 +141,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               subtitle:
                   '10 saniyelik sürede doğru anlamı bularak kombo serisi yapın',
               badge: 'Hızlı Geri Çağırma',
-              badgeColor: const Color(0xFFF59E0B),
+              badgeColor: fb.warning,
               icon: Icons.timer_outlined,
               gradientColors: const [Color(0xFFD97706), Color(0xFFF59E0B)],
               minCardsRequired: 1,
@@ -156,7 +159,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               subtitle:
                   'Örnek cümledeki boşluğa en uygun kelimeyi yerleştirin',
               badge: 'Bağlamsal Öğrenme',
-              badgeColor: const Color(0xFFEC4899),
+              badgeColor: fb.highlight,
               icon: Icons.auto_stories_rounded,
               gradientColors: const [Color(0xFFDB2777), Color(0xFFEC4899)],
               minCardsRequired: 1,

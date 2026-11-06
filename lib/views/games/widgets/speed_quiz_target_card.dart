@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/games/speed_quiz_question_model.dart';
 
 class SpeedQuizTargetCard extends StatelessWidget {
   final SpeedQuizQuestionModel question;
   final bool isAnswered;
-
-  static const Color amberColor = Color(0xFFF59E0B);
 
   const SpeedQuizTargetCard({
     super.key,
@@ -17,6 +16,7 @@ class SpeedQuizTargetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
 
     return Card(
       elevation: 3,
@@ -46,7 +46,7 @@ class SpeedQuizTargetCard extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
-                    color: amberColor,
+                    color: fb.warning,
                   ),
                 ),
                 if (isAnswered && question.card.audioUrl.isNotEmpty)

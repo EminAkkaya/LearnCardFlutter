@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class ScrambleHudRow extends StatelessWidget {
   final int score;
@@ -8,13 +9,18 @@ class ScrambleHudRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
+      runSpacing: 4,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+            Icon(Icons.stars_rounded, color: fb.warning, size: 20),
             const SizedBox(width: 6),
             Text(
               'Puan: $score',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/flashcard_model.dart';
 
@@ -7,8 +8,9 @@ class ScrambleSuccessBanner extends StatelessWidget {
   final bool hasNext;
   final VoidCallback onNext;
 
-  static const Color emerald = Color(0xFF10B981);
   static const Color indigoColor = Color(0xFF6366F1);
+  // indigo-600: beyaz buton metniyle 6.3:1 (indigo-500 yalnız 4.47:1).
+  static const Color indigoFill = Color(0xFF4F46E5);
 
   const ScrambleSuccessBanner({
     super.key,
@@ -19,27 +21,28 @@ class ScrambleSuccessBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     return Column(
       children: [
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: emerald.withValues(alpha: 0.12),
+            color: fb.success.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: emerald.withValues(alpha: 0.4)),
+            border: Border.all(color: fb.success.withValues(alpha: 0.4)),
           ),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: emerald, size: 24),
+                  Icon(Icons.check_circle_rounded, color: fb.success, size: 24),
                   const SizedBox(width: 8),
                   Text(
                     'Harika! Doğru Yazdınız: ${card.word}',
-                    style: const TextStyle(
-                      color: emerald,
+                    style: TextStyle(
+                      color: fb.success,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -75,7 +78,7 @@ class ScrambleSuccessBanner extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: indigoColor,
+              backgroundColor: indigoFill,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../services/srs_service.dart';
 import 'srs_rating_button.dart';
 
 class SRSRatingActionBar extends StatelessWidget {
   final Map<ReviewRating, String> previews;
   final ValueChanged<ReviewRating> onRating;
-
-  static const Color emerald = Color(0xFF10B981);
 
   const SRSRatingActionBar({
     super.key,
@@ -16,6 +15,7 @@ class SRSRatingActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -33,28 +33,28 @@ class SRSRatingActionBar extends StatelessWidget {
             SRSRatingButton(
               label: 'Tekrar',
               days: previews[ReviewRating.again] ?? '',
-              color: Colors.red,
+              color: fb.danger,
               onPressed: () => onRating(ReviewRating.again),
             ),
             const SizedBox(width: 8),
             SRSRatingButton(
               label: 'Zor',
               days: previews[ReviewRating.hard] ?? '',
-              color: Colors.orange,
+              color: fb.warning,
               onPressed: () => onRating(ReviewRating.hard),
             ),
             const SizedBox(width: 8),
             SRSRatingButton(
               label: 'İyi',
               days: previews[ReviewRating.good] ?? '',
-              color: Colors.blue,
+              color: fb.info,
               onPressed: () => onRating(ReviewRating.good),
             ),
             const SizedBox(width: 8),
             SRSRatingButton(
               label: 'Kolay',
               days: previews[ReviewRating.easy] ?? '',
-              color: emerald,
+              color: fb.success,
               onPressed: () => onRating(ReviewRating.easy),
             ),
           ],

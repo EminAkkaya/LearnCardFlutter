@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/flashcard_model.dart';
 import 'deck_card_status_badge.dart';
@@ -18,6 +19,7 @@ class DeckCardListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final fb = FeedbackColors.of(context);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -75,8 +77,8 @@ class DeckCardListItem extends StatelessWidget {
                 if (val == 'edit') onEdit();
                 if (val == 'delete') onDelete();
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(
+              itemBuilder: (_) => [
+                const PopupMenuItem(
                   value: 'edit',
                   child: Row(
                     children: [
@@ -90,9 +92,9 @@ class DeckCardListItem extends StatelessWidget {
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(Icons.delete_rounded, color: Colors.red, size: 20),
-                      SizedBox(width: 8),
-                      Text('Sil', style: TextStyle(color: Colors.red)),
+                      Icon(Icons.delete_rounded, color: fb.danger, size: 20),
+                      const SizedBox(width: 8),
+                      Text('Sil', style: TextStyle(color: fb.danger)),
                     ],
                   ),
                 ),
