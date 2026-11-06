@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+
+class ScrambleControlButtons extends StatelessWidget {
+  final bool isCompleted;
+  final bool hasPlacedLetters;
+  final VoidCallback onClear;
+  final VoidCallback onHint;
+  final VoidCallback onShuffle;
+
+  const ScrambleControlButtons({
+    super.key,
+    required this.isCompleted,
+    required this.hasPlacedLetters,
+    required this.onClear,
+    required this.onHint,
+    required this.onShuffle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isCompleted) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        OutlinedButton.icon(
+          onPressed: hasPlacedLetters ? onClear : null,
+          icon: const Icon(Icons.backspace_outlined, size: 18),
+          label: const Text('Temizle'),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton.icon(
+          onPressed: onShuffle,
+          icon: const Icon(Icons.shuffle_rounded, size: 18),
+          label: const Text('Karıştır'),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton.icon(
+          onPressed: onHint,
+          icon: const Icon(Icons.lightbulb_outline_rounded, size: 18, color: Colors.amber),
+          label: const Text('İpucu'),
+        ),
+      ],
+    );
+  }
+}

@@ -4,6 +4,7 @@ import '../models/flashcard_model.dart';
 import '../services/srs_service.dart';
 import '../services/supabase_service.dart';
 import 'auth_provider.dart';
+import 'stats_provider.dart';
 
 class FlashcardState {
   final List<FlashcardModel> cards;
@@ -60,7 +61,9 @@ class FlashcardState {
 }
 
 class FlashcardNotifier extends StateNotifier<FlashcardState> {
-  FlashcardNotifier([FlashcardState? initialState, bool autoLoad = true])
+  final Ref? _ref;
+
+  FlashcardNotifier([FlashcardState? initialState, bool autoLoad = true, this._ref])
       : super(initialState ?? FlashcardState()) {
     if (autoLoad && initialState == null) {
       loadCards();
@@ -122,6 +125,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
     final updated = [...state.cards, newCard];
     state = state.copyWith(cards: updated);
     await SupabaseService.upsertCard(newCard);
+    _ref?.read(statsProvider.notifier).recordCardAdded();
     return true;
   }
 
@@ -148,6 +152,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
 
     state = state.copyWith(cards: updatedList);
     await SupabaseService.upsertCard(updatedCard);
+    _ref?.read(statsProvider.notifier).recordCardReviewed();
   }
 
   Future<int> bulkAddCards(List<Map<String, String>> newCardsData) async {
@@ -183,6 +188,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       final updatedCards = [...state.cards, ...addedList];
       state = state.copyWith(cards: updatedCards);
       await SupabaseService.saveCardsToSupabase(updatedCards);
+      _ref?.read(statsProvider.notifier).recordCardAdded(addedList.length);
     }
 
     return addedList.length;
@@ -190,7 +196,7 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
 }
 
 final flashcardProvider = StateNotifierProvider<FlashcardNotifier, FlashcardState>((ref) {
-  final notifier = FlashcardNotifier();
+  final notifier = FlashcardNotifier(null, true, ref);
   ref.listen<AppAuthState>(authProvider, (previous, next) {
     final prevUserId = previous?.user?.id;
     final nextUserId = next.user?.id;

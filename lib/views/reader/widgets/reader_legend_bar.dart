@@ -1,32 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../providers/reading_provider.dart';
+import 'reader_legend_item.dart';
 
 class ReaderLegendBar extends StatelessWidget {
   final ReaderThemeColors colors;
 
   const ReaderLegendBar({super.key, required this.colors});
-
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: color.withValues(alpha: 0.9),
-          ),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +16,13 @@ class ReaderLegendBar extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _buildLegendItem(colors.newWordColor, 'Öğrenilmemiş'),
+            ReaderLegendItem(color: colors.newWordColor, label: 'Öğrenilmemiş'),
             const SizedBox(width: 14),
-            _buildLegendItem(colors.learningWordColor, 'Öğrenilmekte'),
+            ReaderLegendItem(color: colors.learningWordColor, label: 'Öğrenilmekte'),
             const SizedBox(width: 14),
-            _buildLegendItem(colors.masteredWordColor, 'Öğrenildi'),
+            ReaderLegendItem(color: colors.masteredWordColor, label: 'Öğrenildi'),
             const SizedBox(width: 14),
-            _buildLegendItem(colors.unaddedWordColor, 'Destede Yok'),
+            ReaderLegendItem(color: colors.unaddedWordColor, label: 'Destede Yok'),
           ],
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/flashcard_model.dart';
+import 'deck_card_status_badge.dart';
 
 class DeckCardListItem extends StatelessWidget {
   final FlashcardModel card;
@@ -14,8 +15,6 @@ class DeckCardListItem extends StatelessWidget {
     required this.onDelete,
   });
 
-  static const Color emerald = Color(0xFF10B981);
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -28,10 +27,7 @@ class DeckCardListItem extends StatelessWidget {
           children: [
             Text(
               card.word,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(width: 8),
             if (card.phonetic.isNotEmpty)
@@ -50,22 +46,17 @@ class DeckCardListItem extends StatelessWidget {
           children: [
             const SizedBox(height: 4),
             Text(
-              card.trTranslation.isNotEmpty
-                  ? card.trTranslation
-                  : card.definition,
+              card.trTranslation.isNotEmpty ? card.trTranslation : card.definition,
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 6),
             Row(
               children: [
-                _buildStatusBadge(card.status),
+                DeckCardStatusBadge(status: card.status),
                 const SizedBox(width: 8),
                 Text(
                   'Tekrar: ${card.repetitions} | Aralık: ${card.interval}g',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
@@ -76,22 +67,16 @@ class DeckCardListItem extends StatelessWidget {
           children: [
             if (card.audioUrl.isNotEmpty)
               IconButton(
-                icon: const Icon(
-                  Icons.volume_up_rounded,
-                  color: Colors.indigo,
-                ),
+                icon: const Icon(Icons.volume_up_rounded, color: Colors.indigo),
                 onPressed: () => AudioHelper.playAudio(card.audioUrl),
               ),
             PopupMenuButton<String>(
               onSelected: (val) {
-                if (val == 'edit') {
-                  onEdit();
-                } else if (val == 'delete') {
-                  onDelete();
-                }
+                if (val == 'edit') onEdit();
+                if (val == 'delete') onDelete();
               },
-              itemBuilder: (ctx) => [
-                const PopupMenuItem(
+              itemBuilder: (_) => const [
+                PopupMenuItem(
                   value: 'edit',
                   child: Row(
                     children: [
@@ -101,49 +86,19 @@ class DeckCardListItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.delete_rounded,
-                        color: Colors.red,
-                        size: 20,
-                      ),
+                      Icon(Icons.delete_rounded, color: Colors.red, size: 20),
                       SizedBox(width: 8),
-                      Text(
-                        'Sil',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                      Text('Sil', style: TextStyle(color: Colors.red)),
                     ],
                   ),
                 ),
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(String status) {
-    Color color = Colors.grey;
-    if (status == 'new') color = Colors.blue;
-    if (status == 'learning') color = Colors.orange;
-    if (status == 'mastered') color = emerald;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          color: color,
         ),
       ),
     );

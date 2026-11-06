@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/utils/audio_helper.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../services/dictionary_service.dart';
+import 'widgets/word_detail_action_button.dart';
+import 'widgets/word_detail_header.dart';
 
 class WordDetailSheet extends ConsumerStatefulWidget {
   final String word;
@@ -22,9 +23,8 @@ class WordDetailSheet extends ConsumerStatefulWidget {
 class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
   bool _isLoading = true;
   WordDefinitionResult? _dictResult;
-  late TextEditingController _trController;
-  late TextEditingController _defController;
-  late TextEditingController _sentenceController;
+  late final TextEditingController _trController;
+  late final TextEditingController _defController;
   bool _isAdding = false;
 
   static const Color emerald = Color(0xFF10B981);
@@ -34,7 +34,6 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
     super.initState();
     _trController = TextEditingController();
     _defController = TextEditingController();
-    _sentenceController = TextEditingController(text: widget.sentenceContext);
     _fetchDetails();
   }
 
@@ -42,7 +41,6 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
   void dispose() {
     _trController.dispose();
     _defController.dispose();
-    _sentenceController.dispose();
     super.dispose();
   }
 
@@ -61,6 +59,31 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _addCardToDeck() async {
+    setState(() => _isAdding = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final nav = Navigator.of(context);
+
+    await ref.read(flashcardProvider.notifier).addCard(
+          word: widget.word,
+          trTranslation: _trController.text,
+          definition: _defController.text,
+          phonetic: _dictResult?.phonetic ?? '',
+          partOfSpeech: _dictResult?.partOfSpeech ?? '',
+          exampleSentence: widget.sentenceContext,
+          audioUrl: _dictResult?.audioUrl ?? '',
+        );
+
+    nav.pop();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('"${widget.word}" desteye eklendi!'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: emerald,
+      ),
+    );
   }
 
   @override
@@ -101,78 +124,15 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
               ),
             ),
             const SizedBox(height: 16),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            widget.word,
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          if (_dictResult?.partOfSpeech.isNotEmpty == true)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                _dictResult!.partOfSpeech,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (_dictResult?.phonetic.isNotEmpty == true)
-                        Text(
-                          _dictResult!.phonetic,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-
-                if (_dictResult?.audioUrl.isNotEmpty == true)
-                  IconButton.filledTonal(
-                    onPressed: () => AudioHelper.playAudio(_dictResult!.audioUrl),
-                    icon: const Icon(Icons.volume_up_rounded),
-                    tooltip: 'Ses Dinle',
-                  ),
-              ],
-            ),
-
+            WordDetailHeader(word: widget.word, dictResult: _dictResult),
             const Divider(height: 24),
-
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24.0),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
+                child: Center(child: CircularProgressIndicator()),
               )
             else ...[
-              Text(
-                'Türkçe Çeviri',
-                style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
+              Text('Türkçe Çeviri', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(
                 controller: _trController,
@@ -180,18 +140,11 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                   hintText: 'Çeviri girin...',
                   filled: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 14),
-
-              Text(
-                'İngilizce Tanım',
-                style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
+              Text('İngilizce Tanım', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(
                 controller: _defController,
@@ -200,19 +153,12 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                   hintText: 'Definition...',
                   filled: true,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 14),
-
               if (widget.sentenceContext.isNotEmpty) ...[
-                Text(
-                  'Cümle İçerisindeki Kullanımı',
-                  style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
+                Text('Cümle İçerisindeki Kullanımı', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -220,70 +166,18 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                     color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(
-                    widget.sentenceContext,
-                    style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
-                  ),
+                  child: Text(widget.sentenceContext, style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic)),
                 ),
                 const SizedBox(height: 16),
               ],
-
               SizedBox(
                 width: double.infinity,
                 height: 48,
-                child: existingCard != null
-                    ? Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: emerald.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: emerald),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.check_circle_rounded, color: emerald),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Destede Var (${existingCard.status.toUpperCase()})',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: emerald,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ElevatedButton.icon(
-                        onPressed: _isAdding
-                            ? null
-                            : () async {
-                                setState(() => _isAdding = true);
-                                final messenger = ScaffoldMessenger.of(context);
-                                final navigator = Navigator.of(context);
-
-                                await ref.read(flashcardProvider.notifier).addCard(
-                                      word: widget.word,
-                                      trTranslation: _trController.text,
-                                      definition: _defController.text,
-                                      phonetic: _dictResult?.phonetic ?? '',
-                                      partOfSpeech: _dictResult?.partOfSpeech ?? '',
-                                      exampleSentence: widget.sentenceContext,
-                                      audioUrl: _dictResult?.audioUrl ?? '',
-                                    );
-
-                                navigator.pop();
-                                messenger.showSnackBar(
-                                  SnackBar(
-                                    content: Text('"${widget.word}" desteye eklendi!'),
-                                    behavior: SnackBarBehavior.floating,
-                                    backgroundColor: emerald,
-                                  ),
-                                );
-                              },
-                        icon: const Icon(Icons.add_rounded),
-                        label: const Text('Desteye Kart Olarak Ekle'),
-                      ),
+                child: WordDetailActionButton(
+                  existingCard: existingCard,
+                  isAdding: _isAdding,
+                  onAdd: _addCardToDeck,
+                ),
               ),
             ],
           ],

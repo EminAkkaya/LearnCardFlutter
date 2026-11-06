@@ -1,34 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/audio_helper.dart';
 import '../../models/flashcard_model.dart';
+import '../../providers/stats_provider.dart';
+import 'widgets/cloze_hud_bar.dart';
+import 'widgets/cloze_options_list.dart';
+import 'widgets/cloze_question_model.dart';
+import 'widgets/cloze_sentence_card.dart';
+import 'widgets/cloze_summary_view.dart';
 
-class _ClozeQuestion {
-  final FlashcardModel card;
-  final String sentenceBefore;
-  final String sentenceAfter;
-  final String correctWord;
-  final List<String> options;
-
-  _ClozeQuestion({
-    required this.card,
-    required this.sentenceBefore,
-    required this.sentenceAfter,
-    required this.correctWord,
-    required this.options,
-  });
-}
-
-class ContextClozeGameScreen extends StatefulWidget {
+class ContextClozeGameScreen extends ConsumerStatefulWidget {
   final List<FlashcardModel> cards;
 
   const ContextClozeGameScreen({super.key, required this.cards});
 
   @override
-  State<ContextClozeGameScreen> createState() => _ContextClozeGameScreenState();
+  ConsumerState<ContextClozeGameScreen> createState() => _ContextClozeGameScreenState();
 }
 
-class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
-  List<_ClozeQuestion> _questions = [];
+class _ContextClozeGameScreenState extends ConsumerState<ContextClozeGameScreen> {
+  List<ClozeQuestionModel> _questions = [];
   int _currentIndex = 0;
 
   String? _selectedOption;
@@ -46,7 +37,7 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
 
   void _prepareQuestions() {
     final List<FlashcardModel> pool = List.from(widget.cards)..shuffle();
-    final List<_ClozeQuestion> list = [];
+    final List<ClozeQuestionModel> list = [];
 
     final List<String> allWords = widget.cards
         .map((c) => c.word.trim().toLowerCase())
@@ -71,7 +62,6 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
       final targetWord = card.word.trim();
       String sentence = card.exampleSentence.trim();
 
-      // If card doesn't have an example sentence, create a context sentence
       if (sentence.isEmpty) {
         if (card.definition.isNotEmpty) {
           sentence = 'It means: ${card.definition}. The key word is $targetWord.';
@@ -80,8 +70,10 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
         }
       }
 
-      // Find target word case-insensitively in sentence
-      final RegExp regExp = RegExp(r'\b' + RegExp.escape(targetWord) + r'(s|ed|ing|ly)?\b', caseSensitive: false);
+      final RegExp regExp = RegExp(
+        r'\b' + RegExp.escape(targetWord) + r'(s|ed|ing|ly)?\b',
+        caseSensitive: false,
+      );
       final match = regExp.firstMatch(sentence);
 
       String before;
@@ -91,13 +83,12 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
         before = sentence.substring(0, match.start);
         after = sentence.substring(match.end);
       } else {
-        // Fallback split
         before = 'In modern contexts, ';
         after = ' plays a vital and noteworthy role.';
       }
 
-      // Pick 3 distractors
-      final distractors = allWords.where((w) => w != targetWord.toLowerCase()).toList()..shuffle();
+      final distractors =
+          allWords.where((w) => w != targetWord.toLowerCase()).toList()..shuffle();
       final List<String> options = [targetWord];
 
       for (final d in distractors) {
@@ -116,7 +107,7 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
 
       options.shuffle();
 
-      list.add(_ClozeQuestion(
+      list.add(ClozeQuestionModel(
         card: card,
         sentenceBefore: before,
         sentenceAfter: after,
@@ -167,9 +158,8 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
         _showHint = false;
       });
     } else {
-      setState(() {
-        _currentIndex++;
-      });
+      ref.read(statsProvider.notifier).recordGameScore(_score);
+      setState(() => _currentIndex++);
     }
   }
 
@@ -185,11 +175,21 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
     }
 
     if (_currentIndex >= _questions.length) {
-      return _buildSummaryScreen(context);
+      return ClozeSummaryView(
+        totalQuestions: _questions.length,
+        correctCount: _correctCount,
+        score: _score,
+        onRestart: () {
+          setState(() {
+            _score = 0;
+            _correctCount = 0;
+            _prepareQuestions();
+          });
+        },
+      );
     }
 
     final q = _questions[_currentIndex];
-    const emerald = Color(0xFF10B981);
     const pinkAccent = Color(0xFFEC4899);
 
     return Scaffold(
@@ -222,233 +222,36 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Progress Bar
             LinearProgressIndicator(
               value: (_currentIndex + 1) / _questions.length,
               color: pinkAccent,
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               minHeight: 4,
             ),
-
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
                 child: Column(
                   children: [
-                    // Score & Streak HUD
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Puan: $_score',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                          ],
-                        ),
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _showHint = !_showHint;
-                            });
-                          },
-                          icon: Icon(
-                            _showHint ? Icons.visibility_off_outlined : Icons.lightbulb_outline_rounded,
-                            size: 18,
-                            color: Colors.amber,
-                          ),
-                          label: Text(
-                            _showHint ? 'İpucunu Gizle' : 'İpucu Gör',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      ],
+                    ClozeHudBar(
+                      score: _score,
+                      showHint: _showHint,
+                      hintText: q.card.trTranslation.isNotEmpty ? q.card.trTranslation : q.card.definition,
+                      onToggleHint: () => setState(() => _showHint = !_showHint),
                     ),
-
-                    if (_showHint) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
-                        ),
-                        child: Text(
-                          'Türkçe Anlamı: ${q.card.trTranslation.isNotEmpty ? q.card.trTranslation : q.card.definition}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.amber,
-                          ),
-                        ),
-                      ),
-                    ],
-
                     const SizedBox(height: 20),
-
-                    // Context Sentence Card with Interactive Blank
-                    Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(22.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: LinearGradient(
-                            colors: [
-                              theme.colorScheme.surface,
-                              theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'CÜMLE BAĞLAMI',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.2,
-                                    color: pinkAccent,
-                                  ),
-                                ),
-                                if (_isAnswered && q.card.audioUrl.isNotEmpty)
-                                  IconButton.filledTonal(
-                                    onPressed: () => AudioHelper.playAudio(q.card.audioUrl),
-                                    icon: const Icon(Icons.volume_up_rounded, size: 20),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Formatted Sentence with Blank
-                            RichText(
-                              text: TextSpan(
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  fontSize: 18,
-                                  height: 1.6,
-                                ),
-                                children: [
-                                  TextSpan(text: q.sentenceBefore),
-                                  WidgetSpan(
-                                    alignment: PlaceholderAlignment.middle,
-                                    child: Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: _isAnswered
-                                            ? (_selectedOption?.toLowerCase() == q.correctWord.toLowerCase()
-                                                ? emerald.withValues(alpha: 0.25)
-                                                : Colors.redAccent.withValues(alpha: 0.25))
-                                            : pinkAccent.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: _isAnswered
-                                              ? (_selectedOption?.toLowerCase() == q.correctWord.toLowerCase()
-                                                  ? emerald
-                                                  : Colors.redAccent)
-                                              : pinkAccent,
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        _isAnswered ? q.correctWord : ' _____ ',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: _isAnswered
-                                              ? (_selectedOption?.toLowerCase() == q.correctWord.toLowerCase()
-                                                  ? emerald
-                                                  : Colors.redAccent)
-                                              : pinkAccent,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  TextSpan(text: q.sentenceAfter),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    ClozeSentenceCard(
+                      question: q,
+                      isAnswered: _isAnswered,
+                      selectedOption: _selectedOption,
                     ),
-
                     const SizedBox(height: 28),
-
-                    // Options Grid
-                    ...q.options.map((option) {
-                      Color btnColor = theme.colorScheme.surface;
-                      Color borderColor = theme.dividerColor.withValues(alpha: 0.5);
-                      Color textColor = theme.textTheme.bodyLarge?.color ?? Colors.white;
-
-                      if (_isAnswered) {
-                        if (option.toLowerCase() == q.correctWord.toLowerCase()) {
-                          btnColor = emerald.withValues(alpha: 0.2);
-                          borderColor = emerald;
-                          textColor = emerald;
-                        } else if (option == _selectedOption) {
-                          btnColor = Colors.redAccent.withValues(alpha: 0.2);
-                          borderColor = Colors.redAccent;
-                          textColor = Colors.redAccent;
-                        }
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isAnswered ? null : () => _onOptionSelected(option),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: btnColor,
-                              foregroundColor: textColor,
-                              elevation: 1,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: BorderSide(
-                                  color: borderColor,
-                                  width: (_isAnswered && (option.toLowerCase() == q.correctWord.toLowerCase() || option == _selectedOption)) ? 2 : 1,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    option,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: textColor,
-                                    ),
-                                  ),
-                                ),
-                                if (_isAnswered && option.toLowerCase() == q.correctWord.toLowerCase())
-                                  const Icon(Icons.check_circle_rounded, color: emerald, size: 20)
-                                else if (_isAnswered && option == _selectedOption)
-                                  const Icon(Icons.cancel_rounded, color: Colors.redAccent, size: 20),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-
+                    ClozeOptionsList(
+                      question: q,
+                      selectedOption: _selectedOption,
+                      isAnswered: _isAnswered,
+                      onOptionSelected: _onOptionSelected,
+                    ),
                     if (_isAnswered) ...[
                       const SizedBox(height: 16),
                       SizedBox(
@@ -464,9 +267,7 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: pinkAccent,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                         ),
                       ),
@@ -476,121 +277,6 @@ class _ContextClozeGameScreenState extends State<ContextClozeGameScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryScreen(BuildContext context) {
-    final theme = Theme.of(context);
-    const pinkAccent = Color(0xFFEC4899);
-    const emerald = Color(0xFF10B981);
-    final double accuracy = _questions.isNotEmpty ? (_correctCount / _questions.length) * 100 : 0;
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Alıştırma Tamamlandı')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: pinkAccent.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.auto_stories_rounded,
-                  size: 72,
-                  color: pinkAccent,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Bağlamsal Pratik Tamamlandı!',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Toplam ${_questions.length} cümleden $_correctCount tanesini başarıyla tamamladınız.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-              const SizedBox(height: 24),
-              Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          const Text('Toplam Puan', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$_score',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.amber),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          const Text('Başarı Oranı', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          const SizedBox(height: 4),
-                          Text(
-                            '%${accuracy.toStringAsFixed(0)}',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: emerald),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _score = 0;
-                      _correctCount = 0;
-                      _prepareQuestions();
-                    });
-                  },
-                  icon: const Icon(Icons.replay_rounded),
-                  label: const Text('Yeni Cümlelerle Tekrar Et'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: pinkAccent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text('Oyun Merkezine Dön'),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

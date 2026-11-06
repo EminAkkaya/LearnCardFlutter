@@ -19,11 +19,13 @@ class SupabaseService {
     {
       'id': 'seed-1',
       'word': 'serendipity',
-      'definition': 'The occurrence and development of events by chance in a happy or beneficial way.',
+      'definition':
+          'The occurrence and development of events by chance in a happy or beneficial way.',
       'tr_translation': 'tesadüf, şans eseri güzel bir şey bulma',
       'phonetic': '/ˌser.ənˈdɪp.ə.ti/',
       'part_of_speech': 'noun',
-      'example_sentence': 'Finding this wonderful book in a second-hand shop was pure serendipity.',
+      'example_sentence':
+          'Finding this wonderful book in a second-hand shop was pure serendipity.',
       'status': 'new',
       'interval': 0,
       'repetitions': 0,
@@ -38,7 +40,8 @@ class SupabaseService {
       'tr_translation': 'gelip geçici, kısa ömürlü',
       'phonetic': '/ɪˈfem.ər.əl/',
       'part_of_speech': 'adjective',
-      'example_sentence': 'Fame in the digital age can often be surprisingly ephemeral.',
+      'example_sentence':
+          'Fame in the digital age can often be surprisingly ephemeral.',
       'status': 'new',
       'interval': 0,
       'repetitions': 0,
@@ -49,11 +52,13 @@ class SupabaseService {
     {
       'id': 'seed-3',
       'word': 'resilient',
-      'definition': 'Able to withstand or recover quickly from difficult conditions.',
+      'definition':
+          'Able to withstand or recover quickly from difficult conditions.',
       'tr_translation': 'dayanıklı, dirençli, esnek',
       'phonetic': '/rɪˈzɪl.jənt/',
       'part_of_speech': 'adjective',
-      'example_sentence': 'The team showed a resilient spirit after their initial setback.',
+      'example_sentence':
+          'The team showed a resilient spirit after their initial setback.',
       'status': 'new',
       'interval': 0,
       'repetitions': 0,
@@ -68,7 +73,8 @@ class SupabaseService {
       'tr_translation': 'her yerde bulunan, yaygın',
       'phonetic': '/juːˈbɪk.wə.təs/',
       'part_of_speech': 'adjective',
-      'example_sentence': 'Smartphones have become ubiquitous in modern daily life.',
+      'example_sentence':
+          'Smartphones have become ubiquitous in modern daily life.',
       'status': 'new',
       'interval': 0,
       'repetitions': 0,
@@ -84,11 +90,15 @@ class SupabaseService {
 
   static Future<List<FlashcardModel>> getSavedCards() async {
     final String? uid = currentUserId;
-    List<FlashcardModel> localCards = await appDatabase.getAllFlashcards(userId: uid);
+    List<FlashcardModel> localCards = await appDatabase.getAllFlashcards(
+      userId: uid,
+    );
 
     // If local DB is empty (first install / cold run), populate with default seed cards
     if (localCards.isEmpty) {
-      final seedList = _seedCards.map((c) => FlashcardModel.fromMap(c).copyWith(userId: uid)).toList();
+      final seedList = _seedCards
+          .map((c) => FlashcardModel.fromMap(c).copyWith(userId: uid))
+          .toList();
       await appDatabase.batchUpsertFlashcards(seedList);
       localCards = seedList;
     }
@@ -111,11 +121,13 @@ class SupabaseService {
           .order('created_at', ascending: true)
           .timeout(const Duration(seconds: 4));
 
-      if (response is List && response.isNotEmpty) {
-        final cloudCards = response.map((row) => FlashcardModel.fromMap(row as Map<String, dynamic>)).toList();
+      if (response.isNotEmpty) {
+        final cloudCards = response
+            .map((row) => FlashcardModel.fromMap(row))
+            .toList();
         await appDatabase.batchUpsertFlashcards(cloudCards);
         return cloudCards;
-      } else if (response is List && response.isEmpty) {
+      } else if (response.isEmpty) {
         // Cloud is empty for this user, seed/upload local cards to cloud in background
         saveCardsToSupabase(localCards).catchError((_) {});
         return localCards;
@@ -129,7 +141,11 @@ class SupabaseService {
 
   static Future<void> saveCardsToSupabase(List<FlashcardModel> cards) async {
     final String? uid = currentUserId;
-    final userCards = cards.map((c) => c.userId == null && uid != null ? c.copyWith(userId: uid) : c).toList();
+    final userCards = cards
+        .map(
+          (c) => c.userId == null && uid != null ? c.copyWith(userId: uid) : c,
+        )
+        .toList();
 
     // 1. Always write to local SQLite database first
     await appDatabase.batchUpsertFlashcards(userCards);
@@ -147,7 +163,9 @@ class SupabaseService {
           .timeout(const Duration(seconds: 4));
     } catch (_) {
       try {
-        final rows = userCards.map((c) => c.toSupabaseRow()..remove('learning_step')).toList();
+        final rows = userCards
+            .map((c) => c.toSupabaseRow()..remove('learning_step'))
+            .toList();
         await client
             .from('flashcards')
             .upsert(rows, onConflict: 'id')
@@ -158,7 +176,9 @@ class SupabaseService {
 
   static Future<void> upsertCard(FlashcardModel card) async {
     final String? uid = currentUserId;
-    final targetCard = (card.userId == null && uid != null) ? card.copyWith(userId: uid) : card;
+    final targetCard = (card.userId == null && uid != null)
+        ? card.copyWith(userId: uid)
+        : card;
 
     // 1. Always write to local SQLite database first
     await appDatabase.upsertFlashcard(targetCard);
@@ -228,9 +248,9 @@ class SupabaseService {
           .order('created_at', ascending: false)
           .timeout(const Duration(seconds: 4));
 
-      if (response is List && response.isNotEmpty) {
+      if (response.isNotEmpty) {
         final readings = response
-            .map((row) => ReadingArticleModel.fromMap(row as Map<String, dynamic>))
+            .map((row) => ReadingArticleModel.fromMap(row))
             .toList();
         await appDatabase.batchUpsertReadingArticles(readings);
         return readings;
@@ -244,7 +264,9 @@ class SupabaseService {
 
   static Future<void> saveReadingArticle(ReadingArticleModel article) async {
     final String? uid = currentUserId;
-    final targetArticle = (article.userId == null && uid != null) ? article.copyWith(userId: uid) : article;
+    final targetArticle = (article.userId == null && uid != null)
+        ? article.copyWith(userId: uid)
+        : article;
 
     // 1. Always write to local SQLite database first
     await appDatabase.upsertReadingArticle(targetArticle);

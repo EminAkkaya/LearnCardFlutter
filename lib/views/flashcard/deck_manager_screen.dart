@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/flashcard_provider.dart';
 import '../games/mini_games_hub_screen.dart';
 import 'widgets/add_edit_card_dialog.dart';
-import 'widgets/deck_card_list_item.dart';
+import 'widgets/deck_cards_list_view.dart';
 import 'widgets/deck_filter_chips.dart';
 import 'widgets/deck_search_bar.dart';
 
@@ -25,9 +25,8 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final cardState = ref.watch(flashcardProvider);
-    final cards = cardState.filteredCards;
+    final notifier = ref.read(flashcardProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,17 +35,15 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
           IconButton(
             icon: const Icon(Icons.sports_esports_rounded),
             tooltip: 'Mini Oyunlar & Alıştırmalar',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MiniGamesHubScreen()),
-              );
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MiniGamesHubScreen()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Kartları Yenile',
-            onPressed: () => ref.read(flashcardProvider.notifier).loadCards(),
+            onPressed: () => notifier.loadCards(),
           ),
         ],
       ),
@@ -64,72 +61,25 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
                 children: [
                   DeckSearchBar(
                     controller: _searchController,
-                    onChanged: (val) => ref
-                        .read(flashcardProvider.notifier)
-                        .setSearchQuery(val),
+                    onChanged: notifier.setSearchQuery,
                     onClear: () {
                       _searchController.clear();
-                      ref
-                          .read(flashcardProvider.notifier)
-                          .setSearchQuery('');
+                      notifier.setSearchQuery('');
                     },
                   ),
                   const SizedBox(height: 12),
                   DeckFilterChips(
                     cardState: cardState,
-                    onSelected: (status) => ref
-                        .read(flashcardProvider.notifier)
-                        .setFilterStatus(status),
+                    onSelected: notifier.setFilterStatus,
                   ),
                 ],
               ),
             ),
           ),
-          if (cardState.isLoading)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (cards.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(
-                child: Text(
-                  'Hiç kart bulunamadı.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                  ),
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.only(
-                left: 16.0,
-                right: 16.0,
-                bottom: 84.0,
-              ),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final card = cards[index];
-                    return DeckCardListItem(
-                      card: card,
-                      onEdit: () => showAddEditCardDialog(
-                        context,
-                        ref,
-                        cardToEdit: card,
-                      ),
-                      onDelete: () => ref
-                          .read(flashcardProvider.notifier)
-                          .deleteCard(card.id),
-                    );
-                  },
-                  childCount: cards.length,
-                ),
-              ),
-            ),
+          DeckCardsListView(
+            cards: cardState.filteredCards,
+            isLoading: cardState.isLoading,
+          ),
         ],
       ),
     );

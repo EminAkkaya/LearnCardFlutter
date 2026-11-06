@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../providers/reading_provider.dart';
+import 'reader_bottom_action_button.dart';
 
 class ReaderBottomBar extends StatelessWidget {
   final ReaderThemeColors colors;
@@ -19,43 +20,10 @@ class ReaderBottomBar extends StatelessWidget {
     required this.onFocusTap,
   });
 
-  Widget _buildBottomAction({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: color,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 4,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       decoration: BoxDecoration(
         color: colors.surface,
         border: Border(
@@ -74,31 +42,31 @@ class ReaderBottomBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildBottomAction(
+          ReaderBottomActionButton(
             icon: Icons.paste_rounded,
             label: 'Yeni Metin',
             color: colors.defaultText,
             onTap: onNewTextTap,
           ),
-          _buildBottomAction(
+          ReaderBottomActionButton(
             icon: Icons.folder_open_rounded,
             label: 'Kayıtlılar',
             color: colors.defaultText,
             onTap: onSavedTap,
           ),
-          _buildBottomAction(
+          ReaderBottomActionButton(
             icon: Icons.palette_outlined,
             label: 'Tema',
             color: colors.defaultText,
             onTap: onThemeTap,
           ),
-          _buildBottomAction(
+          ReaderBottomActionButton(
             icon: Icons.save_outlined,
             label: 'Kaydet',
             color: colors.defaultText,
             onTap: onSaveTap,
           ),
-          _buildBottomAction(
+          ReaderBottomActionButton(
             icon: Icons.fullscreen_rounded,
             label: 'Odak Modu',
             color: colors.defaultText,

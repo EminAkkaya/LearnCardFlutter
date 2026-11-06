@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../providers/flashcard_provider.dart';
+import 'deck_filter_chip_item.dart';
 
 class DeckFilterChips extends StatelessWidget {
   final FlashcardState cardState;
@@ -17,26 +18,42 @@ class DeckFilterChips extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildFilterChip('all', 'Tümü (${cardState.cards.length})'),
+          DeckFilterChipItem(
+            statusKey: 'all',
+            label: 'Tümü (${cardState.cards.length})',
+            isSelected: cardState.filterStatus == 'all',
+            onSelected: onSelected,
+          ),
           const SizedBox(width: 8),
-          _buildFilterChip('due', 'Bugün Tekrar (${cardState.dueCards.length})'),
+          DeckFilterChipItem(
+            statusKey: 'due',
+            label: 'Bugün Tekrar (${cardState.dueCards.length})',
+            isSelected: cardState.filterStatus == 'due',
+            onSelected: onSelected,
+          ),
           const SizedBox(width: 8),
-          _buildFilterChip('new', 'Yeni (${cardState.newCards.length})'),
+          DeckFilterChipItem(
+            statusKey: 'new',
+            label: 'Yeni (${cardState.newCards.length})',
+            isSelected: cardState.filterStatus == 'new',
+            onSelected: onSelected,
+          ),
           const SizedBox(width: 8),
-          _buildFilterChip('learning', 'Öğrenilen (${cardState.learningCards.length})'),
+          DeckFilterChipItem(
+            statusKey: 'learning',
+            label: 'Öğrenilen (${cardState.learningCards.length})',
+            isSelected: cardState.filterStatus == 'learning',
+            onSelected: onSelected,
+          ),
           const SizedBox(width: 8),
-          _buildFilterChip('mastered', 'Öğrenildi (${cardState.masteredCards.length})'),
+          DeckFilterChipItem(
+            statusKey: 'mastered',
+            label: 'Öğrenildi (${cardState.masteredCards.length})',
+            isSelected: cardState.filterStatus == 'mastered',
+            onSelected: onSelected,
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildFilterChip(String key, String label) {
-    final bool isSelected = cardState.filterStatus == key;
-    return FilterChip(
-      selected: isSelected,
-      label: Text(label),
-      onSelected: (_) => onSelected(key),
     );
   }
 }

@@ -3,24 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/text_parser.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../services/dictionary_service.dart';
+import 'widgets/extracted_word_item_card.dart';
+import 'widgets/extracted_words_header.dart';
+import 'widgets/extractor_filters_row.dart';
+import 'widgets/extractor_input_card.dart';
 
 class TextExtractorScreen extends ConsumerStatefulWidget {
   const TextExtractorScreen({super.key});
 
   @override
-  ConsumerState<TextExtractorScreen> createState() => _TextExtractorScreenState();
+  ConsumerState<TextExtractorScreen> createState() =>
+      _TextExtractorScreenState();
 }
 
 class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
   final TextEditingController _textController = TextEditingController();
   bool _filterStopWords = true;
   int _minWordLength = 3;
-
   List<ExtractedWordItem> _extractedWords = [];
   final Set<String> _selectedWords = {};
   bool _isProcessing = false;
 
   static const Color emerald = Color(0xFF10B981);
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
 
   void _extractWords() {
     FocusScope.of(context).unfocus();
@@ -29,7 +39,6 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
       filterStopWords: _filterStopWords,
       minWordLength: _minWordLength,
     );
-
     setState(() {
       _extractedWords = items;
       _selectedWords.clear();
@@ -39,12 +48,13 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
 
   Future<void> _bulkAddToDeck() async {
     if (_selectedWords.isEmpty) return;
-
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _isProcessing = true);
 
     final List<Map<String, String>> newCardsData = [];
-    final targetItems = _extractedWords.where((item) => _selectedWords.contains(item.word)).toList();
+    final targetItems = _extractedWords
+        .where((item) => _selectedWords.contains(item.word))
+        .toList();
 
     for (final item in targetItems) {
       try {
@@ -59,14 +69,12 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
           'sentence': item.sentence,
         });
       } catch (_) {
-        newCardsData.add({
-          'word': item.word,
-          'sentence': item.sentence,
-        });
+        newCardsData.add({'word': item.word, 'sentence': item.sentence});
       }
     }
 
-    final addedCount = await ref.read(flashcardProvider.notifier).bulkAddCards(newCardsData);
+    final addedCount =
+        await ref.read(flashcardProvider.notifier).bulkAddCards(newCardsData);
 
     if (mounted) {
       setState(() => _isProcessing = false);
@@ -82,68 +90,23 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Toplu Kelime Çıkarıcı'),
-      ),
+      appBar: AppBar(title: const Text('Toplu Kelime Çıkarıcı')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'İngilizce Metin Yapıştırın',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _textController,
-              maxLines: 6,
-              decoration: InputDecoration(
-                hintText: 'Makale, ders notu veya herhangi bir İngilizce metin yapıştırın...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                filled: true,
-              ),
-            ),
+            ExtractorInputCard(controller: _textController),
             const SizedBox(height: 14),
-
-            Row(
-              children: [
-                Expanded(
-                  child: FilterChip(
-                    selected: _filterStopWords,
-                    label: const Text('Yaygın Kelimeleri Filtrele (the, a, is...)'),
-                    onSelected: (val) => setState(() => _filterStopWords = val),
-                  ),
-                ),
-              ],
+            ExtractorFiltersRow(
+              filterStopWords: _filterStopWords,
+              minWordLength: _minWordLength,
+              onFilterStopWordsChanged: (v) =>
+                  setState(() => _filterStopWords = v),
+              onMinWordLengthChanged: (v) => setState(() => _minWordLength = v),
             ),
             const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Text(
-                  'Min. Kelime Uzunluğu: $_minWordLength harf',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                Expanded(
-                  child: Slider(
-                    value: _minWordLength.toDouble(),
-                    min: 2,
-                    max: 6,
-                    divisions: 4,
-                    label: '$_minWordLength',
-                    onChanged: (val) => setState(() => _minWordLength = val.toInt()),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -153,90 +116,43 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
                 label: const Text('Kelimeleri Çıkar'),
               ),
             ),
-
             if (_extractedWords.isNotEmpty) ...[
               const Divider(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Çıkarılan Kelimeler (${_selectedWords.length}/${_extractedWords.length})',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_selectedWords.length == _extractedWords.length) {
-                          _selectedWords.clear();
-                        } else {
-                          _selectedWords.addAll(_extractedWords.map((e) => e.word));
-                        }
-                      });
-                    },
-                    child: Text(
-                      _selectedWords.length == _extractedWords.length ? 'Tümünü Kaldır' : 'Tümünü Seç',
-                    ),
-                  ),
-                ],
+              ExtractedWordsHeader(
+                selectedCount: _selectedWords.length,
+                totalCount: _extractedWords.length,
+                onToggleAll: () {
+                  setState(() {
+                    if (_selectedWords.length == _extractedWords.length) {
+                      _selectedWords.clear();
+                    } else {
+                      _selectedWords.addAll(_extractedWords.map((e) => e.word));
+                    }
+                  });
+                },
               ),
               const SizedBox(height: 8),
-
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _extractedWords.length,
-                itemBuilder: (context, index) {
-                  final item = _extractedWords[index];
-                  final isSelected = _selectedWords.contains(item.word);
-
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: CheckboxListTile(
-                      value: isSelected,
-                      onChanged: (val) {
-                        setState(() {
-                          if (val == true) {
-                            _selectedWords.add(item.word);
-                          } else {
-                            _selectedWords.remove(item.word);
-                          }
-                        });
-                      },
-                      title: Row(
-                        children: [
-                          Text(
-                            item.word,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '${item.count}x',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      subtitle: Text(
-                        item.sentence,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
-                      ),
-                    ),
+                itemBuilder: (_, idx) {
+                  final item = _extractedWords[idx];
+                  return ExtractedWordItemCard(
+                    item: item,
+                    isSelected: _selectedWords.contains(item.word),
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == true) {
+                          _selectedWords.add(item.word);
+                        } else {
+                          _selectedWords.remove(item.word);
+                        }
+                      });
+                    },
                   );
                 },
               ),
-
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -247,7 +163,10 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Icon(Icons.library_add_rounded),
                   label: Text(_isProcessing
