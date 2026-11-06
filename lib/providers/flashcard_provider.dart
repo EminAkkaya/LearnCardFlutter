@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../models/flashcard_model.dart';
+import '../services/flashcard_store.dart';
 import '../services/srs_service.dart';
-import '../services/supabase_service.dart';
 import '../services/sync/sync_engine.dart';
 import 'auth_provider.dart';
+import 'load_tracker.dart';
 import 'stats_provider.dart';
 
 class FlashcardState {
@@ -70,25 +72,41 @@ class FlashcardState {
 const Object _keep = Object();
 
 class FlashcardNotifier extends StateNotifier<FlashcardState> {
-  final Ref? _ref;
+  static const String saveFailedMessage =
+      'Değişiklik cihaza kaydedilemedi. Lütfen tekrar dene.';
 
-  FlashcardNotifier([FlashcardState? initialState, bool autoLoad = true, this._ref])
-      : super(initialState ?? FlashcardState()) {
+  final Ref? _ref;
+  final FlashcardStore _store;
+  final LoadTracker<FlashcardModel> _loads = LoadTracker((card) => card.id);
+
+  FlashcardNotifier([
+    FlashcardState? initialState,
+    bool autoLoad = true,
+    this._ref,
+    FlashcardStore? store,
+  ])  : _store = store ?? const FlashcardStore(),
+        super(initialState ?? FlashcardState()) {
     if (autoLoad && initialState == null) {
       loadCards();
     }
   }
 
+  /// Oturum değişimi ve ekran açılışı aynı anda yükleme başlatabilir; yalnız
+  /// en son yükleme durumu yazar ve yükleme sırasındaki düzenlemeler korunur.
   Future<void> loadCards() async {
+    final generation = _loads.begin();
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final loaded = await SupabaseService.getSavedCards();
+      final loaded = await _store.load();
+      if (!mounted || !_loads.isLatest(generation)) return;
       state = state.copyWith(
-        cards: loaded.items,
+        cards: _loads.complete(generation, loaded.items),
         isLoading: false,
         syncError: loaded.sync.errorMessage,
       );
     } catch (e) {
+      if (!mounted || !_loads.isLatest(generation)) return;
+      _loads.fail(generation);
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -96,6 +114,38 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
   void _recordSync(SyncResult result) {
     if (!mounted) return;
     state = state.copyWith(syncError: result.errorMessage);
+  }
+
+  /// İyimser güncellemeyi kalıcılaştırır. Yerel yazma başarısızsa [rollback]
+  /// uygulanır ve hata durumda gösterilir; sessizce yutulmaz.
+  Future<bool> _persist(Future<SyncResult> Function() write, void Function() rollback) async {
+    try {
+      _recordSync(await write());
+      return true;
+    } catch (e) {
+      debugPrint('[flashcards] local write failed: $e');
+      if (mounted) {
+        rollback();
+        state = state.copyWith(error: saveFailedMessage);
+      }
+      return false;
+    }
+  }
+
+  void _putCards(List<FlashcardModel> cards) {
+    final byId = {for (final c in cards) c.id: c};
+    final kept = state.cards.map((c) => byId.remove(c.id) ?? c).toList();
+    state = state.copyWith(cards: [...kept, ...byId.values]);
+    for (final c in cards) {
+      _loads.recordUpsert(c);
+    }
+  }
+
+  void _removeCards(Set<String> ids) {
+    state = state.copyWith(cards: state.cards.where((c) => !ids.contains(c.id)).toList());
+    for (final id in ids) {
+      _loads.recordDelete(id);
+    }
   }
 
   void setFilterStatus(String status) {
@@ -122,9 +172,9 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
     final bool exists = state.cards.any((c) => c.word.toLowerCase() == cleanWord);
     if (exists) return false;
 
-    final String today = DateTime.now().toIso8601String().split('T')[0];
+    final now = DateTime.now();
     final newCard = FlashcardModel(
-      id: 'card_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 6)}',
+      id: 'card_${now.millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 6)}',
       word: cleanWord,
       definition: definition,
       trTranslation: trTranslation,
@@ -136,47 +186,64 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       interval: 0,
       repetitions: 0,
       easeFactor: 2.5,
-      nextReviewDate: today,
-      createdAt: DateTime.now().toIso8601String(),
+      nextReviewDate: SRSService.formatReviewDate(now),
+      createdAt: now.toIso8601String(),
     );
 
-    final updated = [...state.cards, newCard];
-    state = state.copyWith(cards: updated);
-    _recordSync(await SupabaseService.upsertCard(newCard));
+    _putCards([newCard]);
+    final saved = await _persist(
+      () => _store.save([newCard]),
+      () => _removeCards({newCard.id}),
+    );
+    if (!saved) return false;
     _ref?.read(statsProvider.notifier).recordCardAdded();
     return true;
   }
 
   Future<void> updateCard(FlashcardModel updatedCard) async {
-    final updatedList = state.cards.map((c) => c.id == updatedCard.id ? updatedCard : c).toList();
-    state = state.copyWith(cards: updatedList);
-    _recordSync(await SupabaseService.upsertCard(updatedCard));
+    final previous = _findCard(updatedCard.id);
+    _putCards([updatedCard]);
+    await _persist(
+      () => _store.save([updatedCard]),
+      () => previous == null ? _removeCards({updatedCard.id}) : _putCards([previous]),
+    );
   }
 
   Future<void> deleteCard(String id) async {
-    final updatedList = state.cards.where((c) => c.id != id).toList();
-    state = state.copyWith(cards: updatedList);
-    _recordSync(await SupabaseService.deleteCard(id));
+    final previous = _findCard(id);
+    _removeCards({id});
+    await _persist(
+      () => _store.delete(id),
+      () {
+        if (previous != null) _putCards([previous]);
+      },
+    );
   }
 
   Future<void> reviewCard(String id, ReviewRating rating) async {
-    final index = state.cards.indexWhere((c) => c.id == id);
-    if (index == -1) return;
+    final card = _findCard(id);
+    if (card == null) return;
 
-    final card = state.cards[index];
     final updatedCard = SRSService.calculateSRS(card, rating);
-    final updatedList = [...state.cards];
-    updatedList[index] = updatedCard;
+    _putCards([updatedCard]);
+    final saved = await _persist(
+      () => _store.save([updatedCard]),
+      () => _putCards([card]),
+    );
+    if (saved) _ref?.read(statsProvider.notifier).recordCardReviewed();
+  }
 
-    state = state.copyWith(cards: updatedList);
-    _recordSync(await SupabaseService.upsertCard(updatedCard));
-    _ref?.read(statsProvider.notifier).recordCardReviewed();
+  FlashcardModel? _findCard(String id) {
+    for (final c in state.cards) {
+      if (c.id == id) return c;
+    }
+    return null;
   }
 
   Future<int> bulkAddCards(List<Map<String, String>> newCardsData) async {
     final existingWords = state.cards.map((c) => c.word.toLowerCase()).toSet();
     final List<FlashcardModel> addedList = [];
-    final String today = DateTime.now().toIso8601String().split('T')[0];
+    final now = DateTime.now();
 
     for (final item in newCardsData) {
       final String w = item['word']?.trim().toLowerCase() ?? '';
@@ -196,20 +263,22 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
         interval: 0,
         repetitions: 0,
         easeFactor: 2.5,
-        nextReviewDate: today,
-        createdAt: DateTime.now().toIso8601String(),
+        nextReviewDate: SRSService.formatReviewDate(now),
+        createdAt: now.toIso8601String(),
       );
       addedList.add(card);
     }
 
-    if (addedList.isNotEmpty) {
-      final updatedCards = [...state.cards, ...addedList];
-      state = state.copyWith(cards: updatedCards);
-      // Yalnız yeni kartlar yazılır ve gönderilir; tüm deste yeniden yüklenmez.
-      _recordSync(await SupabaseService.saveCardsToSupabase(addedList));
-      _ref?.read(statsProvider.notifier).recordCardAdded(addedList.length);
-    }
+    if (addedList.isEmpty) return 0;
 
+    _putCards(addedList);
+    // Yalnız yeni kartlar yazılır ve gönderilir; tüm deste yeniden yüklenmez.
+    final saved = await _persist(
+      () => _store.save(addedList),
+      () => _removeCards({for (final c in addedList) c.id}),
+    );
+    if (!saved) return 0;
+    _ref?.read(statsProvider.notifier).recordCardAdded(addedList.length);
     return addedList.length;
   }
 }

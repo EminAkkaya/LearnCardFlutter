@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../core/database/app_database.dart';
 import '../models/reading_article_model.dart';
-import '../services/supabase_service.dart';
+import '../services/reading_store.dart';
 import '../services/sync/sync_engine.dart';
 import 'auth_provider.dart';
+import 'load_tracker.dart';
 
 class ReadingState {
   static const String defaultText =
@@ -71,9 +73,17 @@ const Object _sentinel = Object();
 
 class ReadingNotifier extends StateNotifier<ReadingState> {
   final AppDatabase _db;
+  final ReadingStore _store;
+  final LoadTracker<ReadingArticleModel> _loads =
+      LoadTracker((article) => article.id, addNewFirst: true);
 
-  ReadingNotifier([AppDatabase? database, bool autoInit = true])
+  /// Yükleme sürerken kullanıcı başka bir metin/makale seçtiyse, yükleme
+  /// sonunda kayıtlı son seçim geri yüklenmez.
+  bool _selectionChangedDuringLoad = false;
+
+  ReadingNotifier([AppDatabase? database, bool autoInit = true, ReadingStore? store])
       : _db = database ?? appDatabase,
+        _store = store ?? const ReadingStore(),
         super(ReadingState()) {
     if (autoInit) {
       _initNotifier();
@@ -94,43 +104,82 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     } catch (_) {}
   }
 
+  /// Oturum değişimi ve ekran açılışı aynı anda yükleme başlatabilir; yalnız
+  /// en son yükleme durumu yazar ve yükleme sırasındaki düzenlemeler korunur.
   Future<void> loadReadings() async {
+    final generation = _loads.begin();
     state = state.copyWith(isLoading: true);
     try {
-      final loaded = await SupabaseService.getSavedReadings();
-      final articles = loaded.items;
+      final loaded = await _store.load();
+      final restored = await _restoreSelection(loaded.items);
+      if (!mounted || !_loads.isLatest(generation)) return;
 
-      ReadingArticleModel? restoredArticle;
-      String restoredText = state.currentText;
+      final articles = _loads.complete(generation, loaded.items);
+      final keepSelection = _selectionChangedDuringLoad;
+      _selectionChangedDuringLoad = false;
 
-      try {
-        final lastArticleId = await _db.getString('reader_last_article_id');
-        final lastCustomText = await _db.getString('reader_last_custom_text');
-
-        if (lastArticleId != null && lastArticleId.isNotEmpty) {
-          for (final a in articles) {
-            if (a.id == lastArticleId) {
-              restoredArticle = a;
-              restoredText = a.text;
-              break;
-            }
-          }
-        }
-
-        if (restoredArticle == null && lastCustomText != null && lastCustomText.isNotEmpty) {
-          restoredText = lastCustomText;
-        }
-      } catch (_) {}
-
-      state = state.copyWith(
-        articles: articles,
-        selectedArticle: restoredArticle,
-        currentText: restoredText,
-        isLoading: false,
-        syncError: loaded.sync.errorMessage,
-      );
-    } catch (_) {
+      if (keepSelection) {
+        final selectedId = state.selectedArticle?.id;
+        state = state.copyWith(
+          articles: articles,
+          selectedArticle: _byId(articles, selectedId) ?? state.selectedArticle,
+          isLoading: false,
+          syncError: loaded.sync.errorMessage,
+        );
+      } else {
+        state = state.copyWith(
+          articles: articles,
+          selectedArticle: _byId(articles, restored.articleId),
+          currentText: restored.text,
+          isLoading: false,
+          syncError: loaded.sync.errorMessage,
+        );
+      }
+    } catch (e) {
+      if (!mounted || !_loads.isLatest(generation)) return;
+      _loads.fail(generation);
+      _selectionChangedDuringLoad = false;
+      debugPrint('[readings] load failed: $e');
       state = state.copyWith(isLoading: false);
+    }
+  }
+
+  static ReadingArticleModel? _byId(List<ReadingArticleModel> articles, String? id) {
+    if (id == null) return null;
+    for (final a in articles) {
+      if (a.id == id) return a;
+    }
+    return null;
+  }
+
+  /// Kayıtlı son makaleyi veya serbest metni bulur.
+  Future<({String? articleId, String text})> _restoreSelection(
+    List<ReadingArticleModel> articles,
+  ) async {
+    try {
+      final lastArticleId = await _db.getString('reader_last_article_id');
+      final article = _byId(articles, lastArticleId);
+      if (article != null) return (articleId: article.id, text: article.text);
+
+      final lastCustomText = await _db.getString('reader_last_custom_text');
+      if (lastCustomText != null && lastCustomText.isNotEmpty) {
+        return (articleId: null, text: lastCustomText);
+      }
+    } catch (_) {}
+    return (articleId: null, text: state.currentText);
+  }
+
+  void _markSelectionChanged() {
+    if (_loads.isLoading) _selectionChangedDuringLoad = true;
+  }
+
+  /// Yerel yazma hatası yutulmaz: loglanır ve eşitleme hatası olarak gösterilir.
+  Future<void> _persist(Future<SyncResult> Function() write) async {
+    try {
+      _recordSync(await write());
+    } catch (e) {
+      debugPrint('[readings] local write failed: $e');
+      if (mounted) state = state.copyWith(syncError: e.toString());
     }
   }
 
@@ -149,6 +198,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
 
   void updateCurrentText(String text) async {
     final trimmed = text.trim();
+    _markSelectionChanged();
     state = state.copyWith(currentText: trimmed, selectedArticle: null);
     try {
       await _db.removeKey('reader_last_article_id');
@@ -185,6 +235,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
         if (a.folder == trimmed) {
           final updated = a.copyWith(folder: 'Genel');
           moved.add(updated);
+          _loads.recordUpsert(updated);
           return updated;
         }
         return a;
@@ -208,11 +259,12 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
       );
     }
     if (moved.isNotEmpty) {
-      _recordSync(await SupabaseService.saveReadingArticles(moved));
+      await _persist(() => _store.save(moved));
     }
   }
 
   void selectArticle(ReadingArticleModel? article) async {
+    _markSelectionChanged();
     if (article != null) {
       state = state.copyWith(
         selectedArticle: article,
@@ -241,6 +293,8 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     );
 
     final updated = [article, ...state.articles.where((a) => a.id != article.id)];
+    _loads.recordUpsert(article);
+    _markSelectionChanged();
     state = state.copyWith(
       articles: updated,
       selectedArticle: article,
@@ -253,7 +307,7 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     } catch (_) {}
 
     await addCustomFolder(folderName);
-    _recordSync(await SupabaseService.saveReadingArticle(article));
+    await _persist(() => _store.save([article]));
     return article;
   }
 
@@ -263,9 +317,10 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     if (selected?.id == article.id) {
       selected = article;
     }
+    _loads.recordUpsert(article);
     state = state.copyWith(articles: updatedArticles, selectedArticle: selected);
     await addCustomFolder(article.folder);
-    _recordSync(await SupabaseService.saveReadingArticle(article));
+    await _persist(() => _store.save([article]));
   }
 
   Future<void> deleteArticle(String id) async {
@@ -275,13 +330,14 @@ class ReadingNotifier extends StateNotifier<ReadingState> {
     if (wasSelected) {
       selected = null;
     }
+    _loads.recordDelete(id);
     state = state.copyWith(articles: updated, selectedArticle: selected);
     if (wasSelected) {
       try {
         await _db.removeKey('reader_last_article_id');
       } catch (_) {}
     }
-    _recordSync(await SupabaseService.deleteReadingArticle(id));
+    await _persist(() => _store.delete(id));
   }
 
   String get currentTextKey {
