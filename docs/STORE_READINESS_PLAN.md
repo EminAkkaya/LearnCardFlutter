@@ -19,11 +19,11 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **S1 Android release yapılandırması:** `key.properties` tabanlı release imzası (yoksa debug'a düşer), uygulama adı "LearnCard". applicationId kullanıcı onayı bekliyor (soru 1). Minify/targetSdk → S8.
 - [x] **S2 iOS yapılandırması:** display name "LearnCard", `ITSAppUsesNonExemptEncryption=false`. İzin metni gerekmiyor (kamera/konum yok). Bundle id → soru 1; Podfile/PrivacyInfo → S6/S7.
 - [x] **S3 Hesap silme:** (Ayarlar → Hesabı Sil, "SİL" yazarak onay; `supabase/functions/delete-account` Edge Function; sunucu silmezse yerel veriye dokunulmaz) uygulama içinden hesap + veri silme (Play ve App Store zorunlu kılıyor).
-- [~] **S4 Gizlilik:** taslaklar `docs/PRIVACY_POLICY.md`, `docs/DATA_SAFETY.md`, yayın rehberi `docs/RELEASE.md` hazır; kalan: ayarlarda politika linki (URL kullanıcıdan). gizlilik politikası sayfası/bağlantısı ayarlar ekranında; Data Safety / Privacy Nutrition için toplanan veri listesi (`docs/`).
+- [x] **S4 Gizlilik:** taslaklar (`docs/PRIVACY_POLICY.md`, `docs/DATA_SAFETY.md`, `docs/RELEASE.md`) + uygulama içi Ayarlar → Gizlilik Politikası ekranı. Kalan (kullanıcı): politikayı herkese açık bir URL'de yayınla ve mağaza formuna gir.
 - [x] **S5 Supabase config:** (karar: yerel `supabase_config.dart` korunur — kullanıcının dosyasının üzerine yazılmaz; CI'da template'ten secret'larla üretilir, RELEASE.md §1. Supabase yoksa uygulama çevrimdışı modda açılır ve bant gösterir — D11/Q2.) `supabase_config.dart` gitignore'da; release/CI için `--dart-define` tabanlı yapı, anahtar yoksa net hata.
 
 ### P1 — Kalite
-- [ ] **Q1 Oyun mantığı gözden geçirme:** az kartla (<4) davranış, çeldirici kalitesi, tekrar oynanabilirlik, istatistik kaydı, SRS ile etkileşim.
+- [x] **Q1 Oyun mantığı gözden geçirme:** review yapıldı, G1–G9 uygulandı (aşağıda).
 - [x] **Q2 Hata/çevrimdışı davranış:** (ana ekranda senkron/çevrimdışı/kayıt hatası bandı + yeniden dene) ağ hatalarında kullanıcıya geri bildirim, sessiz `catch (_) {}` noktalarının gözden geçirilmesi.
 - [ ] **Q3 Test kapsamı:** SRS, auth, sync, stats için eksik testler.
 - [ ] **Q4 Erişilebilirlik ve küçük ekran:** semantik etiketler, metin ölçekleme, taşma.
@@ -102,3 +102,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
   Riskler: buluttaki eski yerel-saatli tarihler UTC okunursa kartlar ~3 saat geç vadeye girebilir (tek seferlik); `FlashcardState.copyWith` error'ı her değişimde temizlediği için kayıt-hatası bandı kısa görünür; bant gerçek uygulamada denenmedi.
 - 01:55 — G9 tamam (geri al + test), S5 karar notuyla kapandı, Kotlin 2.3.20'ye yükseltildi (release build ile doğrulanacak).
 - 02:00 — S8 tamam, release build doğrulandı. Tema renkleri + küçük ekran (G10/Q4) subagent'ta.
+- 02:01 — S4 tamam (uygulama içi gizlilik ekranı + test). Q1 kapandı.

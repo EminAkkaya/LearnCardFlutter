@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../privacy/privacy_policy_screen.dart';
 
 class AppInfoCard extends StatelessWidget {
   final Color primaryColor;
@@ -20,7 +21,7 @@ class AppInfoCard extends StatelessWidget {
               child: Icon(Icons.touch_app_rounded, color: primaryColor),
             ),
             title: const Text('Uygulama Adı'),
-            subtitle: const Text('LearnCard Mobile'),
+            subtitle: const Text('LearnCard'),
           ),
           const Divider(height: 1),
           ListTile(
@@ -39,6 +40,18 @@ class AppInfoCard extends StatelessWidget {
             ),
             title: const Text('Veri Senkronizasyonu'),
             subtitle: const Text('Supabase Cloud + Drift SQLite'),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: primaryColor.withValues(alpha: 0.15),
+              child: Icon(Icons.privacy_tip_outlined, color: primaryColor),
+            ),
+            title: const Text('Gizlilik Politikası'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+            ),
           ),
         ],
       ),
