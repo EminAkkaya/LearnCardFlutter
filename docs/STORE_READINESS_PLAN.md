@@ -63,10 +63,10 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G2 (P0) Skor yalnız son "İleri"de kaydediliyor:** son cevapta kaydet; yarıda bırakılan oyunu kaydetme ama çift kaydı bayrakla engelle. Word match: game-over gecikmesinde restart → çift kayıt (`word_match_provider.dart` restart'ta `_recorded` bayrağı).
 - [x] **G3 (P0) Hızlı Karar çeldiricileri:** sabit Türkçe fallback cümlelerini kaldır; yeterli çeldirici yoksa (destede <4 farklı anlam) soru sayısını düşür / şık sayısını 3'e indir; TR yoksa definition kullanan kartlar yalnız aynı dildeki anlamlarla eşlensin.
 - [x] **G4 (P1) Cloze:** regex eşleşmeyen kartı atla (sahte şablon yok), eki boşluğun dışında bırak ("walk|ed"); sabit fallback kelimeleri kaldır, <2 soru üretilirse "yetersiz kart" göster.
-- [ ] **G5 (P1) Eşleştirme:** aynı TR metnine sahip kartları tek oyunda kullanma; definition kullanılıyorsa etiket "TANIM"; hata sayısı skordan düşsün; streak çarpanını sınırla.
-- [ ] **G6 (P1) Hub:** kategori boşsa sessizce tüm desteye düşme → uyarı/disabled; oyun başına geçerli kart sayısını kontrol et (scramble tek kelimelik kart sayısı).
+- [x] **G5 (P1) Eşleştirme:** aynı TR metnine sahip kartları tek oyunda kullanma; definition kullanılıyorsa etiket "TANIM"; hata sayısı skordan düşsün; streak çarpanını sınırla.
+- [x] **G6 (P1) Hub:** kategori boşsa sessizce tüm desteye düşme → uyarı/disabled; oyun başına geçerli kart sayısını kontrol et (scramble tek kelimelik kart sayısı).
 - [x] **G7 (P1) Harf Sihirbazı:** "Geç" butonu; ipucu cezası yalnız o kelimenin puanından (önceki kelimeleri silmesin); İ/ı için `toLowerCase` yerine güvenli normalizasyon (Türkçe karakterler tek karo).
-- [ ] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
+- [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
 - [ ] **G9 (P1) Tekrar ekranı:** `flashcard_review_screen.dart:28-33, 56-62` customCards ile gelince bitişte eski due kartlara başa sarma hatası; çıkış onayı (PopScope); son derecelendirmeyi geri al.
 - [ ] **G10 (P2) Erişilebilirlik/tema:** oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
 - [ ] **G11 (P2) Fikirler:** zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
@@ -83,4 +83,5 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 2026-11-07 00:30 — Plan oluşturuldu, refactor main'e merge edildi (`ee0a127`).
 - 2026-11-07 00:55 — R1 review bitti, S1/S2 kısmi, D3 tamam (misafir yalnız userId=null veriyi görür/siler). Sıradaki: G2.
 - 00:36 — G2 (skor son cevapta, tek sefer) ve G3 (sabit çeldiriciler kaldırıldı, aynı tür şıklar) tamam. Sıradaki: D1+D6+D2 senkron.
-- 00:50 — G4 (cloze: ek dışarıda, sahte şablon/kelime yok) ve G7 (Geç butonu, ipucu cezası kelime bazlı, İ düzeltmesi) tamam. D1 senkron subagent'ta.
+- 00:38 — G4 (cloze: ek dışarıda, sahte şablon/kelime yok) ve G7 (Geç butonu, ipucu cezası kelime bazlı, İ düzeltmesi) tamam. D1 senkron subagent'ta.
+- 00:40 — G5 (eşleştirme tekil anlam, TANIM etiketi, çarpan sınırı, hata cezası), G6 (hub boş kategoriye düşmüyor, oyun başına oynanabilir içerik sayılıyor), G8 (seri bonusu ≤100) tamam.

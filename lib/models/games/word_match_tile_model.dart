@@ -5,6 +5,9 @@ class WordMatchTileModel {
   final String cardId;
   final String text;
   final bool isEnglish;
+
+  /// Kutucuğun dil etiketi: EN, TR veya (Türkçe karşılık yoksa) TANIM.
+  final String label;
   final FlashcardModel card;
   final bool isMatched;
   final bool isSelected;
@@ -15,6 +18,7 @@ class WordMatchTileModel {
     required this.cardId,
     required this.text,
     required this.isEnglish,
+    required this.label,
     required this.card,
     this.isMatched = false,
     this.isSelected = false,
@@ -27,6 +31,7 @@ class WordMatchTileModel {
       cardId: cardId,
       text: text,
       isEnglish: isEnglish,
+      label: label,
       card: card,
       isMatched: isMatched ?? this.isMatched,
       isSelected: isSelected ?? this.isSelected,

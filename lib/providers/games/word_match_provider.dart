@@ -6,18 +6,46 @@ import '../../models/games/word_match_tile_model.dart';
 import 'game_callbacks.dart';
 
 const int wordMatchMaxPairs = 6;
+const int wordMatchPairPoints = 100;
+const int wordMatchMaxMultiplier = 3;
+const int wordMatchMistakePenalty = 25;
 
-/// Her kart için bir EN ve bir TR kutucuğu üretip karıştırır.
+String _meaningOf(FlashcardModel c) =>
+    (c.trTranslation.trim().isNotEmpty ? c.trTranslation : c.definition).trim();
+
+/// Her kart için bir EN ve bir anlam kutucuğu üretip karıştırır.
+///
+/// Aynı kelimeye veya aynı anlama sahip ikinci kart oyuna alınmaz; aksi hâlde
+/// ekranda birebir aynı iki kutucuk çıkar ve doğru eşleşme hata sayılır.
 List<WordMatchTileModel> buildWordMatchTiles(List<FlashcardModel> cards) {
-  final selected = (List<FlashcardModel>.from(cards)..shuffle()).take(wordMatchMaxPairs);
+  final seenWords = <String>{};
+  final seenMeanings = <String>{};
+  final selected = <FlashcardModel>[];
+  for (final card in List<FlashcardModel>.from(cards)..shuffle()) {
+    if (selected.length >= wordMatchMaxPairs) break;
+    final word = card.word.trim().toLowerCase();
+    final meaning = _meaningOf(card).toLowerCase();
+    if (word.isEmpty || meaning.isEmpty) continue;
+    if (!seenWords.add(word) || !seenMeanings.add(meaning)) continue;
+    selected.add(card);
+  }
+
   return [
     for (final card in selected) ...[
-      WordMatchTileModel(id: '${card.id}_en', cardId: card.id, text: card.word, isEnglish: true, card: card),
+      WordMatchTileModel(
+        id: '${card.id}_en',
+        cardId: card.id,
+        text: card.word.trim(),
+        isEnglish: true,
+        label: 'EN',
+        card: card,
+      ),
       WordMatchTileModel(
         id: '${card.id}_tr',
         cardId: card.id,
-        text: card.trTranslation.isNotEmpty ? card.trTranslation : card.definition,
+        text: _meaningOf(card),
         isEnglish: false,
+        label: card.trTranslation.trim().isNotEmpty ? 'TR' : 'TANIM',
         card: card,
       ),
     ],
@@ -131,7 +159,7 @@ class WordMatchNotifier extends StateNotifier<WordMatchState> {
       firstSelectedId: () => null,
       matchedPairs: state.matchedPairs + 1,
       streak: streak,
-      score: state.score + 100 * streak,
+      score: state.score + wordMatchPairPoints * streak.clamp(1, wordMatchMaxMultiplier),
     );
 
     if (state.matchedPairs == state.totalPairs) {
@@ -148,6 +176,7 @@ class WordMatchNotifier extends StateNotifier<WordMatchState> {
       isLocked: true,
       mistakes: state.mistakes + 1,
       streak: 0,
+      score: (state.score - wordMatchMistakePenalty).clamp(0, 1 << 30),
     );
     _pending = Timer(_mismatchDelay, () {
       if (!mounted) return;

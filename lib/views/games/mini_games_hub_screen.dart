@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
+import '../../providers/games/context_cloze_provider.dart';
+import '../../providers/games/speed_quiz_provider.dart';
+import '../../providers/games/word_match_provider.dart';
+import '../../providers/games/word_scramble_provider.dart';
 import '../flashcard/widgets/custom_study_bottom_sheet.dart';
 import 'context_cloze_game_screen.dart';
 import 'speed_quiz_game_screen.dart';
@@ -21,20 +25,18 @@ class MiniGamesHubScreen extends ConsumerStatefulWidget {
 class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
   String _selectedCategory = 'all';
 
+  /// Seçili kategorinin kartları. Kategori boşsa sessizce tüm desteye
+  /// düşülmez; oyunlar "yetersiz kart" olarak kapalı görünür.
   List<FlashcardModel> _getCategoryCards(FlashcardState state) {
     switch (_selectedCategory) {
       case 'due':
-        return state.dueCards.isNotEmpty ? state.dueCards : state.cards;
+        return state.dueCards;
       case 'learning':
-        return state.learningCards.isNotEmpty
-            ? state.learningCards
-            : state.cards;
+        return state.learningCards;
       case 'new':
-        return state.newCards.isNotEmpty ? state.newCards : state.cards;
+        return state.newCards;
       case 'mastered':
-        return state.masteredCards.isNotEmpty
-            ? state.masteredCards
-            : state.cards;
+        return state.masteredCards;
       case 'all':
       default:
         return state.cards;
@@ -46,6 +48,12 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
     final theme = Theme.of(context);
     final cardState = ref.watch(flashcardProvider);
     final currentPool = _getCategoryCards(cardState);
+    // Her oyun için gerçekten oynanabilir içerik sayısı (ör. tek kelimelik kart,
+    // yeterli çeldiricisi olan soru).
+    final matchPairs = buildWordMatchTiles(currentPool).length ~/ 2;
+    final scrambleWords = pickScrambleCards(currentPool).length;
+    final quizQuestions = buildSpeedQuizQuestions(currentPool).length;
+    final clozeQuestions = buildClozeQuestions(currentPool).length;
 
     return Scaffold(
       appBar: AppBar(
@@ -99,7 +107,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               icon: Icons.grid_view_rounded,
               gradientColors: const [Color(0xFF059669), Color(0xFF10B981)],
               minCardsRequired: 3,
-              currentCardsCount: currentPool.length,
+              currentCardsCount: matchPairs,
               onPlay: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -116,7 +124,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               icon: Icons.spellcheck_rounded,
               gradientColors: const [Color(0xFF4F46E5), Color(0xFF6366F1)],
               minCardsRequired: 1,
-              currentCardsCount: currentPool.length,
+              currentCardsCount: scrambleWords,
               onPlay: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -133,8 +141,8 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               badgeColor: const Color(0xFFF59E0B),
               icon: Icons.timer_outlined,
               gradientColors: const [Color(0xFFD97706), Color(0xFFF59E0B)],
-              minCardsRequired: 4,
-              currentCardsCount: currentPool.length,
+              minCardsRequired: 1,
+              currentCardsCount: quizQuestions,
               onPlay: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -151,8 +159,8 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
               badgeColor: const Color(0xFFEC4899),
               icon: Icons.auto_stories_rounded,
               gradientColors: const [Color(0xFFDB2777), Color(0xFFEC4899)],
-              minCardsRequired: 2,
-              currentCardsCount: currentPool.length,
+              minCardsRequired: 1,
+              currentCardsCount: clozeQuestions,
               onPlay: () => Navigator.push(
                 context,
                 MaterialPageRoute(

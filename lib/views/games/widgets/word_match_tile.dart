@@ -57,7 +57,7 @@ class WordMatchTile extends StatelessWidget {
                   const Icon(Icons.check_circle_rounded, color: emerald, size: 16)
                 else
                   Text(
-                    tile.isEnglish ? 'EN' : 'TR',
+                    tile.label,
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,

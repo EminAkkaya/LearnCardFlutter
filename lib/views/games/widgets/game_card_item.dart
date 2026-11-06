@@ -111,7 +111,7 @@ class GameCardItem extends StatelessWidget {
                     if (!canPlay) ...[
                       const SizedBox(height: 6),
                       Text(
-                        'En az $minCardsRequired kelime gerekiyor',
+                        'Bu kategoride oynamaya yetecek kart yok',
                         style: const TextStyle(
                           fontSize: 11,
                           color: Colors.redAccent,

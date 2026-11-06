@@ -7,6 +7,7 @@ import 'game_callbacks.dart';
 
 const int speedQuizQuestionSeconds = 10;
 const int speedQuizMaxQuestions = 10;
+const int speedQuizMaxStreakBonus = 100;
 
 const int speedQuizMaxOptions = 4;
 const int speedQuizMinOptions = 3;
@@ -174,7 +175,7 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
     }
 
     _playAudio(q.card.audioUrl);
-    final points = 100 + (state.secondsRemaining * 10) + (state.streak * 20);
+    final points = 100 + (state.secondsRemaining * 10) + (state.streak * 20).clamp(0, speedQuizMaxStreakBonus);
     final streak = state.streak + 1;
     state = state.copyWith(
       selectedOption: () => option,

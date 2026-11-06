@@ -41,6 +41,7 @@ void main() {
     n.tapTile('c2_tr');
     expect(n.state.isLocked, isTrue);
     expect(n.state.mistakes, 1);
+    expect(n.state.score, 0);
 
     n.tapTile('c2_en'); // kilitliyken yok sayılır
     expect(n.state.tiles.where((t) => t.isSelected), hasLength(2));
@@ -65,5 +66,32 @@ void main() {
     expect(recorded, [300]);
     await flushTimers();
     expect(n.state.isGameOver, isTrue);
+  });
+
+  test('aynı anlamlı ikinci kart oyuna alınmaz, tanım etiketi doğru', () {
+    final tiles = buildWordMatchTiles([
+      testCard('a', 'car', 'araba'),
+      testCard('b', 'automobile', 'araba'),
+      testCard('c', 'house', ''),
+    ]);
+    expect(tiles, hasLength(4));
+    expect(tiles.where((t) => t.text == 'araba'), hasLength(1));
+    expect(tiles.firstWhere((t) => t.cardId == 'c' && !t.isEnglish).label, 'TANIM');
+  });
+
+  test('seri çarpanı sınırlıdır, hata puan düşürür', () {
+    final many = WordMatchNotifier(
+      [for (var i = 0; i < 5; i++) testCard('k$i', 'w$i', 'm$i')],
+      playAudio: (_) {},
+      recordScore: (_) {},
+      mismatchDelay: Duration.zero,
+      gameOverDelay: Duration.zero,
+    );
+    for (var i = 0; i < 5; i++) {
+      many.tapTile('k${i}_en');
+      many.tapTile('k${i}_tr');
+    }
+    expect(many.state.score, 100 + 200 + 300 + 300 + 300);
+    many.dispose();
   });
 }
