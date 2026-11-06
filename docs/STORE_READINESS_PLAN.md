@@ -30,7 +30,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 
 ### P2 — Olsa iyi olur
 - [x] **N1 Store listing taslağı:** kısa/uzun açıklama (TR/EN), anahtar kelimeler, ekran görüntüsü listesi (`docs/store_listing.md`).
-- [ ] **N2 Onboarding / ilk açılış deneyimi.**
+- [x] **N2 Onboarding / ilk açılış deneyimi.** (3 sayfa, Atla/Devam/Başla; yalnız oturumsuz ilk kullanıcıya; durum DB'de. Not: güncellemeyle gelen mevcut kullanıcılar bir kez görebilir.)
 - [ ] **N3 Çoklu dil altyapısı (intl) değerlendirmesi.**
 
 ## Review bulguları (R1, 2026-11-07) → görevler
@@ -103,3 +103,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:55 — G9 tamam (geri al + test), S5 karar notuyla kapandı, Kotlin 2.3.20'ye yükseltildi (release build ile doğrulanacak).
 - 02:00 — S8 tamam, release build doğrulandı. Tema renkleri + küçük ekran (G10/Q4) subagent'ta.
 - 02:01 — S4 tamam (uygulama içi gizlilik ekranı + test). Q1 kapandı.
+- 02:02 — N2 tamam (onboarding + test; yükleme/tamamlama yarışı yakalanıp düzeltildi).
