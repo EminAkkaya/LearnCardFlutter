@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
+import 'providers/sync_status_provider.dart';
 import 'providers/theme_provider.dart';
 import 'views/auth/auth_gate.dart';
 
@@ -10,16 +11,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Supabase with the exact project URL & Key
+  var cloudAvailable = true;
   try {
     await Supabase.initialize(
       url: SupabaseConfig.url,
       publishableKey: SupabaseConfig.anonKey,
     );
   } catch (e) {
+    cloudAvailable = false;
     debugPrint('Supabase initialization error: $e');
   }
 
-  runApp(const ProviderScope(child: LearnCardApp()));
+  runApp(ProviderScope(
+    overrides: [cloudAvailableProvider.overrideWithValue(cloudAvailable)],
+    child: const LearnCardApp(),
+  ));
 }
 
 class LearnCardApp extends ConsumerWidget {

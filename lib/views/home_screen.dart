@@ -8,6 +8,7 @@ import 'flashcard/flashcard_review_screen.dart';
 import 'reader/reader_screen.dart';
 import 'stats/stats_overview_screen.dart';
 import 'widgets/home_navigation_bar.dart';
+import 'widgets/sync_status_banner.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -54,7 +55,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       },
       child: Scaffold(
-        body: IndexedStack(index: _currentIndex, children: pages),
+        body: Column(
+          children: [
+            Expanded(child: IndexedStack(index: _currentIndex, children: pages)),
+            if (!(isFocusMode && _currentIndex == 1)) const SyncStatusBanner(),
+          ],
+        ),
         bottomNavigationBar: (isFocusMode && _currentIndex == 1)
             ? null
             : HomeNavigationBar(
