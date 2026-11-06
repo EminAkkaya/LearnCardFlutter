@@ -28,10 +28,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     defaultConfig {
         // Play'de yayından sonra değiştirilemez; nihai kimlik docs/STORE_READINESS_PLAN.md'de onay bekliyor.
         applicationId = "com.learncard.learncard_flutter"
@@ -54,12 +50,22 @@ android {
 
     buildTypes {
         release {
+            // R8 ile kod küçültme ve kullanılmayan kaynakları atma (APK/AAB boyutu).
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 

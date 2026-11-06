@@ -52,7 +52,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **D10 Tarih/saat dilimi:** `srs_service.dart:171` nextReviewDate karışık format → UTC ISO.
 - [x] **D11 Hata görünürlüğü:** flashcard_provider iyimser güncellemede DB hatası yutuluyor; `bulkAddCards` tüm desteyi upsert ediyor (yalnız yenileri gönder); `main.dart` Supabase init hatası sessiz; `resendVerificationOtp` istemci yoksa başarı dönüyor.
 - [x] **D12 signUp mevcut e-posta:** `identities` boşsa "bu e-posta kayıtlı" göster.
-- [ ] **S8 Android:** targetSdk açıkça 35+, release'te `isMinifyEnabled/isShrinkResources` (release build ile doğrulanarak), kullanılmayan bağımlılıklar (`path`, `path_provider`?) `flutter pub deps` ile doğrula/temizle.
+- [x] **S8 Android:** targetSdk/compileSdk 36 (Flutter varsayılanı, APK'dan doğrulandı), R8 minify + shrinkResources açık, Kotlin 2.3.20 + `compilerOptions` DSL, kullanılmayan `path`, `path_provider`, `cupertino_icons` kaldırıldı. `flutter build apk --release` başarılı (64 MB fat APK; AAB ile ABI başına çok daha küçük). **Kalan:** release APK gerçek cihazda açılıp denenmeli (R8 yansıma sorunları yalnız çalışırken görünür). Gradle 9.1 / AGP 9 yükseltme uyarısı var — yayın sonrası.
 - [~] **S9 google_fonts çevrimdışı:** (font dosyası indirmek kullanıcı onayı ister → soru 8; google_fonts ilk çevrimiçi açılıştan sonra önbellekten çalışır, engel değil) fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
 - [x] **SEC1 RLS doğrulama:** (SQL hazır: `docs/supabase_migrations/002_rls_policies.sql`; çalıştırmak ve eski geniş politikaları kaldırmak kullanıcıda) anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
 
@@ -101,3 +101,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:54 — Çekirdek subagent'ı bitti: D5, D8, D10, D11, D12, Q2 (7 commit, 158 test, analyzer temiz). D9: seed id'leri artık benzersiz (sync commit'i).
   Riskler: buluttaki eski yerel-saatli tarihler UTC okunursa kartlar ~3 saat geç vadeye girebilir (tek seferlik); `FlashcardState.copyWith` error'ı her değişimde temizlediği için kayıt-hatası bandı kısa görünür; bant gerçek uygulamada denenmedi.
 - 01:55 — G9 tamam (geri al + test), S5 karar notuyla kapandı, Kotlin 2.3.20'ye yükseltildi (release build ile doğrulanacak).
+- 02:00 — S8 tamam, release build doğrulandı. Tema renkleri + küçük ekran (G10/Q4) subagent'ta.
