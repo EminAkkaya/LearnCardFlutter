@@ -12,6 +12,7 @@ import 'package:learncard_flutter/services/flashcard_store.dart';
 import 'package:learncard_flutter/services/reading_store.dart';
 import 'package:learncard_flutter/services/supabase_service.dart';
 import 'package:learncard_flutter/services/sync/sync_engine.dart';
+import 'package:learncard_flutter/services/srs_service.dart';
 import 'package:sqlite3/open.dart';
 
 FlashcardModel _card(String id, {String word = 'word'}) => FlashcardModel(
@@ -215,5 +216,24 @@ void main() {
       expect(notifier.state.currentText, 'my text');
       notifier.dispose();
     });
+  });
+
+  test('undoLastReview restores the card state before the last rating', () async {
+    final store = _FakeCardStore();
+    final card = _card('u1');
+    final notifier = FlashcardNotifier(FlashcardState(cards: [card]), false, null, store);
+    expect(notifier.canUndoReview, isFalse);
+
+    await notifier.reviewCard('u1', ReviewRating.good);
+    expect(notifier.state.cards.single.status, isNot('new'));
+    expect(notifier.canUndoReview, isTrue);
+
+    expect(await notifier.undoLastReview(), isTrue);
+    final restored = notifier.state.cards.single;
+    expect(restored.status, card.status);
+    expect(restored.interval, card.interval);
+    expect(restored.nextReviewDate, card.nextReviewDate);
+    expect(notifier.canUndoReview, isFalse);
+    expect(await notifier.undoLastReview(), isFalse);
   });
 }

@@ -20,7 +20,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **S2 iOS yapılandırması:** display name "LearnCard", `ITSAppUsesNonExemptEncryption=false`. İzin metni gerekmiyor (kamera/konum yok). Bundle id → soru 1; Podfile/PrivacyInfo → S6/S7.
 - [x] **S3 Hesap silme:** (Ayarlar → Hesabı Sil, "SİL" yazarak onay; `supabase/functions/delete-account` Edge Function; sunucu silmezse yerel veriye dokunulmaz) uygulama içinden hesap + veri silme (Play ve App Store zorunlu kılıyor).
 - [~] **S4 Gizlilik:** taslaklar `docs/PRIVACY_POLICY.md`, `docs/DATA_SAFETY.md`, yayın rehberi `docs/RELEASE.md` hazır; kalan: ayarlarda politika linki (URL kullanıcıdan). gizlilik politikası sayfası/bağlantısı ayarlar ekranında; Data Safety / Privacy Nutrition için toplanan veri listesi (`docs/`).
-- [ ] **S5 Supabase config:** `supabase_config.dart` gitignore'da; release/CI için `--dart-define` tabanlı yapı, anahtar yoksa net hata.
+- [x] **S5 Supabase config:** (karar: yerel `supabase_config.dart` korunur — kullanıcının dosyasının üzerine yazılmaz; CI'da template'ten secret'larla üretilir, RELEASE.md §1. Supabase yoksa uygulama çevrimdışı modda açılır ve bant gösterir — D11/Q2.) `supabase_config.dart` gitignore'da; release/CI için `--dart-define` tabanlı yapı, anahtar yoksa net hata.
 
 ### P1 — Kalite
 - [ ] **Q1 Oyun mantığı gözden geçirme:** az kartla (<4) davranış, çeldirici kalitesi, tekrar oynanabilirlik, istatistik kaydı, SRS ile etkileşim.
@@ -67,7 +67,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G6 (P1) Hub:** kategori boşsa sessizce tüm desteye düşme → uyarı/disabled; oyun başına geçerli kart sayısını kontrol et (scramble tek kelimelik kart sayısı).
 - [x] **G7 (P1) Harf Sihirbazı:** "Geç" butonu; ipucu cezası yalnız o kelimenin puanından (önceki kelimeleri silmesin); İ/ı için `toLowerCase` yerine güvenli normalizasyon (Türkçe karakterler tek karo).
 - [x] **G8 (P1) Hızlı Karar puanı:** seri bonusunu sınırla; süre dolması ayrı sayılsın (özet ekranında).
-- [~] **G9 (P1) Tekrar ekranı:** (başa sarma hatası + çıkış onayı tamam; kalan: son derecelendirmeyi geri al — flashcard_provider'a `undoLastReview` gerekir, D1 sonrası; ekran için widget testi yok) `flashcard_review_screen.dart:28-33, 56-62` customCards ile gelince bitişte eski due kartlara başa sarma hatası; çıkış onayı (PopScope); son derecelendirmeyi geri al.
+- [x] **G9 (P1) Tekrar ekranı:** başa sarma düzeltildi, yarıda çıkış onayı, son derecelendirmeyi geri al (AppBar ↶, `undoLastReview`).
 - [~] **G10 (P2) Erişilebilirlik/tema:** (Semantics: eşleştirme ve harf karoları/slotları tamam; kalan: sabit renkleri temaya bağlama) oyun karolarına `Semantics`, eşleşen karoya ikon, sabit `Colors.white/black` ve dağınık `emerald` sabitlerini tema rengine bağla.
 - [~] **G11 (P2) Fikirler:** (zayıf kartlara ağırlıklı seçim tamam — `practice_order.dart`; kalan: TR→EN yönü) zayıf kartlara (lapses/due) ağırlıklı seçim, oyun sonu kart başına doğru/yanlış özeti + doğruluk yüzdesi, TR→EN yönü.
 
@@ -100,3 +100,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:48 — G11 kısmi: oyunlar zayıf kartları (yeni/öğreniliyor, düşük ease, kısa aralık) daha sık seçiyor.
 - 01:54 — Çekirdek subagent'ı bitti: D5, D8, D10, D11, D12, Q2 (7 commit, 158 test, analyzer temiz). D9: seed id'leri artık benzersiz (sync commit'i).
   Riskler: buluttaki eski yerel-saatli tarihler UTC okunursa kartlar ~3 saat geç vadeye girebilir (tek seferlik); `FlashcardState.copyWith` error'ı her değişimde temizlediği için kayıt-hatası bandı kısa görünür; bant gerçek uygulamada denenmedi.
+- 01:55 — G9 tamam (geri al + test), S5 karar notuyla kapandı, Kotlin 2.3.20'ye yükseltildi (release build ile doğrulanacak).

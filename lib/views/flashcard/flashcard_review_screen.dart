@@ -33,6 +33,21 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
     setState(() => _currentIndex += 1);
   }
 
+  Future<void> _handleUndo() async {
+    if (!widget.isCustomStudy) {
+      final undone = await ref
+          .read(flashcardProvider.notifier)
+          .undoLastReview();
+      if (!undone) return;
+    }
+    if (mounted) setState(() => _currentIndex -= 1);
+  }
+
+  bool get _canUndo =>
+      _currentIndex > 0 &&
+      (widget.isCustomStudy ||
+          ref.read(flashcardProvider.notifier).canUndoReview);
+
   void _handleRestart() async {
     if (widget.isCustomStudy) {
       setState(() => _currentIndex = 0);
@@ -92,6 +107,12 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
           ),
           centerTitle: true,
           actions: [
+            if (_canUndo)
+              IconButton(
+                tooltip: 'Son cevabı geri al',
+                icon: const Icon(Icons.undo_rounded),
+                onPressed: _handleUndo,
+              ),
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: Center(

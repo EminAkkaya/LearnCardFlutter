@@ -79,6 +79,10 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
   final FlashcardStore _store;
   final LoadTracker<FlashcardModel> _loads = LoadTracker((card) => card.id);
 
+  /// Son derecelendirmeden önceki kart; tek adım geri alma için.
+  FlashcardModel? _beforeLastReview;
+  bool get canUndoReview => _beforeLastReview != null;
+
   FlashcardNotifier([
     FlashcardState? initialState,
     bool autoLoad = true,
@@ -230,7 +234,19 @@ class FlashcardNotifier extends StateNotifier<FlashcardState> {
       () => _store.save([updatedCard]),
       () => _putCards([card]),
     );
-    if (saved) _ref?.read(statsProvider.notifier).recordCardReviewed();
+    if (saved) {
+      _beforeLastReview = card;
+      _ref?.read(statsProvider.notifier).recordCardReviewed();
+    }
+  }
+
+  /// Son derecelendirmeyi geri alır: kart önceki SRS durumuna döner.
+  Future<bool> undoLastReview() async {
+    final previous = _beforeLastReview;
+    if (previous == null) return false;
+    _beforeLastReview = null;
+    await updateCard(previous);
+    return true;
   }
 
   FlashcardModel? _findCard(String id) {
