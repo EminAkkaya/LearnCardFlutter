@@ -93,4 +93,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 01:45 — D1/D2/D6/D7 tamam (`60209f1`, şema v3, `lib/services/sync/`, 120 test). **Kullanıcı:** `docs/supabase_migrations/001_sync_columns.sql`'i Supabase'de çalıştır. Kalan risk: SupabaseRemoteStore gerçek Supabase'e karşı denenmedi; provider'lardaki yeni `syncError` UI'da gösterilmiyor (→ Q2).
 - 01:45 — G1 tamam: oyun sonu "Tekrar etmen gerekenler" kartı, tek dokunuşla SRS `again`. Sıradaki: S3 hesap silme.
 - 01:44 — S3 tamam (hesap silme UI + Edge Function + widget testi, 125 test). Sıradaki: D4 auth deep link.
-- 01:50 — D4 tamam (126 test). Gerçek cihazda e-posta bağlantısı denenmedi. Sıradaki: D5, D8-D12, Q2 (syncError UI).
+- 01:45 — D4 tamam (126 test). Gerçek cihazda e-posta bağlantısı denenmedi. Sıradaki: D5, D8-D12, Q2 (syncError UI).
