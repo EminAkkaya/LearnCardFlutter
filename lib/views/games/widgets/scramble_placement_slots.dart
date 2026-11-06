@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'letter_tile_model.dart';
+import '../../../models/games/letter_tile_model.dart';
 
 class ScramblePlacementSlots extends StatelessWidget {
   final int targetLength;

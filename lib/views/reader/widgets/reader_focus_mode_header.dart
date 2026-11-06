@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../models/reader_theme.dart';
 import '../../../providers/reading_provider.dart';
 import 'theme_selector_sheet.dart';
 

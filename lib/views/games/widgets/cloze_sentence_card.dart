@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/audio_helper.dart';
-import 'cloze_question_model.dart';
+import '../../../models/games/cloze_question_model.dart';
 
 class ClozeSentenceCard extends StatelessWidget {
   final ClozeQuestionModel question;

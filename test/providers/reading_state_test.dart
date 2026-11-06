@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learncard_flutter/models/reading_article_model.dart';
+import 'package:learncard_flutter/models/reader_theme.dart';
+import 'package:learncard_flutter/providers/reader_settings_provider.dart';
 import 'package:learncard_flutter/providers/reading_provider.dart';
 
 void main() {
@@ -23,13 +25,11 @@ void main() {
       expect(darkSepia.label, equals('Gece Papirüsü'));
     });
 
-    test('2. ReadingState initial state contains default text, folders, and standard typography', () {
+    test('2. ReadingState initial state contains default text and folders', () {
       final state = ReadingState();
 
       expect(state.currentText, isNotEmpty);
       expect(state.currentText, contains('LearnCard Interactive Reader'));
-      expect(state.fontSize, equals(18.0));
-      expect(state.lineHeight, equals(1.6));
       expect(state.isFocusMode, isFalse);
       expect(state.selectedFolder, equals('Tümü'));
       expect(state.customFolders, containsAll(['Genel', 'Makaleler', 'Hikayeler', 'Haberler']));
@@ -79,6 +79,18 @@ void main() {
       // Clear selectedArticle
       final stateCleared = stateWithArticle.copyWith(selectedArticle: null);
       expect(stateCleared.selectedArticle, isNull);
+    });
+
+    test('5. ReaderSettings defaults and copyWith', () {
+      const settings = ReaderSettings();
+      expect(settings.themeMode, ReaderThemeMode.matteDark);
+      expect(settings.fontSize, 18.0);
+      expect(settings.lineHeight, 1.6);
+
+      final updated = settings.copyWith(themeMode: ReaderThemeMode.papyrus, fontSize: 22);
+      expect(updated.colors.label, 'Papirüs');
+      expect(updated.fontSize, 22);
+      expect(updated.lineHeight, 1.6);
     });
   });
 }

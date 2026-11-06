@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../models/reader_theme.dart';
 import '../../../providers/reading_provider.dart';
 
 class ReaderAppBarTitle extends StatelessWidget {

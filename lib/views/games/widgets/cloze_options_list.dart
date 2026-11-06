@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'cloze_question_model.dart';
+import '../../../models/games/cloze_question_model.dart';
 
 class ClozeOptionsList extends StatelessWidget {
   final ClozeQuestionModel question;

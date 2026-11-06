@@ -1,0 +1,69 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:learncard_flutter/providers/games/word_match_provider.dart';
+import 'game_test_cards.dart';
+
+void main() {
+  late List<int> recorded;
+  late WordMatchNotifier n;
+
+  setUp(() {
+    recorded = [];
+    n = WordMatchNotifier(
+      gameTestCards.take(2).toList(),
+      playAudio: (_) {},
+      recordScore: recorded.add,
+      mismatchDelay: Duration.zero,
+      gameOverDelay: Duration.zero,
+    );
+  });
+
+  tearDown(() => n.dispose());
+
+  Future<void> flushTimers() => Future<void>.delayed(Duration.zero);
+
+  test('her kart için EN ve TR kutucuğu üretilir', () {
+    expect(n.state.tiles, hasLength(4));
+    expect(n.state.totalPairs, 2);
+  });
+
+  test('doğru eşleşme seriyle artan puan verir', () {
+    n.tapTile('c1_en');
+    n.tapTile('c1_tr');
+    expect(n.state.matchedPairs, 1);
+    expect(n.state.score, 100);
+    n.tapTile('c2_tr');
+    n.tapTile('c2_en');
+    expect(n.state.score, 100 + 200);
+  });
+
+  test('yanlış eşleşme kilitler, sonra kutucukları serbest bırakır', () async {
+    n.tapTile('c1_en');
+    n.tapTile('c2_tr');
+    expect(n.state.isLocked, isTrue);
+    expect(n.state.mistakes, 1);
+
+    n.tapTile('c2_en'); // kilitliyken yok sayılır
+    expect(n.state.tiles.where((t) => t.isSelected), hasLength(2));
+
+    await flushTimers();
+    expect(n.state.isLocked, isFalse);
+    expect(n.state.tiles.any((t) => t.isSelected || t.isError), isFalse);
+  });
+
+  test('aynı dildeki iki kutucuk eşleşmez', () async {
+    n.tapTile('c1_en');
+    n.tapTile('c2_en');
+    expect(n.state.matchedPairs, 0);
+    await flushTimers();
+  });
+
+  test('tüm çiftler bulununca skor kaydedilir ve oyun biter', () async {
+    n.tapTile('c1_en');
+    n.tapTile('c1_tr');
+    n.tapTile('c2_en');
+    n.tapTile('c2_tr');
+    expect(recorded, [300]);
+    await flushTimers();
+    expect(n.state.isGameOver, isTrue);
+  });
+}

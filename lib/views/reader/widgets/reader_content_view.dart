@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/text_parser.dart';
 import '../../../providers/flashcard_provider.dart';
+import '../../../models/reader_theme.dart';
+import '../../../providers/reader_settings_provider.dart';
 import '../../../providers/reading_provider.dart';
 import '../word_detail_sheet.dart';
 import 'reader_paragraph.dart';
@@ -11,7 +13,7 @@ class ReaderContentView extends ConsumerStatefulWidget {
   final ScrollController scrollController;
   final ReaderThemeColors colors;
   final bool isFocusMode;
-  final ReadingState readingState;
+  final ReaderSettings settings;
 
   const ReaderContentView({
     super.key,
@@ -19,7 +21,7 @@ class ReaderContentView extends ConsumerStatefulWidget {
     required this.scrollController,
     required this.colors,
     required this.isFocusMode,
-    required this.readingState,
+    required this.settings,
   });
 
   @override
@@ -160,8 +162,8 @@ class _ReaderContentViewState extends ConsumerState<ReaderContentView> {
             cardMap: cardMap,
             colors: widget.colors,
             onWordTap: _openWordSheet,
-            fontSize: widget.readingState.fontSize,
-            lineHeight: widget.readingState.lineHeight,
+            fontSize: widget.settings.fontSize,
+            lineHeight: widget.settings.lineHeight,
           );
         },
       ),

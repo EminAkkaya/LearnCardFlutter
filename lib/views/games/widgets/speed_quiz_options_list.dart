@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'speed_quiz_question_model.dart';
+import '../../../models/games/speed_quiz_question_model.dart';
 
 class SpeedQuizOptionsList extends StatelessWidget {
   final SpeedQuizQuestionModel question;

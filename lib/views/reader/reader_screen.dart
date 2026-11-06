@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/reader_settings_provider.dart';
 import '../../providers/reading_provider.dart';
 import 'dialogs/new_text_dialog.dart';
 import 'dialogs/save_article_dialog.dart';
@@ -49,7 +50,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     final readingState = ref.watch(readingProvider);
     final isFocusMode = readingState.isFocusMode;
-    final themeColors = ReaderThemeColors.fromMode(readingState.themeMode);
+    final settings = ref.watch(readerSettingsProvider);
+    final themeColors = settings.colors;
 
     return Scaffold(
       backgroundColor: themeColors.background,
@@ -76,7 +78,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                 scrollController: _scrollController,
                 colors: themeColors,
                 isFocusMode: isFocusMode,
-                readingState: readingState,
+                settings: settings,
               ),
             ),
             if (!isFocusMode)

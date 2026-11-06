@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/utils/audio_helper.dart';
-import 'speed_quiz_question_model.dart';
+import '../../../models/games/speed_quiz_question_model.dart';
 
 class SpeedQuizTargetCard extends StatelessWidget {
   final SpeedQuizQuestionModel question;

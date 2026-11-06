@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../providers/reading_provider.dart';
+import '../../../models/reader_theme.dart';
 import 'reader_bottom_action_button.dart';
 
 class ReaderBottomBar extends StatelessWidget {

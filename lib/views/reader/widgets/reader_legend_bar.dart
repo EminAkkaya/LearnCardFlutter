@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../providers/reading_provider.dart';
+import '../../../models/reader_theme.dart';
 import 'reader_legend_item.dart';
 
 class ReaderLegendBar extends StatelessWidget {

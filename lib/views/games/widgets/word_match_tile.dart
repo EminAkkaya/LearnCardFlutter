@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'word_match_tile_model.dart';
+import '../../../models/games/word_match_tile_model.dart';
 
 class WordMatchTile extends StatelessWidget {
   final WordMatchTileModel tile;

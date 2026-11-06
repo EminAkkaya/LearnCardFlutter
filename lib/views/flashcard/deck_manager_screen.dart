@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/flashcard_provider.dart';
 import '../games/mini_games_hub_screen.dart';
-import 'widgets/add_edit_card_dialog.dart';
+import 'dialogs/add_edit_card_dialog.dart';
 import 'widgets/deck_cards_list_view.dart';
 import 'widgets/deck_filter_chips.dart';
 import 'widgets/deck_search_bar.dart';
@@ -48,7 +48,7 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showAddEditCardDialog(context, ref),
+        onPressed: () => AddEditCardDialog.show(context, ref),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Yeni Kart'),
       ),

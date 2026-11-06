@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
-import 'add_edit_card_dialog.dart';
+import '../dialogs/add_edit_card_dialog.dart';
 import 'deck_card_list_item.dart';
 
 class DeckCardsListView extends ConsumerWidget {
@@ -49,7 +49,7 @@ class DeckCardsListView extends ConsumerWidget {
             final card = cards[index];
             return DeckCardListItem(
               card: card,
-              onEdit: () => showAddEditCardDialog(
+              onEdit: () => AddEditCardDialog.show(
                 context,
                 ref,
                 cardToEdit: card,

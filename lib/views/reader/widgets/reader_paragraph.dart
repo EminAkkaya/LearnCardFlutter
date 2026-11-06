@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/text_parser.dart';
-import '../../../providers/reading_provider.dart';
+import '../../../models/reader_theme.dart';
 
 class ReaderParagraph extends ConsumerStatefulWidget {
   final String text;

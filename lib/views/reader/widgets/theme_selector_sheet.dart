@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../providers/reading_provider.dart';
+import '../../../models/reader_theme.dart';
+import '../../../providers/reader_settings_provider.dart';
 import 'theme_option_tile.dart';
 import 'theme_slider_control.dart';
 
@@ -23,8 +24,8 @@ class ThemeSelectorSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final readingState = ref.watch(readingProvider);
-    final notifier = ref.read(readingProvider.notifier);
+    final settings = ref.watch(readerSettingsProvider);
+    final notifier = ref.read(readerSettingsProvider.notifier);
 
     return Container(
       constraints: BoxConstraints(
@@ -67,7 +68,7 @@ class ThemeSelectorSheet extends ConsumerWidget {
             ...ReaderThemeMode.values.map((mode) {
               return ThemeOptionTile(
                 mode: mode,
-                isSelected: readingState.themeMode == mode,
+                isSelected: settings.themeMode == mode,
                 onSelect: notifier.setThemeMode,
               );
             }),
@@ -76,8 +77,8 @@ class ThemeSelectorSheet extends ConsumerWidget {
             const SizedBox(height: 8),
             ThemeSliderControl(
               title: 'Yazı Boyutu',
-              badgeText: '${readingState.fontSize.toInt()} pt',
-              value: readingState.fontSize,
+              badgeText: '${settings.fontSize.toInt()} pt',
+              value: settings.fontSize,
               min: 14.0,
               max: 28.0,
               divisions: 14,
@@ -90,8 +91,8 @@ class ThemeSelectorSheet extends ConsumerWidget {
             const SizedBox(height: 12),
             ThemeSliderControl(
               title: 'Satır Aralığı',
-              badgeText: '${readingState.lineHeight.toStringAsFixed(1)}x',
-              value: readingState.lineHeight,
+              badgeText: '${settings.lineHeight.toStringAsFixed(1)}x',
+              value: settings.lineHeight,
               min: 1.2,
               max: 2.4,
               divisions: 12,

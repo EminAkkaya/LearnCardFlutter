@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../providers/reading_provider.dart';
+import '../../../models/reader_theme.dart';
 
 class ThemeOptionTile extends StatelessWidget {
   final ReaderThemeMode mode;

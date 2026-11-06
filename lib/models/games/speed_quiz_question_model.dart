@@ -1,4 +1,4 @@
-import '../../../models/flashcard_model.dart';
+import '../flashcard_model.dart';
 
 class SpeedQuizQuestionModel {
   final FlashcardModel card;

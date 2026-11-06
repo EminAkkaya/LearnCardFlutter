@@ -88,8 +88,10 @@ void main() {
   group('Word Match Game Tests', () {
     testWidgets('2. WordMatchGameScreen renders matching tiles and HUD', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: WordMatchGameScreen(cards: testCards),
+        ProviderScope(
+          child: MaterialApp(
+            home: WordMatchGameScreen(cards: testCards),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -108,8 +110,10 @@ void main() {
   group('Word Scramble Game Tests', () {
     testWidgets('3. WordScrambleGameScreen displays clues, slots, pool and controls', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: WordScrambleGameScreen(cards: testCards),
+        ProviderScope(
+          child: MaterialApp(
+            home: WordScrambleGameScreen(cards: testCards),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -130,8 +134,10 @@ void main() {
   group('Speed Quiz Game Tests', () {
     testWidgets('4. SpeedQuizGameScreen displays target word and 4 multiple choice options', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SpeedQuizGameScreen(cards: testCards),
+        ProviderScope(
+          child: MaterialApp(
+            home: SpeedQuizGameScreen(cards: testCards),
+          ),
         ),
       );
       await tester.pump();
@@ -149,8 +155,10 @@ void main() {
   group('Context Cloze Game Tests', () {
     testWidgets('5. ContextClozeGameScreen renders sentence blank and word options', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: ContextClozeGameScreen(cards: testCards),
+        ProviderScope(
+          child: MaterialApp(
+            home: ContextClozeGameScreen(cards: testCards),
+          ),
         ),
       );
       await tester.pumpAndSettle();
