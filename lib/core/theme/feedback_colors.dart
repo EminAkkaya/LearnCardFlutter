@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 /// Oyun ve tekrar ekranlarındaki geri bildirim renkleri (doğru, yanlış, uyarı...).
 ///
-/// Açık ve koyu tema için ayrı tonlar seçildi; her renk tema yüzeyi
-/// üzerinde metin olarak WCAG AA (>= 4.5:1) kontrastını sağlar:
-/// - Açık (beyaz #FFFFFF üzerinde): success 5.5, danger 6.5, warning 5.0,
-///   highlight 6.0, info 6.7. Aynı renkler dolgu olarak beyaz [onAccent] ile
-///   aynı oranları verir.
-/// - Koyu (#1E293B yüzeyinde): success 5.8, danger 5.3, warning 6.8,
-///   highlight 5.5, info 5.8. Dolgu üzerinde koyu [onAccent] (#0F172A) >= 6.4.
+/// Minimalist Tasarım Sistemi v1.1 semantik çiftleri (`-fg` tonları): her renk kart
+/// yüzeyinde metin olarak ≥ 4.5:1 verir. Açık: success #3B6B38, danger #98432E,
+/// warning #7D550A, info (adaçayı) #486858, highlight (toprak) #8A4F2B.
+/// Koyu (#221C18 üzerinde): success #86B37D, danger #D98770, warning #D4A94A,
+/// info #83A894, highlight #D9A27A. Dolgu üzerinde [onAccent] kullanılır.
+/// Durum göstergesinde renge tek başına güvenilmez: renk + ikon + metin birlikte.
 @immutable
 class FeedbackColors extends ThemeExtension<FeedbackColors> {
   final Color success;
@@ -32,21 +31,21 @@ class FeedbackColors extends ThemeExtension<FeedbackColors> {
   });
 
   static const light = FeedbackColors(
-    success: Color(0xFF047857), // emerald-700
-    danger: Color(0xFFB91C1C), // red-700
-    warning: Color(0xFFB45309), // amber-700
-    info: Color(0xFF1D4ED8), // blue-700
-    highlight: Color(0xFFBE185D), // pink-700
-    onAccent: Colors.white,
+    success: Color(0xFF3B6B38),
+    danger: Color(0xFF98432E),
+    warning: Color(0xFF7D550A),
+    info: Color(0xFF486858),
+    highlight: Color(0xFF8A4F2B),
+    onAccent: Color(0xFFFBFAF7),
   );
 
   static const dark = FeedbackColors(
-    success: Color(0xFF10B981), // emerald-500
-    danger: Color(0xFFF87171), // red-400
-    warning: Color(0xFFF59E0B), // amber-500
-    info: Color(0xFF60A5FA), // blue-400
-    highlight: Color(0xFFF472B6), // pink-400
-    onAccent: Color(0xFF0F172A), // slate-900
+    success: Color(0xFF86B37D),
+    danger: Color(0xFFD98770),
+    warning: Color(0xFFD4A94A),
+    info: Color(0xFF83A894),
+    highlight: Color(0xFFD9A27A),
+    onAccent: Color(0xFF14110F),
   );
 
   /// Temadaki eklentiyi döndürür; eklenti yoksa (ör. testlerde düz

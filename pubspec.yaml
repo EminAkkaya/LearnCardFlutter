@@ -45,6 +45,7 @@ dependencies:
   path_provider: ^2.1.5
   audioplayers: ^6.7.1
   uuid: ^4.6.0
+  lucide_icons_flutter: ^4.0.2
 
 dev_dependencies:
   flutter_test:
@@ -64,19 +65,17 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # Plus Jakarta Sans (SIL OFL 1.1, lisans: assets/fonts/OFL.txt) uygulamaya gömülüdür;
-  # çalışma anında internetten yazı tipi indirilmez.
+  # Inter (SIL OFL 1.1, lisans: assets/fonts/OFL-Inter.txt) uygulamaya gömülüdür;
+  # çalışma anında internetten yazı tipi indirilmez. İtalik, sistemce eğdirilir.
   fonts:
-    - family: PlusJakartaSans
+    - family: Inter
       fonts:
-        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
-        - asset: assets/fonts/PlusJakartaSans-Italic.ttf
-          style: italic
-        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
           weight: 500
-        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+        - asset: assets/fonts/Inter-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
 
   # Çevrimdışı EN->TR sözlük (Wiktionary, CC BY-SA 4.0). Üretim: tool/dictionary/build_en_tr.py

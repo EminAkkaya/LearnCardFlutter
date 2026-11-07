@@ -30,17 +30,17 @@ class ThemeState {
 }
 
 class ThemeNotifier extends StateNotifier<ThemeState> {
-  static const Color defaultPrimary = Color(0xFF6366F1); // Indigo
+  /// Varsayılan vurgu: adaçayı. Seçenekler açık tema tonlarıdır; koyu karşılıkları
+  /// `AppTheme.darkAccentFor` içinde. Hepsi krem yazıyla ≥ 4.5:1 kontrast verir.
+  static const Color defaultPrimary = Color(0xFF4D6B5C);
 
   static const List<AppColorOption> colorOptions = [
-    AppColorOption(name: 'İndigo', color: Color(0xFF6366F1)),
-    AppColorOption(name: 'Okyanus', color: Color(0xFF2563EB)),
-    AppColorOption(name: 'Zümrüt', color: Color(0xFF10B981)),
-    AppColorOption(name: 'Turuncu', color: Color(0xFFF97316)),
-    AppColorOption(name: 'Gül', color: Color(0xFFEC4899)),
-    AppColorOption(name: 'Asil Mor', color: Color(0xFF8B5CF6)),
-    AppColorOption(name: 'Camgöbeği', color: Color(0xFF06B6D4)),
-    AppColorOption(name: 'Kırmızı', color: Color(0xFFEF4444)),
+    AppColorOption(name: 'Adaçayı', color: Color(0xFF4D6B5C)),
+    AppColorOption(name: 'Kiremit', color: Color(0xFF98432E)),
+    AppColorOption(name: 'Okyanus', color: Color(0xFF3F5F7A)),
+    AppColorOption(name: 'Erik', color: Color(0xFF6B4A6E)),
+    AppColorOption(name: 'Hardal', color: Color(0xFF7D550A)),
+    AppColorOption(name: 'Toprak', color: Color(0xFF6F5340)),
   ];
 
   final AppDatabase _db;
@@ -48,7 +48,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   ThemeNotifier([AppDatabase? database])
       : _db = database ?? appDatabase,
         super(const ThemeState(
-          themeMode: ThemeMode.dark,
+          themeMode: ThemeMode.system,
           primaryColor: defaultPrimary,
         )) {
     _loadTheme();
@@ -61,17 +61,16 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     final String? isDarkStr = await _db.getString(_prefThemeKey);
     final int? colorValue = await _db.getInt(_prefColorKey);
 
-    ThemeMode mode = ThemeMode.dark;
+    ThemeMode mode = ThemeMode.system;
     if (isDarkStr == 'light') {
       mode = ThemeMode.light;
-    } else if (isDarkStr == 'system') {
-      mode = ThemeMode.system;
-    } else {
+    } else if (isDarkStr == 'dark') {
       mode = ThemeMode.dark;
     }
 
+    // Eski paletten (indigo vb.) kalan seçim yeni tasarımda yok: varsayılana dön.
     Color color = defaultPrimary;
-    if (colorValue != null) {
+    if (colorValue != null && colorOptions.any((o) => o.color.toARGB32() == colorValue)) {
       color = Color(colorValue);
     }
 

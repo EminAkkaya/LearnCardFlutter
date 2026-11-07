@@ -8,10 +8,11 @@ void main() {
       final options = ThemeNotifier.colorOptions;
 
       expect(options, isNotEmpty);
-      expect(options.length, greaterThanOrEqualTo(8));
+      expect(options.length, greaterThanOrEqualTo(6));
 
       final names = options.map((o) => o.name).toList();
-      expect(names, containsAll(['İndigo', 'Okyanus', 'Zümrüt', 'Turuncu', 'Gül', 'Asil Mor', 'Camgöbeği', 'Kırmızı']));
+      expect(names, containsAll(['Adaçayı', 'Kiremit', 'Okyanus', 'Erik', 'Hardal', 'Toprak']));
+      expect(options.first.color, ThemeNotifier.defaultPrimary);
 
       // Every option must have an opaque distinct color
       for (final option in options) {

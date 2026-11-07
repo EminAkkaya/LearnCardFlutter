@@ -15,6 +15,7 @@ import 'package:learncard_flutter/views/games/widgets/speed_quiz_summary_view.da
 import 'package:learncard_flutter/views/games/widgets/word_match_game_over_view.dart';
 import 'package:learncard_flutter/views/games/word_match_game_screen.dart';
 import 'package:learncard_flutter/views/games/word_scramble_game_screen.dart';
+import 'package:learncard_flutter/core/theme/app_palette.dart';
 
 /// Küçük ekran (320x568) + büyük yazı (1.5x) altında oyun ve tekrar
 /// ekranlarının taşma (RenderFlex overflow) üretmediğini doğrular.
@@ -230,9 +231,22 @@ void main() {
     });
   }
 
-  test('FeedbackColors açık/koyu tonları AA için seçilen değerler', () {
-    expect(FeedbackColors.light.success, const Color(0xFF047857));
-    expect(FeedbackColors.dark.success, const Color(0xFF10B981));
+  test('FeedbackColors tonları kart yüzeyinde metin olarak AA (>= 4.5:1)', () {
+    double contrast(Color a, Color b) {
+      final la = a.computeLuminance(), lb = b.computeLuminance();
+      return ((la > lb ? la : lb) + 0.05) / ((la > lb ? lb : la) + 0.05);
+    }
+
+    for (final (fb, surface) in [
+      (FeedbackColors.light, AppPalette.light.card),
+      (FeedbackColors.light, AppPalette.light.bg),
+      (FeedbackColors.dark, AppPalette.dark.card),
+      (FeedbackColors.dark, AppPalette.dark.bg),
+    ]) {
+      for (final c in [fb.success, fb.danger, fb.warning, fb.info, fb.highlight]) {
+        expect(contrast(c, surface), greaterThanOrEqualTo(4.5), reason: '$c / $surface');
+      }
+    }
   });
 
   testWidgets('FeedbackColors.of eklentisiz MaterialApp içinde çalışır',
