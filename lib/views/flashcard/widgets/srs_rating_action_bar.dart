@@ -34,7 +34,7 @@ class SRSRatingActionBar extends StatelessWidget {
         Row(
           children: [
             SRSRatingButton(
-              label: 'Tekrar',
+              label: 'Yine',
               days: previews[ReviewRating.again] ?? '',
               color: fb.danger,
               onPressed: () => onRating(ReviewRating.again),

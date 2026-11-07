@@ -94,7 +94,7 @@ class DeckDistributionCard extends StatelessWidget {
                   color: fb.success,
                 ),
                 DeckDistributionLegendTile(
-                  label: 'Öğrenilen',
+                  label: 'Öğrenilmekte',
                   value: '$learning (%${(learningPct * 100).toInt()})',
                   color: fb.warning,
                 ),

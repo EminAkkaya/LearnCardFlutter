@@ -88,7 +88,7 @@ void main() {
       expect(find.text('Deste Durum Dağılımı'), findsOneWidget);
       expect(find.text('Toplam 3 Kelime'), findsOneWidget);
       expect(find.text('Öğrenildi'), findsOneWidget);
-      expect(find.text('Öğrenilen'), findsOneWidget);
+      expect(find.text('Öğrenilmekte'), findsOneWidget);
 
       // Minigames stats
       expect(find.text('Oyun Başarıları & Skor'), findsOneWidget);

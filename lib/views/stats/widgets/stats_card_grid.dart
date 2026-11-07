@@ -49,7 +49,7 @@ class StatsCardGrid extends StatelessWidget {
               onTap: () => onNavigateToTab?.call(0),
             ),
             StatsMetricCard(
-              title: 'Öğrenilen',
+              title: 'Öğrenilmekte',
               value: '$learningCount',
               icon: LucideIcons.repeat,
               color: fb.warning,

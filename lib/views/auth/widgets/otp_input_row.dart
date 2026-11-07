@@ -30,9 +30,15 @@ class OtpInputRow extends StatelessWidget {
         return SizedBox(
           width: 48,
           height: 58,
-          child: KeyboardListener(
-            focusNode: FocusNode(),
-            onKeyEvent: (event) => onKeyEvent(index, event),
+          // Kendi odak düğümü olmayan Focus: alttaki alanın tuş olaylarını dinler,
+          // her build'de sızan bir FocusNode yaratmaz.
+          child: Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onKeyEvent: (_, event) {
+              onKeyEvent(index, event);
+              return KeyEventResult.ignored;
+            },
             child: TextFormField(
               controller: controllers[index],
               focusNode: focusNodes[index],

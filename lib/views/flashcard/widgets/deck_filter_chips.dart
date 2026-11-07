@@ -41,7 +41,7 @@ class DeckFilterChips extends StatelessWidget {
           const SizedBox(width: 8),
           DeckFilterChipItem(
             statusKey: 'learning',
-            label: 'Öğrenilen (${cardState.learningCards.length})',
+            label: 'Öğrenilmekte (${cardState.learningCards.length})',
             isSelected: cardState.filterStatus == 'learning',
             onSelected: onSelected,
           ),

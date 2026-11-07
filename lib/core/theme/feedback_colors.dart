@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 ///
 /// Minimalist Tasarım Sistemi v1.1 semantik çiftleri (`-fg` tonları): her renk kart
 /// yüzeyinde metin olarak ≥ 4.5:1 verir. Açık: success #3B6B38, danger #98432E,
-/// warning #7D550A, info (adaçayı) #486858, highlight (toprak) #8A4F2B.
+/// warning #7D550A, info (okyanus) #3F5F7A, highlight (toprak) #8A4F2B.
 /// Koyu (#221C18 üzerinde): success #86B37D, danger #D98770, warning #D4A94A,
-/// info #83A894, highlight #D9A27A. Dolgu üzerinde [onAccent] kullanılır.
+/// info #8FAFC8, highlight #D9A27A. Dolgu üzerinde [onAccent] kullanılır.
 /// Durum göstergesinde renge tek başına güvenilmez: renk + ikon + metin birlikte.
 @immutable
 class FeedbackColors extends ThemeExtension<FeedbackColors> {
@@ -34,7 +34,7 @@ class FeedbackColors extends ThemeExtension<FeedbackColors> {
     success: Color(0xFF3B6B38),
     danger: Color(0xFF98432E),
     warning: Color(0xFF7D550A),
-    info: Color(0xFF486858),
+    info: Color(0xFF3F5F7A),
     highlight: Color(0xFF8A4F2B),
     onAccent: Color(0xFFFBFAF7),
   );
@@ -43,7 +43,7 @@ class FeedbackColors extends ThemeExtension<FeedbackColors> {
     success: Color(0xFF86B37D),
     danger: Color(0xFFD98770),
     warning: Color(0xFFD4A94A),
-    info: Color(0xFF83A894),
+    info: Color(0xFF8FAFC8),
     highlight: Color(0xFFD9A27A),
     onAccent: Color(0xFF14110F),
   );

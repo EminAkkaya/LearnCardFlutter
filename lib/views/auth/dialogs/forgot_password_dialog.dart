@@ -42,18 +42,22 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
       return;
     }
 
+    // Diyalog kapanınca bu widget'ın context'i ve ref'i geçersiz olur; sonucu
+    // gösterebilmek için ekranın messenger'ını ve provider container'ını önceden al.
+    final messenger = ScaffoldMessenger.of(context);
+    final container = ProviderScope.containerOf(context, listen: false);
     Navigator.pop(context);
-    final success = await ref.read(authProvider.notifier).resetPassword(email);
-    if (!mounted) return;
+    final success = await container.read(authProvider.notifier).resetPassword(email);
+    if (!messenger.mounted) return;
 
-    final error = ref.read(authProvider).error;
-    showAuthSnackBar(
-      context,
+    final error = container.read(authProvider).error;
+    messenger.showSnackBar(buildAuthSnackBar(
+      messenger.context,
       success
           ? 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.'
           : (error ?? 'Sıfırlama e-postası gönderilemedi.'),
       tone: success ? AuthSnackTone.success : AuthSnackTone.error,
-    );
+    ));
   }
 
   @override

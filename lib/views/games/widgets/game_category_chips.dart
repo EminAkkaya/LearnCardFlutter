@@ -22,7 +22,7 @@ class GameCategoryChips extends StatelessWidget {
     final categories = [
       {'key': 'all', 'label': 'Tümü (${cardState.cards.length})'},
       {'key': 'due', 'label': 'Bugün Tekrar (${cardState.dueCards.length})'},
-      {'key': 'learning', 'label': 'Öğrenilen (${cardState.learningCards.length})'},
+      {'key': 'learning', 'label': 'Öğrenilmekte (${cardState.learningCards.length})'},
       {'key': 'new', 'label': 'Yeni (${cardState.newCards.length})'},
       {'key': 'mastered', 'label': 'Ustalaşılan (${cardState.masteredCards.length})'},
     ];
