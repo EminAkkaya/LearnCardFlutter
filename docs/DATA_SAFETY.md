@@ -23,7 +23,6 @@ Kullanıcının dokunduğu **kelime/metin parçası** çeviri ve sözlük için 
 - `api.dictionaryapi.dev` — İngilizce tanım ve telaffuz sesi
 - `api.mymemory.translated.net` — çeviri
 - `translate.googleapis.com` — çeviri (**resmî olmayan uç nokta, bkz. plan SEC2**)
-- Google Fonts — yazı tipi indirme (IP adresi Google'a gider)
 
 ## Play Data Safety cevapları (özet)
 - Data collected: Personal info → Email address (App functionality, Account management; required for account, optional overall since guest mode exists).

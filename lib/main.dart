@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
@@ -36,8 +37,12 @@ class LearnCardApp extends ConsumerWidget {
     final themeState = ref.watch(themeProvider);
 
     return MaterialApp(
-      title: 'LearnCard Mobile',
+      title: 'LearnCard',
       debugShowCheckedModeBanner: false,
+      // Arayüz yalnız Türkçe; sistem metinleri (kopyala/yapıştır, geri vb.) de Türkçe olsun.
+      locale: const Locale('tr'),
+      supportedLocales: const [Locale('tr')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: AppTheme.getLightTheme(themeState.primaryColor),
       darkTheme: AppTheme.getDarkTheme(themeState.primaryColor),
       themeMode: themeState.themeMode,

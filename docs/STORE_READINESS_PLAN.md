@@ -31,7 +31,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 ### P2 — Olsa iyi olur
 - [x] **N1 Store listing taslağı:** kısa/uzun açıklama (TR/EN), anahtar kelimeler, ekran görüntüsü listesi (`docs/store_listing.md`).
 - [x] **N2 Onboarding / ilk açılış deneyimi.** (3 sayfa, Atla/Devam/Başla; yalnız oturumsuz ilk kullanıcıya; durum DB'de. Not: güncellemeyle gelen mevcut kullanıcılar bir kez görebilir.)
-- [x] **N3 Çoklu dil altyapısı (intl) değerlendirmesi.** Karar önerisi: v1.0 yalnız Türkçe arayüzle yayınlanır (hedef kitle İngilizce öğrenen Türkçe konuşanlar; mağaza metni TR+EN hazır). Arayüzde ~114+ doğrudan Türkçe `Text('…')` var. İngilizce arayüz istenirse: `flutter_localizations` + `intl` + `l10n.yaml`, metinleri `lib/l10n/app_tr.arb` / `app_en.arb`'ye taşıma (tahmini 1 oturum, subagent işi). Ayrıca `MaterialApp`'e `locale: Locale('tr')` + `supportedLocales` eklenmeli ki tarih/sistem diyalogları Türkçe olsun → soru 9.
+- [x] **N3 Çoklu dil altyapısı (intl) değerlendirmesi.** Karar önerisi: v1.0 yalnız Türkçe arayüzle yayınlanır — **kullanıcı onayladı, `MaterialApp` `locale: tr` + `GlobalMaterialLocalizations` eklendi** (hedef kitle İngilizce öğrenen Türkçe konuşanlar; mağaza metni TR+EN hazır). Arayüzde ~114+ doğrudan Türkçe `Text('…')` var. İngilizce arayüz istenirse: `flutter_localizations` + `intl` + `l10n.yaml`, metinleri `lib/l10n/app_tr.arb` / `app_en.arb`'ye taşıma (tahmini 1 oturum, subagent işi). Ayrıca `MaterialApp`'e `locale: Locale('tr')` + `supportedLocales` eklenmeli ki tarih/sistem diyalogları Türkçe olsun → soru 9.
 
 ## Review bulguları (R1, 2026-11-07) → görevler
 
@@ -53,7 +53,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **D11 Hata görünürlüğü:** flashcard_provider iyimser güncellemede DB hatası yutuluyor; `bulkAddCards` tüm desteyi upsert ediyor (yalnız yenileri gönder); `main.dart` Supabase init hatası sessiz; `resendVerificationOtp` istemci yoksa başarı dönüyor.
 - [x] **D12 signUp mevcut e-posta:** `identities` boşsa "bu e-posta kayıtlı" göster.
 - [x] **S8 Android:** targetSdk/compileSdk 36 (Flutter varsayılanı, APK'dan doğrulandı), R8 minify + shrinkResources açık, Kotlin 2.3.20 + `compilerOptions` DSL, kullanılmayan `path`, `path_provider`, `cupertino_icons` kaldırıldı. `flutter build apk --release` başarılı (64 MB fat APK; AAB ile ABI başına çok daha küçük). **Kalan:** release APK gerçek cihazda açılıp denenmeli (R8 yansıma sorunları yalnız çalışırken görünür). Gradle 9.1 / AGP 9 yükseltme uyarısı var — yayın sonrası.
-- [~] **S9 google_fonts çevrimdışı:** (font dosyası indirmek kullanıcı onayı ister → soru 8; google_fonts ilk çevrimiçi açılıştan sonra önbellekten çalışır, engel değil) fontu asset olarak paketle veya `GoogleFonts.config.allowRuntimeFetching` + asset.
+- [x] **S9 google_fonts çevrimdışı:** Plus Jakarta Sans 400/500/600/700 + italik `assets/fonts/`'a gömüldü (~320 KB, OFL.txt yanında), `google_fonts` bağımlılığı kaldırıldı; artık çalışma anında Google Fonts'a istek gitmiyor.
 - [x] **SEC1 RLS doğrulama:** (SQL hazır: `docs/supabase_migrations/002_rls_policies.sql`; çalıştırmak ve eski geniş politikaları kaldırmak kullanıcıda) anon key ilk commit (35969d8) geçmişinde var; anon key public olsa da tablolarda RLS politikaları kontrol edilmeli (kullanıcı Supabase panelinden; SQL'i `docs/supabase_rls.sql` olarak hazırla).
 
 - [ ] **SEC2 Resmî olmayan Google Translate uç noktası:** `lib/services/dictionary_service.dart:33` `translate.googleapis.com/translate_a/single?client=gtx` — Google ToS dışı, her an kesilebilir/engellenebilir. MyMemory'yi birincil yap, Google'ı kaldır ya da resmî Cloud Translation API (anahtar sunucu tarafında, Edge Function) kullan.
@@ -78,8 +78,8 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 4. **Hesap silme:** fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).
 5. **Supabase paneli:** `001_sync_columns.sql` ve `002_rls_policies.sql`'i çalıştır, redirect URL `io.learncard.app://login-callback` ekle, `delete-account` fonksiyonunu deploy et.
 6. Play Console (25$) ve Apple Developer (99$/yıl) hesapları.
-9. **Arayüz dili (N3):** v1.0 yalnız Türkçe mi, yoksa İngilizce arayüz de olsun mu? (Varsayılan: yalnız Türkçe.)
-8. **Yazı tipi (S9):** Plus Jakarta Sans TTF'lerini (OFL lisanslı) `assets/fonts/`'a indirip pakete gömeyim mi? Çevrimdışı ilk açılışta da doğru font olur, ~500 KB ekler.
+9. ~~Arayüz dili (N3)~~ → yalnız Türkçe (karar verildi).
+8. ~~Yazı tipi (S9)~~ → gömüldü (~320 KB).
 7. **Çeviri servisi (SEC2):** şu an birincil çeviri resmî olmayan Google `client=gtx` uç noktası (kalitesi iyi ama ToS dışı, kesilebilir). Seçenekler: (a) olduğu gibi bırak, (b) MyMemory'yi birincil yap (kalite düşer, günlük limit), (c) resmî Google Cloud Translation / DeepL'i bir Supabase Edge Function arkasına koy (anahtar sunucuda, ücretli). Öneri: yayın öncesi (c), o zamana kadar (a).
 
 ## İlerleme günlüğü
@@ -108,3 +108,4 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - 02:02 — N3 değerlendirildi (soru 9).
 - 02:05 — G10/Q4 tamam (`a0d63d2`), Q3 kapandı. 177 test, analyzer temiz.
 - 02:06 — G11 tamam. Kod tarafında açık görev kalmadı; kalanlar kullanıcı kararı/aksiyonu (S7, S9, SEC2 ve 'Kullanıcıya sorulacaklar').
+- 11:28 — S9 tamam (font gömüldü, google_fonts kaldırıldı), N3 kararı: yalnız Türkçe + tr locale.

@@ -18,7 +18,7 @@ istatistikleriniz yalnızca cihazınızda saklanır.
 
 **Üçüncü taraf servisler.** Bir kelimeye dokunduğunuzda, yalnızca o kelime ya da kısa metin
 çeviri ve sözlük bilgisi almak için şu servislere gönderilir: dictionaryapi.dev, MyMemory,
-Google çeviri. Yazı tipleri Google Fonts'tan indirilir. Bu servislere kimlik bilgileriniz gönderilmez.
+Google çeviri. Bu servislere kimlik bilgileriniz gönderilmez.
 
 **Yapmadıklarımız.** Reklam göstermiyoruz, analitik veya takip aracı kullanmıyoruz,
 verilerinizi satmıyoruz ya da paylaşmıyoruz.
@@ -41,7 +41,7 @@ Silme talebi en geç 30 gün içinde tamamlanır. KVKK kapsamındaki taleplerini
   review history and saved texts (sync across devices), hosted on Supabase.
 - **Third parties:** when you tap a word, only that word or short text is sent to
   dictionaryapi.dev, MyMemory and Google translation to fetch definitions and translations.
-  Fonts are downloaded from Google Fonts. No identity data is sent to them.
+  No identity data is sent to them.
 - **We do not** show ads, use analytics or tracking, sell or share your data.
 - **Deletion:** delete your account and all data in-app (Settings → Delete account) or via
   `<deletion web URL>`; requests are completed within 30 days. Contact: `<support email>`.

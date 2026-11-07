@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'feedback_colors.dart';
 
 class AppTheme {
+  /// pubspec.yaml'da gömülü yazı tipi ailesi.
+  static const String fontFamily = 'PlusJakartaSans';
+
   static const Color primaryColor = Color(0xFF6366F1); // Indigo
   static const Color secondaryColor = Color(0xFF8B5CF6); // Purple
   static const Color accentColor = Color(0xFF06B6D4); // Cyan
@@ -35,7 +37,7 @@ class AppTheme {
         error: errorColor,
       ),
       scaffoldBackgroundColor: lightBg,
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.light().textTheme),
+      fontFamily: fontFamily,
       cardTheme: CardThemeData(
         color: lightSurface,
         elevation: 2,
@@ -46,10 +48,11 @@ class AppTheme {
         backgroundColor: lightBg,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.plusJakartaSans(
+        titleTextStyle: const TextStyle(
+          fontFamily: fontFamily,
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFF0F172A),
+          color: Color(0xFF0F172A),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -57,7 +60,8 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -88,7 +92,7 @@ class AppTheme {
         error: errorColor,
       ),
       scaffoldBackgroundColor: darkBg,
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme),
+      fontFamily: fontFamily,
       cardTheme: CardThemeData(
         color: darkSurface,
         elevation: 2,
@@ -99,7 +103,8 @@ class AppTheme {
         backgroundColor: darkBg,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.plusJakartaSans(
+        titleTextStyle: const TextStyle(
+          fontFamily: fontFamily,
           fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -110,7 +115,8 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.plusJakartaSans(
+          textStyle: const TextStyle(
+            fontFamily: fontFamily,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
