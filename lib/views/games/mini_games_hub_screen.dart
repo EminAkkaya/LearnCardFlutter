@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/feedback_colors.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../core/theme/app_palette.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../providers/games/context_cloze_provider.dart';
@@ -46,9 +47,7 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final fb = FeedbackColors.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final p = AppPalette.of(context);
     final cardState = ref.watch(flashcardProvider);
     final currentPool = _getCategoryCards(cardState);
     // Her oyun için gerçekten oynanabilir içerik sayısı (ör. tek kelimelik kart,
@@ -58,6 +57,58 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
     final quizQuestions = buildSpeedQuizQuestions(currentPool).length;
     final clozeQuestions = buildClozeQuestions(currentPool).length;
 
+    final games = <GameCardItem>[
+      GameCardItem(
+        title: '1. Özel Kart Tekrarı (Serbest Mod)',
+        subtitle: 'Algoritmadan bağımsız, özelleştirilmiş seans ile kartları çalışın',
+        badge: 'Serbest Tekrar',
+        icon: LucideIcons.layers,
+        minCardsRequired: 1,
+        currentCardsCount: currentPool.length,
+        onPlay: () => showCustomStudyBottomSheet(
+          context,
+          cardState,
+          initialStatus: _selectedCategory,
+        ),
+      ),
+      GameCardItem(
+        title: '2. Kelime Eşleştirme',
+        subtitle: 'İngilizce kelimeler ile Türkçe karşılıklarını eşleştirin',
+        badge: 'Çift Kodlama',
+        icon: LucideIcons.grid2x2,
+        minCardsRequired: 3,
+        currentCardsCount: matchPairs,
+        onPlay: () => _open(context, WordMatchGameScreen(cards: currentPool)),
+      ),
+      GameCardItem(
+        title: '3. Harf Sihirbazı (Yazım)',
+        subtitle: 'Karışık harflerden doğru İngilizce kelimeyi oluşturun',
+        badge: 'İmlasal Bellek',
+        icon: LucideIcons.spellCheck,
+        minCardsRequired: 1,
+        currentCardsCount: scrambleWords,
+        onPlay: () => _open(context, WordScrambleGameScreen(cards: currentPool)),
+      ),
+      GameCardItem(
+        title: '4. Hızlı Karar Testi',
+        subtitle: '10 saniyelik sürede doğru anlamı bularak kombo serisi yapın',
+        badge: 'Hızlı Geri Çağırma',
+        icon: LucideIcons.timer,
+        minCardsRequired: 1,
+        currentCardsCount: quizQuestions,
+        onPlay: () => _open(context, SpeedQuizGameScreen(cards: currentPool)),
+      ),
+      GameCardItem(
+        title: '5. Cümle İçi Boşluk Doldurma',
+        subtitle: 'Örnek cümledeki boşluğa en uygun kelimeyi yerleştirin',
+        badge: 'Bağlamsal Öğrenme',
+        icon: LucideIcons.textCursorInput,
+        minCardsRequired: 1,
+        currentCardsCount: clozeQuestions,
+        onPlay: () => _open(context, ContextClozeGameScreen(cards: currentPool)),
+      ),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mini Oyunlar & Alıştırmalar'),
@@ -65,12 +116,12 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const GameHubIntroBanner(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             GameCategoryChips(
               cardState: cardState,
               selectedCategory: _selectedCategory,
@@ -79,102 +130,32 @@ class _MiniGamesHubScreenState extends ConsumerState<MiniGamesHubScreen> {
             const SizedBox(height: 24),
             Text(
               'Eğitim Modları & Oyunlar',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: p.textPrimary),
             ),
             const SizedBox(height: 12),
-            GameCardItem(
-              title: '1. Özel Kart Tekrarı (Serbest Mod)',
-              subtitle:
-                  'Algoritmadan bağımsız, özelleştirilmiş seans ile kartları çalışın',
-              badge: 'Serbest Tekrar',
-              badgeColor: fb.success,
-              icon: Icons.style_rounded,
-              gradientColors: const [Color(0xFF059669), Color(0xFF10B981)],
-              minCardsRequired: 1,
-              currentCardsCount: currentPool.length,
-              onPlay: () => showCustomStudyBottomSheet(
-                context,
-                cardState,
-                initialStatus: _selectedCategory,
-              ),
-            ),
-            const SizedBox(height: 14),
-            GameCardItem(
-              title: '2. Kelime Eşleştirme',
-              subtitle:
-                  'İngilizce kelimeler ile Türkçe karşılıklarını eşleştirin',
-              badge: 'Çift Kodlama',
-              badgeColor: fb.success,
-              icon: Icons.grid_view_rounded,
-              gradientColors: const [Color(0xFF059669), Color(0xFF10B981)],
-              minCardsRequired: 3,
-              currentCardsCount: matchPairs,
-              onPlay: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => WordMatchGameScreen(cards: currentPool),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            GameCardItem(
-              title: '3. Harf Sihirbazı (Yazım)',
-              subtitle: 'Karışık harflerden doğru İngilizce kelimeyi oluşturun',
-              badge: 'İmlasal Bellek',
-              badgeColor: isDark ? const Color(0xFF818CF8) : const Color(0xFF4338CA),
-              icon: Icons.spellcheck_rounded,
-              gradientColors: const [Color(0xFF4F46E5), Color(0xFF6366F1)],
-              minCardsRequired: 1,
-              currentCardsCount: scrambleWords,
-              onPlay: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => WordScrambleGameScreen(cards: currentPool),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            GameCardItem(
-              title: '4. Hızlı Karar Testi',
-              subtitle:
-                  '10 saniyelik sürede doğru anlamı bularak kombo serisi yapın',
-              badge: 'Hızlı Geri Çağırma',
-              badgeColor: fb.warning,
-              icon: Icons.timer_outlined,
-              gradientColors: const [Color(0xFFD97706), Color(0xFFF59E0B)],
-              minCardsRequired: 1,
-              currentCardsCount: quizQuestions,
-              onPlay: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SpeedQuizGameScreen(cards: currentPool),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            GameCardItem(
-              title: '5. Cümle İçi Boşluk Doldurma',
-              subtitle:
-                  'Örnek cümledeki boşluğa en uygun kelimeyi yerleştirin',
-              badge: 'Bağlamsal Öğrenme',
-              badgeColor: fb.highlight,
-              icon: Icons.auto_stories_rounded,
-              gradientColors: const [Color(0xFFDB2777), Color(0xFFEC4899)],
-              minCardsRequired: 1,
-              currentCardsCount: clozeQuestions,
-              onPlay: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ContextClozeGameScreen(cards: currentPool),
-                ),
-              ),
+            // Dar ekranda tek sütun liste, genişte iki sütunlu ızgara.
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const gap = 12.0;
+                final twoCols = constraints.maxWidth >= 640;
+                final itemWidth = twoCols ? (constraints.maxWidth - gap) / 2 : constraints.maxWidth;
+                return Wrap(
+                  spacing: gap,
+                  runSpacing: gap,
+                  children: [
+                    for (final g in games) SizedBox(width: itemWidth, child: g),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 32),
           ],
         ),
       ),
     );
+  }
+
+  void _open(BuildContext context, Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 }

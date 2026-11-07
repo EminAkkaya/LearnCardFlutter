@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/feedback_colors.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 /// Cevaptan sonra çıkan "Sonraki Soru / Sonuçları Gör" butonu.
-/// [color] bir [FeedbackColors] dolgusu olmalı; metin [FeedbackColors.onAccent].
+/// Temanın birincil (vurgu) dolgusunu kullanır; metin onPrimary.
 class GameNextButton extends StatelessWidget {
   final bool hasNext;
-  final Color color;
   final VoidCallback onPressed;
 
   const GameNextButton({
     super.key,
     required this.hasNext,
-    required this.color,
     required this.onPressed,
   });
 
@@ -19,18 +17,13 @@ class GameNextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 48,
       child: ElevatedButton.icon(
         onPressed: onPressed,
-        icon: const Icon(Icons.arrow_forward_rounded),
+        icon: const Icon(LucideIcons.arrowRight, size: 18),
         label: Text(
           hasNext ? 'Sonraki Soru' : 'Sonuçları Gör',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: FeedbackColors.of(context).onAccent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
     );

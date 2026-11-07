@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../../../services/srs_service.dart';
@@ -28,39 +30,39 @@ class _GameMistakesCardState extends ConsumerState<GameMistakesCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Tekrar etmen gerekenler (${widget.cards.length})',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            for (final card in widget.cards)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Text(
-                  '${card.word} — ${card.trTranslation.isNotEmpty ? card.trTranslation : card.definition}',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _queued ? null : _queueForReview,
-                icon: Icon(_queued ? Icons.check_rounded : Icons.replay_rounded),
-                label: Text(_queued ? 'Tekrar listesine eklendi' : 'Bunları kart tekrarına ekle'),
+    final p = AppPalette.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: p.cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tekrar etmen gerekenler (${widget.cards.length})',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: p.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          for (final card in widget.cards)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Text(
+                '${card.word} — ${card.trTranslation.isNotEmpty ? card.trTranslation : card.definition}',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14, color: p.textSecondary, height: 1.4),
               ),
             ),
-          ],
-        ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _queued ? null : _queueForReview,
+              icon: Icon(_queued ? LucideIcons.check : LucideIcons.rotateCcw, size: 18),
+              label: Text(_queued ? 'Tekrar listesine eklendi' : 'Bunları kart tekrarına ekle'),
+            ),
+          ),
+        ],
       ),
     );
   }

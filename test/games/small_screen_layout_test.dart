@@ -132,6 +132,8 @@ void main() {
           expect(size.height, greaterThanOrEqualTo(48));
         }
 
+        await tester.ensureVisible(find.text('İpucu'));
+        await tester.pump();
         await tester.tap(find.text('İpucu'));
         await _frames(tester);
         _expectNoOverflow(tester);
@@ -143,6 +145,8 @@ void main() {
         _expectNoOverflow(tester);
         await _tapFirstOption(tester);
         _expectNoOverflow(tester);
+        // Doğru şık renk + ikon + metinle işaretlenir.
+        expect(find.text('Doğru'), findsOneWidget);
         // Zamanlayıcıyı kapatmak için ağacı sök.
         await tester.pumpWidget(const SizedBox());
       });
@@ -155,6 +159,7 @@ void main() {
         await _frames(tester);
         await _tapFirstOption(tester);
         _expectNoOverflow(tester);
+        expect(find.text('Doğru'), findsOneWidget);
       });
 
       testWidgets('oyun sonu ekranları taşmaz', (tester) async {

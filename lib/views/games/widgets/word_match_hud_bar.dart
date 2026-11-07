@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/feedback_colors.dart';
 
 class WordMatchHudBar extends StatelessWidget {
@@ -19,67 +21,67 @@ class WordMatchHudBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
     final fb = FeedbackColors.of(context);
+    final onStreak = streak > 1;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: fb.success.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: fb.success.withValues(alpha: 0.3)),
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: p.cardDecoration(),
       // Wrap: dar ekran / büyük yazıda istatistikler alt satıra iner.
       child: Wrap(
         alignment: WrapAlignment.spaceBetween,
         spacing: 12,
         runSpacing: 8,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Eşleşen', style: TextStyle(fontSize: 11, color: Colors.grey)),
-              const SizedBox(height: 2),
-              Text(
-                '$matchedPairs/$totalPairs',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: fb.success),
-              ),
-            ],
+          _HudStat(label: 'Eşleşen', value: '$matchedPairs/$totalPairs'),
+          _HudStat(label: 'Puan', value: '$score'),
+          _HudStat(
+            label: 'Seri',
+            value: 'x$streak',
+            icon: onStreak ? LucideIcons.flame : null,
+            color: onStreak ? fb.warning : p.textMuted,
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Puan', style: TextStyle(fontSize: 11, color: Colors.grey)),
-              const SizedBox(height: 2),
-              Text(
-                '$score',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: fb.warning),
-              ),
-            ],
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Seri', style: TextStyle(fontSize: 11, color: Colors.grey)),
-              const SizedBox(height: 2),
-              Text(
-                'x$streak',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                  color: streak > 1 ? fb.warning : Colors.grey,
-                ),
-              ),
-            ],
-          ),
-          const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Süre', style: TextStyle(fontSize: 11, color: Colors.grey)),
-              SizedBox(height: 2),
-              Text('Serbest', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-            ],
-          ),
+          const _HudStat(label: 'Süre', value: 'Serbest'),
         ],
       ),
+    );
+  }
+}
+
+class _HudStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData? icon;
+  final Color? color;
+
+  const _HudStat({required this.label, required this.value, this.icon, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
+    final c = color ?? p.textPrimary;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: p.textSecondary)),
+        const SizedBox(height: 2),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[Icon(icon, size: 14, color: c), const SizedBox(width: 2)],
+            Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: c,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

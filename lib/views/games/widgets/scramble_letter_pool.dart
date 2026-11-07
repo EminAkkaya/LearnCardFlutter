@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/games/letter_tile_model.dart';
 
 class ScrambleLetterPool extends StatelessWidget {
   final List<LetterTileModel> pool;
   final bool isCompleted;
   final ValueChanged<LetterTileModel> onTileTapped;
-
-  static const Color indigoColor = Color(0xFF6366F1);
 
   const ScrambleLetterPool({
     super.key,
@@ -17,7 +16,8 @@ class ScrambleLetterPool extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final p = AppPalette.of(context);
+    final radius = BorderRadius.circular(AppPalette.radiusControl);
 
     return Wrap(
       spacing: 10,
@@ -30,35 +30,29 @@ class ScrambleLetterPool extends StatelessWidget {
           label: 'Harf ${tile.char.toUpperCase()}',
           excludeSemantics: true,
           child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
+            duration: AppPalette.motionBase,
             opacity: tile.isPlaced ? 0.0 : 1.0,
-            child: InkWell(
-              onTap: (tile.isPlaced || isCompleted)
-                  ? null
-                  : () => onTileTapped(tile),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                width: 50,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: indigoColor.withValues(alpha: 0.4)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
+            child: Material(
+              color: p.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: radius,
+                side: BorderSide(color: p.controlBorder),
+              ),
+              child: InkWell(
+                onTap: (tile.isPlaced || isCompleted) ? null : () => onTileTapped(tile),
+                borderRadius: radius,
+                child: SizedBox(
+                  width: 50,
+                  height: 52,
+                  child: Center(
+                    child: Text(
+                      tile.char.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: p.textPrimary,
+                      ),
                     ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  tile.char.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),

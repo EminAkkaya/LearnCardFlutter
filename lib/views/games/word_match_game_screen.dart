@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/games/word_match_provider.dart';
 import 'widgets/word_match_game_over_view.dart';
@@ -40,7 +41,7 @@ class WordMatchGameScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(LucideIcons.rotateCcw, size: 20),
             tooltip: 'Yeniden Başlat',
             onPressed: notifier.restart,
           ),

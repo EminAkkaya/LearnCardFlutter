@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/feedback_colors.dart';
+import '../../core/theme/app_palette.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/games/context_cloze_provider.dart';
 import 'widgets/cloze_hud_bar.dart';
@@ -17,7 +17,6 @@ class ContextClozeGameScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fb = FeedbackColors.of(context);
     final provider = contextClozeProvider(cards);
     final s = ref.watch(provider);
     final notifier = ref.read(provider.notifier);
@@ -52,8 +51,8 @@ class ContextClozeGameScreen extends ConsumerWidget {
           children: [
             LinearProgressIndicator(
               value: (s.currentIndex + 1) / s.questions.length,
-              color: fb.highlight,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: Theme.of(context).colorScheme.primary,
+              backgroundColor: AppPalette.of(context).border,
               minHeight: 4,
             ),
             Expanded(
@@ -82,7 +81,7 @@ class ContextClozeGameScreen extends ConsumerWidget {
                     ),
                     if (s.isAnswered) ...[
                       const SizedBox(height: 16),
-                      GameNextButton(hasNext: s.hasNext, color: fb.highlight, onPressed: notifier.next),
+                      GameNextButton(hasNext: s.hasNext, onPressed: notifier.next),
                     ],
                   ],
                 ),

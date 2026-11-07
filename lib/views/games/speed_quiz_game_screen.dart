@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_palette.dart';
 import '../../core/theme/feedback_colors.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/games/speed_quiz_provider.dart';
@@ -54,8 +55,8 @@ class SpeedQuizGameScreen extends ConsumerWidget {
           children: [
             LinearProgressIndicator(
               value: s.secondsRemaining / speedQuizQuestionSeconds,
-              color: timeLow ? fb.danger : fb.warning,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: timeLow ? fb.danger : Theme.of(context).colorScheme.primary,
+              backgroundColor: AppPalette.of(context).border,
               minHeight: 5,
             ),
             Expanded(
@@ -79,7 +80,7 @@ class SpeedQuizGameScreen extends ConsumerWidget {
                     ),
                     if (s.isAnswered) ...[
                       const SizedBox(height: 12),
-                      GameNextButton(hasNext: s.hasNext, color: fb.warning, onPressed: notifier.next),
+                      GameNextButton(hasNext: s.hasNext, onPressed: notifier.next),
                     ],
                   ],
                 ),

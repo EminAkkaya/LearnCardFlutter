@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/feedback_colors.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/games/speed_quiz_question_model.dart';
 
@@ -16,67 +17,56 @@ class SpeedQuizTargetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fb = FeedbackColors.of(context);
+    final p = AppPalette.of(context);
 
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [
-              theme.colorScheme.surface,
-              theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      decoration: p.cardDecoration(),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
                   question.isReverse ? 'İNGİLİZCESİ NEDİR?' : 'HEDEF KELİME',
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    color: fb.warning,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                    color: p.textSecondary,
                   ),
                 ),
-                if (isAnswered && question.card.audioUrl.isNotEmpty)
-                  IconButton.filledTonal(
-                    onPressed: () => AudioHelper.playAudio(question.card.audioUrl),
-                    icon: const Icon(Icons.volume_up_rounded, size: 20),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              question.targetWord,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
               ),
-            ),
-            if (question.card.phonetic.isNotEmpty && (!question.isReverse || isAnswered)) ...[
-              const SizedBox(height: 4),
-              Text(
-                question.card.phonetic,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              if (isAnswered && question.card.audioUrl.isNotEmpty)
+                IconButton.outlined(
+                  tooltip: 'Telaffuzu dinle',
+                  onPressed: () => AudioHelper.playAudio(question.card.audioUrl),
+                  icon: const Icon(LucideIcons.volume2, size: 20),
                 ),
-              ),
             ],
+          ),
+          const SizedBox(height: 12),
+          // Ana kelime: ekrandaki tek gerçek vurgu.
+          Text(
+            question.targetWord,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+              color: p.textPrimary,
+            ),
+          ),
+          if (question.card.phonetic.isNotEmpty && (!question.isReverse || isAnswered)) ...[
+            const SizedBox(height: 4),
+            Text(
+              question.card.phonetic,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: p.textSecondary),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

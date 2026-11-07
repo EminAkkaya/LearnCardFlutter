@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/flashcard_model.dart';
 
 class ScrambleClueCard extends StatelessWidget {
@@ -9,63 +11,48 @@ class ScrambleClueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const indigoColor = Color(0xFF6366F1);
+    final p = AppPalette.of(context);
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.translate_rounded,
-                  color: indigoColor,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    'TÜRKÇE ANLAMI',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.1,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(
-                        alpha: 0.6,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              card.trTranslation.isNotEmpty
-                  ? card.trTranslation
-                  : card.definition,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (card.definition.isNotEmpty &&
-                card.trTranslation.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                card.definition,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.textTheme.bodyMedium?.color?.withValues(
-                    alpha: 0.7,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      decoration: p.cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.languages, color: p.accentGraphic, size: 16),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'TÜRKÇE ANLAMI',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.5,
+                    color: p.textSecondary,
                   ),
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            card.trTranslation.isNotEmpty ? card.trTranslation : card.definition,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: p.textPrimary,
+            ),
+          ),
+          if (card.definition.isNotEmpty && card.trTranslation.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              card.definition,
+              style: TextStyle(fontSize: 14, height: 1.5, color: p.textSecondary),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

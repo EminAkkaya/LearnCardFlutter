@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/feedback_colors.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class ScrambleControlButtons extends StatelessWidget {
   final bool isCompleted;
@@ -21,7 +21,6 @@ class ScrambleControlButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fb = FeedbackColors.of(context);
     if (isCompleted) return const SizedBox.shrink();
 
     return Wrap(
@@ -31,22 +30,22 @@ class ScrambleControlButtons extends StatelessWidget {
       children: [
         OutlinedButton.icon(
           onPressed: hasPlacedLetters ? onClear : null,
-          icon: const Icon(Icons.backspace_outlined, size: 18),
+          icon: const Icon(LucideIcons.delete, size: 18),
           label: const Text('Temizle'),
         ),
         OutlinedButton.icon(
           onPressed: onShuffle,
-          icon: const Icon(Icons.shuffle_rounded, size: 18),
+          icon: const Icon(LucideIcons.shuffle, size: 18),
           label: const Text('Karıştır'),
         ),
         OutlinedButton.icon(
           onPressed: onHint,
-          icon: Icon(Icons.lightbulb_outline_rounded, size: 18, color: fb.warning),
+          icon: const Icon(LucideIcons.lightbulb, size: 18),
           label: const Text('İpucu'),
         ),
         TextButton.icon(
           onPressed: onSkip,
-          icon: const Icon(Icons.skip_next_rounded, size: 18),
+          icon: const Icon(LucideIcons.skipForward, size: 18),
           label: const Text('Geç'),
         ),
       ],

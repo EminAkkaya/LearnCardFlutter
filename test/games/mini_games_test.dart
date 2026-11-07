@@ -82,6 +82,11 @@ void main() {
       expect(find.text('3. Harf Sihirbazı (Yazım)'), findsOneWidget);
       expect(find.text('4. Hızlı Karar Testi'), findsOneWidget);
       expect(find.text('5. Cümle İçi Boşluk Doldurma'), findsOneWidget);
+      // Minimalist tasarım: oyun merkezinde gradient yok.
+      final gradients = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).gradient != null);
+      expect(gradients, isEmpty);
     });
   });
 

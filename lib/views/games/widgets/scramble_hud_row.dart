@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/feedback_colors.dart';
+import '../../../core/theme/app_palette.dart';
+import 'game_score_label.dart';
 
 class ScrambleHudRow extends StatelessWidget {
   final int score;
@@ -9,28 +10,17 @@ class ScrambleHudRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fb = FeedbackColors.of(context);
-    final mutedColor = Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6);
+    final p = AppPalette.of(context);
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
       crossAxisAlignment: WrapCrossAlignment.center,
       spacing: 12,
       runSpacing: 4,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.stars_rounded, color: fb.warning, size: 20),
-            const SizedBox(width: 6),
-            Text(
-              'Puan: $score',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
-          ],
-        ),
+        GameScoreLabel(score: score),
         Text(
           'Kelime Uzunluğu: $wordLength Harf',
-          style: TextStyle(fontSize: 12, color: mutedColor),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: p.textSecondary),
         ),
       ],
     );

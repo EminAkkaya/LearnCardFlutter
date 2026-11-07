@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/feedback_colors.dart';
+import 'game_score_label.dart';
 
 class SpeedQuizHudBar extends StatelessWidget {
   final int score;
@@ -15,7 +18,14 @@ class SpeedQuizHudBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
     final fb = FeedbackColors.of(context);
+    final onStreak = streak > 1;
+    final streakColor = onStreak ? fb.warning : p.textMuted;
+    final timeLow = secondsRemaining <= 3;
+    final timeColor = timeLow ? fb.danger : p.textSecondary;
+    const tabular = [FontFeature.tabularFigures()];
+
     // Wrap: dar ekran / büyük yazıda göstergeler alt satıra iner.
     return Wrap(
       alignment: WrapAlignment.spaceBetween,
@@ -23,63 +33,42 @@ class SpeedQuizHudBar extends StatelessWidget {
       spacing: 12,
       runSpacing: 8,
       children: [
+        GameScoreLabel(score: score),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.stars_rounded, color: fb.warning, size: 22),
-            const SizedBox(width: 6),
-            Text(
-              'Puan: $score',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-          ],
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.local_fire_department_rounded,
-              color: streak > 1 ? fb.warning : Colors.grey,
-              size: 22,
-            ),
+            Icon(LucideIcons.flame, color: streakColor, size: 18),
             const SizedBox(width: 4),
             Text(
               'Seri: x$streak',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 14,
-                color: streak > 1 ? fb.warning : Colors.grey,
+                color: streakColor,
+                fontFeatures: tabular,
               ),
             ),
           ],
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: (secondsRemaining <= 3 ? fb.danger : fb.warning).withValues(
-              alpha: 0.15,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: secondsRemaining <= 3 ? fb.danger : fb.warning,
-              width: 1.5,
-            ),
+            color: timeLow ? fb.dangerContainer : p.subtle,
+            borderRadius: BorderRadius.circular(AppPalette.radiusPill),
+            border: Border.all(color: timeLow ? fb.danger : p.border),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.timer_outlined,
-                size: 16,
-                color: secondsRemaining <= 3 ? fb.danger : fb.warning,
-              ),
+              Icon(LucideIcons.timer, size: 16, color: timeColor),
               const SizedBox(width: 4),
               Text(
                 '${secondsRemaining}s',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: secondsRemaining <= 3 ? fb.danger : fb.warning,
+                  color: timeColor,
+                  fontFeatures: tabular,
                 ),
               ),
             ],

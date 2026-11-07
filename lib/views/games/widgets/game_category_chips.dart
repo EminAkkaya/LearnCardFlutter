@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../providers/flashcard_provider.dart';
 
 class GameCategoryChips extends StatelessWidget {
@@ -15,7 +16,8 @@ class GameCategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final p = AppPalette.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     final categories = [
       {'key': 'all', 'label': 'Tümü (${cardState.cards.length})'},
@@ -30,9 +32,7 @@ class GameCategoryChips extends StatelessWidget {
       children: [
         Text(
           'Kelime Havuzu Seçimi',
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: p.textSecondary),
         ),
         const SizedBox(height: 8),
         SingleChildScrollView(
@@ -48,7 +48,15 @@ class GameCategoryChips extends StatelessWidget {
                 child: ChoiceChip(
                   label: Text(label),
                   selected: isSelected,
-                  selectedColor: theme.colorScheme.primaryContainer,
+                  shape: const StadiumBorder(),
+                  side: BorderSide(color: isSelected ? scheme.primary : p.border),
+                  backgroundColor: p.card,
+                  selectedColor: scheme.primaryContainer,
+                  labelStyle: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? p.textPrimary : p.textSecondary,
+                  ),
                   onSelected: (_) => onSelected(key),
                 ),
               );

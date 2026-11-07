@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/feedback_colors.dart';
+import 'game_score_label.dart';
 
 class ClozeHudBar extends StatelessWidget {
   final int score;
@@ -25,27 +28,13 @@ class ClozeHudBar extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           spacing: 12,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.stars_rounded, color: fb.warning, size: 20),
-                const SizedBox(width: 6),
-                Text(
-                  'Puan: $score',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-              ],
-            ),
+            GameScoreLabel(score: score),
             TextButton.icon(
               onPressed: onToggleHint,
-              icon: Icon(
-                showHint ? Icons.visibility_off_outlined : Icons.lightbulb_outline_rounded,
-                size: 18,
-                color: fb.warning,
-              ),
+              icon: Icon(showHint ? LucideIcons.eyeOff : LucideIcons.lightbulb, size: 18),
               label: Text(
                 showHint ? 'İpucunu Gizle' : 'İpucu Gör',
-                style: const TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -56,17 +45,25 @@ class ClozeHudBar extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: fb.warning.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
+              color: fb.warningContainer,
+              borderRadius: BorderRadius.circular(AppPalette.radiusControl),
               border: Border.all(color: fb.warning.withValues(alpha: 0.4)),
             ),
-            child: Text(
-              'Türkçe Anlamı: $hintText',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: fb.warning,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 1),
+                  child: Icon(LucideIcons.lightbulb, size: 16, color: fb.warning),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Türkçe Anlamı: $hintText',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: fb.warning),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

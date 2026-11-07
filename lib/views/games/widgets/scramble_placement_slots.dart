@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/feedback_colors.dart';
 import '../../../models/games/letter_tile_model.dart';
+import 'game_status_line.dart';
 
 class ScramblePlacementSlots extends StatelessWidget {
   final int targetLength;
@@ -8,8 +11,6 @@ class ScramblePlacementSlots extends StatelessWidget {
   final bool isCompleted;
   final bool hasError;
   final ValueChanged<int> onSlotTapped;
-
-  static const Color indigoColor = Color(0xFF6366F1);
 
   const ScramblePlacementSlots({
     super.key,
@@ -22,10 +23,12 @@ class ScramblePlacementSlots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final p = AppPalette.of(context);
     final fb = FeedbackColors.of(context);
+    final radius = BorderRadius.circular(AppPalette.radiusControl);
 
-    return Wrap(
+    final slots = Wrap(
       spacing: 8,
       runSpacing: 8,
       alignment: WrapAlignment.center,
@@ -33,22 +36,21 @@ class ScramblePlacementSlots extends StatelessWidget {
         final bool hasLetter = index < placedLetters.length;
         final String char = hasLetter ? placedLetters[index].char : '';
 
-        Color borderColor = theme.dividerColor.withValues(alpha: 0.5);
-        Color bgColor = theme.colorScheme.surface;
-        Color textColor = theme.colorScheme.onSurface;
+        Color borderColor = p.controlBorder;
+        Color bgColor = p.subtle;
+        Color textColor = p.textPrimary;
 
         if (isCompleted) {
           borderColor = fb.success;
-          bgColor = fb.success.withValues(alpha: 0.15);
+          bgColor = fb.successContainer;
           textColor = fb.success;
         } else if (hasError && hasLetter) {
           borderColor = fb.danger;
-          bgColor = fb.danger.withValues(alpha: 0.15);
+          bgColor = fb.dangerContainer;
           textColor = fb.danger;
         } else if (hasLetter) {
-          borderColor = indigoColor;
-          bgColor = indigoColor.withValues(alpha: 0.1);
-          textColor = indigoColor;
+          borderColor = scheme.primary;
+          bgColor = scheme.primaryContainer;
         }
 
         return Semantics(
@@ -57,36 +59,43 @@ class ScramblePlacementSlots extends StatelessWidget {
               ? '${index + 1}. harf ${char.toUpperCase()}, kaldırmak için dokun'
               : '${index + 1}. harf boş',
           excludeSemantics: true,
-          child: InkWell(
-            onTap: (hasLetter && !isCompleted)
-                ? () => onSlotTapped(index)
-                : null,
-            borderRadius: BorderRadius.circular(12),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: borderColor,
-                  width: hasLetter ? 2 : 1,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                char.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+          child: Material(
+            color: bgColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: radius,
+              side: BorderSide(color: borderColor, width: hasLetter ? 1.5 : 1),
+            ),
+            child: InkWell(
+              onTap: (hasLetter && !isCompleted) ? () => onSlotTapped(index) : null,
+              borderRadius: radius,
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Text(
+                    char.toUpperCase(),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: textColor),
+                  ),
                 ),
               ),
             ),
           ),
         );
       }),
+    );
+
+    if (!hasError || isCompleted) return slots;
+    return Column(
+      children: [
+        slots,
+        const SizedBox(height: 12),
+        GameStatusLine(
+          icon: LucideIcons.x,
+          text: 'Sıralama hatalı, harfe dokunup kaldırabilirsin',
+          color: fb.danger,
+          fontSize: 13,
+        ),
+      ],
     );
   }
 }

@@ -1,80 +1,37 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
+/// Oyun merkezinin üstündeki sade giriş: başlık, kısa açıklama ve gerekçe.
 class GameHubIntroBanner extends StatelessWidget {
   const GameHubIntroBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final p = AppPalette.of(context);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.tertiary.withValues(alpha: 0.85),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Bilişsel Öğrenme Oyunları',
+          style: TextStyle(
+            color: p.textPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.3),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.sports_esports_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 14),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Bilişsel Öğrenme Oyunları',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'SRS algoritmasını etkilemeyen serbest pratik',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const Text(
-            'İkinci dil ediniminde aktif geri çağırma (Active Retrieval), çift kodlama ve bağlam içi pratik kelime kalıcılığını %80\'e kadar artırır.',
-            style: TextStyle(color: Colors.white, fontSize: 13, height: 1.4),
-          ),
-        ],
-      ),
+        const SizedBox(height: 4),
+        Text(
+          'SRS algoritmasını etkilemeyen serbest pratik',
+          style: TextStyle(color: p.textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'İkinci dil ediniminde aktif geri çağırma (Active Retrieval), çift kodlama ve bağlam içi pratik kelime kalıcılığını %80\'e kadar artırır.',
+          style: TextStyle(color: p.textSecondary, fontSize: 14, height: 1.5),
+        ),
+      ],
     );
   }
 }
