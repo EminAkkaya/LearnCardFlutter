@@ -43,7 +43,9 @@ class _ReaderContentViewState extends ConsumerState<ReaderContentView> {
   @override
   void didUpdateWidget(covariant ReaderContentView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.textController.text != widget.textController.text) {
+    // Controller aynı nesne olabilir (eski ve yeni widget aynı controller'ı taşır);
+    // bu yüzden gösterilen paragraflarla karşılaştır, controller'ı kendisiyle değil.
+    if (_paragraphs.join('\n') != widget.textController.text) {
       _updateParagraphs(widget.textController.text);
       _restoreScrollPosition();
     }
