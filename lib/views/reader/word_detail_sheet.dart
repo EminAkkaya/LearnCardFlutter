@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
-import '../../services/dictionary_service.dart';
+import '../../providers/word_lookup_provider.dart';
 import 'widgets/word_detail_action_button.dart';
 import 'widgets/word_detail_header.dart';
+import 'widgets/word_meanings_section.dart';
 
 class WordDetailSheet extends ConsumerStatefulWidget {
   final String word;
@@ -21,8 +22,6 @@ class WordDetailSheet extends ConsumerStatefulWidget {
 }
 
 class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
-  bool _isLoading = true;
-  WordDefinitionResult? _dictResult;
   late final TextEditingController _trController;
   late final TextEditingController _defController;
   bool _isAdding = false;
@@ -34,7 +33,6 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
     super.initState();
     _trController = TextEditingController();
     _defController = TextEditingController();
-    _fetchDetails();
   }
 
   @override
@@ -44,20 +42,11 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
     super.dispose();
   }
 
-  Future<void> _fetchDetails() async {
-    setState(() => _isLoading = true);
-    try {
-      final res = await DictionaryService.fetchWordDefinition(widget.word);
-      if (mounted) {
-        setState(() {
-          _dictResult = res;
-          _trController.text = res.trTranslation;
-          _defController.text = res.definition;
-          _isLoading = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _isLoading = false);
+  /// Yükleme bitince alanları doldurur; kullanıcının yazdığını ezmez.
+  void _onLookup(WordLookupState? prev, WordLookupState next) {
+    if (prev?.isLoading == true && !next.isLoading) {
+      if (_trController.text.isEmpty) _trController.text = next.suggestedTranslation;
+      if (_defController.text.isEmpty) _defController.text = next.details?.definition ?? '';
     }
   }
 
@@ -66,14 +55,15 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
     final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
 
+    final details = ref.read(wordLookupProvider(widget.word)).details;
     await ref.read(flashcardProvider.notifier).addCard(
           word: widget.word,
           trTranslation: _trController.text,
           definition: _defController.text,
-          phonetic: _dictResult?.phonetic ?? '',
-          partOfSpeech: _dictResult?.partOfSpeech ?? '',
+          phonetic: details?.phonetic ?? '',
+          partOfSpeech: details?.partOfSpeech ?? '',
           exampleSentence: widget.sentenceContext,
-          audioUrl: _dictResult?.audioUrl ?? '',
+          audioUrl: details?.audioUrl ?? '',
         );
 
     nav.pop();
@@ -90,6 +80,8 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardState = ref.watch(flashcardProvider);
+    final lookup = ref.watch(wordLookupProvider(widget.word));
+    ref.listen(wordLookupProvider(widget.word), _onLookup);
     final cleanWord = widget.word.trim().toLowerCase();
 
     final FlashcardModel? existingCard = cardState.cards.cast<FlashcardModel?>().firstWhere(
@@ -124,14 +116,28 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            WordDetailHeader(word: widget.word, dictResult: _dictResult),
+            WordDetailHeader(word: widget.word, dictResult: lookup.details),
             const Divider(height: 24),
-            if (_isLoading)
+            if (lookup.isLoading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24.0),
                 child: Center(child: CircularProgressIndicator()),
               )
             else ...[
+              if (lookup.offline != null) ...[
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _trController,
+                  builder: (context, value, _) => WordMeaningsSection(
+                    entry: lookup.offline!,
+                    selected: value.text,
+                    online: lookup.online,
+                    isOnlineLoading: lookup.isOnlineLoading,
+                    onPick: (tr) => _trController.text = tr,
+                    onFetchOnline: () => ref.read(wordLookupProvider(widget.word).notifier).fetchOnline(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               Text('Türkçe Çeviri', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(

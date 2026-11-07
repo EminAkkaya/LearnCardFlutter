@@ -16,9 +16,10 @@ istatistikleriniz yalnızca cihazınızda saklanır.
 - Kelime kartlarınız, tekrar geçmişiniz ve kaydettiğiniz metinler: cihazlarınız arasında
   senkronize etmek için. Bu veriler Supabase altyapısında saklanır.
 
-**Üçüncü taraf servisler.** Bir kelimeye dokunduğunuzda, yalnızca o kelime ya da kısa metin
-çeviri ve sözlük bilgisi almak için şu servislere gönderilir: dictionaryapi.dev, MyMemory,
-Google çeviri. Bu servislere kimlik bilgileriniz gönderilmez.
+**Üçüncü taraf servisler.** Türkçe karşılıklar uygulamanın içindeki sözlükten (Wiktionary) gelir.
+Bir kelimeye dokunduğunuzda İngilizce tanım ve telaffuz için yalnızca o kelime dictionaryapi.dev'e
+gönderilir. Kelime sözlükte yoksa ya da siz isterseniz çeviri için MyMemory ve Google çeviri
+servislerine de gönderilir. Bu servislere kimlik bilgileriniz gönderilmez.
 
 **Yapmadıklarımız.** Reklam göstermiyoruz, analitik veya takip aracı kullanmıyoruz,
 verilerinizi satmıyoruz ya da paylaşmıyoruz.
@@ -39,8 +40,10 @@ Silme talebi en geç 30 gün içinde tamamlanır. KVKK kapsamındaki taleplerini
 - **Guest mode:** no account needed; your cards, texts and stats stay on your device.
 - **With an account** we store your email address (sign-in and verification) and your flashcards,
   review history and saved texts (sync across devices), hosted on Supabase.
-- **Third parties:** when you tap a word, only that word or short text is sent to
-  dictionaryapi.dev, MyMemory and Google translation to fetch definitions and translations.
+- **Third parties:** Turkish meanings come from a dictionary bundled in the app (Wiktionary).
+  When you tap a word, only that word is sent to dictionaryapi.dev for the English definition and
+  audio; if it is not in the bundled dictionary, or you ask for it, it is also sent to MyMemory
+  and Google translation.
   No identity data is sent to them.
 - **We do not** show ads, use analytics or tracking, sell or share your data.
 - **Deletion:** delete your account and all data in-app (Settings → Delete account) or via

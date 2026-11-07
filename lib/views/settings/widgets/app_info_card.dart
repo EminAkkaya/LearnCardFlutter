@@ -45,6 +45,15 @@ class AppInfoCard extends StatelessWidget {
           ListTile(
             leading: CircleAvatar(
               backgroundColor: primaryColor.withValues(alpha: 0.15),
+              child: Icon(Icons.menu_book_rounded, color: primaryColor),
+            ),
+            title: const Text('Sözlük Verisi'),
+            subtitle: const Text('Wiktionary katkıcıları · CC BY-SA 4.0'),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: primaryColor.withValues(alpha: 0.15),
               child: Icon(Icons.privacy_tip_outlined, color: primaryColor),
             ),
             title: const Text('Gizlilik Politikası'),

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'offline_dictionary.dart';
+
 class WordDefinitionResult {
   final String word;
   final String definition;
@@ -17,10 +19,20 @@ class WordDefinitionResult {
     required this.partOfSpeech,
     required this.audioUrl,
   });
+
+  WordDefinitionResult withTranslation(String tr) => WordDefinitionResult(
+        word: word,
+        definition: definition,
+        trTranslation: tr,
+        phonetic: phonetic,
+        partOfSpeech: partOfSpeech,
+        audioUrl: audioUrl,
+      );
 }
 
 class DictionaryService {
   static final Map<String, WordDefinitionResult> _cache = {};
+  static const String notFoundText = 'Çeviri bulunamadı';
 
   /// Translates English text into Turkish using Google Translate GTX API with MyMemory fallback
   static Future<String> translateToTurkish(String text) async {
@@ -60,17 +72,24 @@ class DictionaryService {
       }
     } catch (_) {}
 
-    return 'Çeviri bulunamadı';
+    return notFoundText;
   }
 
-  /// Fetches dictionary definitions, phonetics, audio, and Turkish translation
-  static Future<WordDefinitionResult> fetchWordDefinition(String word) async {
+  /// Tanım, okunuş, ses ve Türkçe çeviri. Çeviri önce [offline] sözlükten alınır;
+  /// orada yoksa çevrimiçi servise gidilir.
+  static Future<WordDefinitionResult> fetchWordDefinition(String word, {OfflineDictionary? offline}) async {
+    final offlineTr = offline?.lookup(word)?.primaryTranslation;
+    final trFuture = offlineTr != null ? Future.value(offlineTr) : translateToTurkish(word.toLowerCase().trim());
+    final details = await fetchEnglishDetails(word);
+    return details.withTranslation(await trFuture);
+  }
+
+  /// Yalnız İngilizce bilgiler (tanım, okunuş, tür, ses); çeviri boş döner.
+  static Future<WordDefinitionResult> fetchEnglishDetails(String word) async {
     final String normalized = word.toLowerCase().trim();
     if (_cache.containsKey(normalized)) {
       return _cache[normalized]!;
     }
-
-    final Future<String> trFuture = translateToTurkish(normalized);
 
     String definition = 'Tanım bulunamadı.';
     String phonetic = '';
@@ -116,12 +135,10 @@ class DictionaryService {
       }
     } catch (_) {}
 
-    final String trTranslation = await trFuture;
-
     final result = WordDefinitionResult(
       word: normalized,
       definition: definition,
-      trTranslation: trTranslation,
+      trTranslation: '',
       phonetic: phonetic,
       partOfSpeech: partOfSpeech,
       audioUrl: audioUrl,

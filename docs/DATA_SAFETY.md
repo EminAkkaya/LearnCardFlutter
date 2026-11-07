@@ -18,8 +18,9 @@ Koddan çıkarılmıştır (2026-11-07). Yeni bir servis eklenince güncelle.
 - Kullanıcı hesabını ve verilerini silebilir (uygulama içi hesap silme, görev S3).
 
 ## Üçüncü taraf servislere giden veriler
-Kullanıcının dokunduğu **kelime/metin parçası** çeviri ve sözlük için şu servislere gönderilir
-(kişisel kimlik bilgisi gönderilmez):
+Türkçe karşılıklar uygulamaya gömülü sözlükten (Wiktionary, CC BY-SA 4.0) gelir. Kullanıcının
+dokunduğu **kelime** şu servislere gönderilir (kişisel kimlik bilgisi gönderilmez); çeviri
+servislerine yalnız kelime sözlükte yoksa ya da kullanıcı "çevrimiçi çeviri" isterse:
 - `api.dictionaryapi.dev` — İngilizce tanım ve telaffuz sesi
 - `api.mymemory.translated.net` — çeviri
 - `translate.googleapis.com` — çeviri (**resmî olmayan uç nokta, bkz. plan SEC2**)

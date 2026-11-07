@@ -41,13 +41,14 @@ dependencies:
   drift: ^2.24.2
   drift_flutter: ^0.2.4
   sqlite3_flutter_libs: ^0.5.28
+  sqlite3: ^2.4.6
+  path_provider: ^2.1.5
   audioplayers: ^6.7.1
   uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  sqlite3: ^2.4.6
   drift_dev: ^2.24.2
   build_runner: ^2.4.15
   flutter_lints: ^6.0.0
@@ -77,6 +78,10 @@ flutter:
           weight: 600
         - asset: assets/fonts/PlusJakartaSans-Bold.ttf
           weight: 700
+
+  # Çevrimdışı EN->TR sözlük (Wiktionary, CC BY-SA 4.0). Üretim: tool/dictionary/build_en_tr.py
+  assets:
+    - assets/dictionary/en_tr.sqlite.gz
 
   # To add assets to your application, add an assets section, like this:
   # assets:

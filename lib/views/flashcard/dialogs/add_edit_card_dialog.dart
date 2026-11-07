@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
+import '../../../providers/word_lookup_provider.dart';
 import '../../../services/dictionary_service.dart';
 
 class AddEditCardDialog extends ConsumerStatefulWidget {
@@ -63,7 +64,8 @@ class _AddEditCardDialogState extends ConsumerState<AddEditCardDialog> {
   Future<void> _fetchDefinition() async {
     if (_wordCtrl.text.trim().isEmpty) return;
     setState(() => _isLookingUp = true);
-    final res = await DictionaryService.fetchWordDefinition(_wordCtrl.text);
+    final dict = await ref.read(offlineDictionaryProvider.future);
+    final res = await DictionaryService.fetchWordDefinition(_wordCtrl.text, offline: dict);
     if (!mounted) return;
     setState(() {
       _trCtrl.text = res.trTranslation;

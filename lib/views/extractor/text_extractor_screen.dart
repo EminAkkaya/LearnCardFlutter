@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/text_parser.dart';
 import '../../providers/flashcard_provider.dart';
+import '../../providers/word_lookup_provider.dart';
 import '../../services/dictionary_service.dart';
 import 'widgets/extracted_word_item_card.dart';
 import 'widgets/extracted_words_header.dart';
@@ -56,9 +57,10 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
         .where((item) => _selectedWords.contains(item.word))
         .toList();
 
+    final dict = await ref.read(offlineDictionaryProvider.future);
     for (final item in targetItems) {
       try {
-        final res = await DictionaryService.fetchWordDefinition(item.word);
+        final res = await DictionaryService.fetchWordDefinition(item.word, offline: dict);
         newCardsData.add({
           'word': item.word,
           'trTranslation': res.trTranslation,
