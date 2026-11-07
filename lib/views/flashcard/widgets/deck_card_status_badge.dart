@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/feedback_colors.dart';
+import '../../../models/flashcard_model.dart';
 
 class DeckCardStatusBadge extends StatelessWidget {
   final String status;
@@ -21,7 +22,7 @@ class DeckCardStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        status.toUpperCase(),
+        cardStatusLabel(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,

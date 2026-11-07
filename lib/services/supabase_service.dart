@@ -10,6 +10,7 @@ import 'sync/drift_sync_store.dart';
 import 'sync/supabase_remote_store.dart';
 import 'sync/sync_engine.dart';
 import 'sync/sync_stores.dart';
+import 'seed_gate.dart';
 
 /// Yerel liste ve onu üreten eşitleme turunun sonucu.
 typedef SyncedList<T> = ({List<T> items, SyncResult sync});
@@ -78,6 +79,8 @@ class SupabaseService {
     }
     return result;
   }
+
+  static final SeedGate _seedGate = SeedGate();
 
   static final List<Map<String, dynamic>> _seedCards = [
     {
@@ -164,8 +167,10 @@ class SupabaseService {
 
     var cards = await appDatabase.getAllFlashcards(userId: uid);
     if (cards.isEmpty) {
-      await _insertSeedCards(uid, uploadable: result.pullSucceeded);
-      cards = await appDatabase.getAllFlashcards(userId: uid);
+      cards = await _seedGate.fillIfEmpty(
+        read: () => appDatabase.getAllFlashcards(userId: uid),
+        seed: () => _insertSeedCards(uid, uploadable: result.pullSucceeded),
+      );
     }
     return (items: cards, sync: result);
   }

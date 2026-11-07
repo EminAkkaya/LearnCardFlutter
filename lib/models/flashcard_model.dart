@@ -1,5 +1,13 @@
 import 'syncable.dart';
 
+/// Kart durumunun ekranda gösterilen Türkçe etiketi (büyük harf).
+String cardStatusLabel(String status) => switch (status) {
+      'new' => 'YENİ',
+      'learning' => 'ÖĞRENİLİYOR',
+      'mastered' => 'ÖĞRENİLDİ',
+      _ => status.toUpperCase(),
+    };
+
 class FlashcardModel implements Syncable {
   @override
   final String id;

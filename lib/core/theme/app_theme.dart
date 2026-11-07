@@ -22,6 +22,14 @@ class AppTheme {
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFF1F5F9);
 
+  /// [background] üzerinde daha okunaklı olan yazı rengi (beyaz ya da koyu lacivert).
+  static Color onColorFor(Color background) {
+    final bg = background.computeLuminance();
+    final whiteContrast = 1.05 / (bg + 0.05);
+    final darkContrast = (bg + 0.05) / (darkBg.computeLuminance() + 0.05);
+    return whiteContrast >= darkContrast ? Colors.white : darkBg;
+  }
+
   static ThemeData getLightTheme([Color primary = primaryColor]) {
     return ThemeData(
       useMaterial3: true,
@@ -31,6 +39,7 @@ class AppTheme {
         seedColor: primary,
         brightness: Brightness.light,
         primary: primary,
+        onPrimary: onColorFor(primary),
         secondary: secondaryColor,
         tertiary: accentColor,
         surface: lightSurface,
@@ -86,6 +95,7 @@ class AppTheme {
         seedColor: primary,
         brightness: Brightness.dark,
         primary: primary,
+        onPrimary: onColorFor(primary),
         secondary: secondaryColor,
         tertiary: accentColor,
         surface: darkSurface,

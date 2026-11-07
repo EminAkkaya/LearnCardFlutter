@@ -31,7 +31,7 @@ class WordDetailActionButton extends StatelessWidget {
             const Icon(Icons.check_circle_rounded, color: emerald),
             const SizedBox(width: 8),
             Text(
-              'Destede Var (${existingCard!.status.toUpperCase()})',
+              'Destede Var (${cardStatusLabel(existingCard!.status)})',
               style: const TextStyle(fontWeight: FontWeight.bold, color: emerald),
             ),
           ],

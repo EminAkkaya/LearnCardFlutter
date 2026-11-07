@@ -122,7 +122,7 @@ void main() {
         expect(find.text('pragmatic'), findsOneWidget);
         expect(find.text('Pratik, uygulamacı'), findsOneWidget);
         expect(find.text('/præɡˈmætɪk/'), findsOneWidget);
-        expect(find.text('LEARNING'), findsOneWidget);
+        expect(find.text('ÖĞRENİLİYOR'), findsOneWidget);
         expect(find.text('Tekrar: 2 | Aralık: 3g'), findsOneWidget);
 
         // Open popup menu
