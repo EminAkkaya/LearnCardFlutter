@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 
+/// Görünüm modu satırı: sade ikon kutusu, başlık, açıklama ve seçim işareti.
 class ThemeModeTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  final Color iconColor;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -13,31 +15,41 @@ class ThemeModeTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
-    required this.iconColor,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final palette = AppPalette.of(context);
     return ListTile(
       onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      leading: CircleAvatar(
-        backgroundColor: iconColor.withValues(alpha: 0.15),
-        child: Icon(icon, color: iconColor),
+      selected: isSelected,
+      selectedTileColor: scheme.primaryContainer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppPalette.radiusControl)),
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: palette.subtle,
+          borderRadius: BorderRadius.circular(AppPalette.radiusControl),
+          border: Border.all(color: palette.border),
+        ),
+        child: Icon(icon, size: 18, color: isSelected ? scheme.primary : palette.textSecondary),
       ),
       title: Text(
         title,
         style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          fontSize: 14,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          color: palette.textPrimary,
         ),
       ),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: palette.textSecondary)),
       trailing: isSelected
-          ? Icon(Icons.check_circle_rounded, color: theme.colorScheme.primary)
-          : const Icon(Icons.circle_outlined, color: Colors.grey),
+          ? Icon(LucideIcons.circleCheck, size: 20, color: scheme.primary)
+          : Icon(LucideIcons.circle, size: 20, color: palette.controlBorder),
     );
   }
 }

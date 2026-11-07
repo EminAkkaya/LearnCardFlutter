@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_palette.dart';
 import 'register_screen.dart';
 import 'widgets/auth_header_widget.dart';
 import 'widgets/guest_mode_section.dart';
@@ -10,7 +11,7 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -22,19 +23,18 @@ class LoginScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const AuthHeaderWidget(),
-                const SizedBox(height: 36),
+                const SizedBox(height: 32),
                 const LoginFormWidget(),
                 const SizedBox(height: 16),
                 const GuestModeSection(),
                 const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       'Hesabınız yok mu?',
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-                      ),
+                      style: TextStyle(color: palette.textSecondary),
                     ),
                     TextButton(
                       onPressed: () {
@@ -45,7 +45,7 @@ class LoginScreen extends ConsumerWidget {
                       },
                       child: const Text(
                         'Kayıt Olun',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],

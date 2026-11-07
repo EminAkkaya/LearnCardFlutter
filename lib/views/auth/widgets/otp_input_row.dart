@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../core/theme/app_palette.dart';
 
 class OtpInputRow extends StatelessWidget {
   final int otpLength;
@@ -20,6 +21,8 @@ class OtpInputRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
+    final radius = BorderRadius.circular(AppPalette.radiusControl);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -36,9 +39,10 @@ class OtpInputRow extends StatelessWidget {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
+                color: palette.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
               inputFormatters: [
                 LengthLimitingTextInputFormatter(6),
@@ -48,25 +52,20 @@ class OtpInputRow extends StatelessWidget {
                 counterText: '',
                 contentPadding: EdgeInsets.zero,
                 filled: true,
-                fillColor: theme.colorScheme.surface,
+                fillColor: WidgetStateColor.resolveWith(
+                  (states) => states.contains(WidgetState.focused) ? palette.card : palette.subtle,
+                ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                    color: theme.dividerColor.withValues(alpha: 0.3),
-                  ),
+                  borderRadius: radius,
+                  borderSide: BorderSide(color: palette.controlBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                    color: theme.dividerColor.withValues(alpha: 0.4),
-                  ),
+                  borderRadius: radius,
+                  borderSide: BorderSide(color: palette.controlBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(
-                    color: theme.colorScheme.primary,
-                    width: 2.2,
-                  ),
+                  borderRadius: radius,
+                  borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                 ),
               ),
               onChanged: (val) => onDigitChanged(index, val),

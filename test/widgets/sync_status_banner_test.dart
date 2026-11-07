@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:learncard_flutter/providers/flashcard_provider.dart';
 import 'package:learncard_flutter/providers/sync_status_provider.dart';
 import 'package:learncard_flutter/views/widgets/sync_status_banner.dart';
@@ -67,6 +68,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Tekrar dene'), findsOneWidget);
+    expect(find.byIcon(LucideIcons.refreshCwOff), findsOneWidget);
   });
 
   testWidgets('banner is empty when there is nothing to report', (tester) async {
@@ -75,6 +77,6 @@ void main() {
       child: const MaterialApp(home: Scaffold(body: SyncStatusBanner())),
     ));
     expect(find.byType(TextButton), findsNothing);
-    expect(find.byIcon(Icons.sync_problem_rounded), findsNothing);
+    expect(find.byIcon(LucideIcons.refreshCwOff), findsNothing);
   });
 }

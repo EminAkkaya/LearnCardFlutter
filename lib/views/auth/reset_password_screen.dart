@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
+import 'widgets/auth_ui.dart';
 
 /// Şifre sıfırlama e-postasındaki bağlantıyla uygulamaya dönen kullanıcının
 /// yeni şifresini belirlediği ekran.
@@ -31,8 +32,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final ok = await ref.read(authProvider.notifier).updatePassword(_passwordCtrl.text);
     if (!mounted) return;
-    messenger.showSnackBar(SnackBar(
-      content: Text(ok ? 'Şifren güncellendi.' : (ref.read(authProvider).error ?? 'Şifre güncellenemedi.')),
+    messenger.showSnackBar(buildAuthSnackBar(
+      context,
+      ok ? 'Şifren güncellendi.' : (ref.read(authProvider).error ?? 'Şifre güncellenemedi.'),
+      tone: ok ? AuthSnackTone.success : AuthSnackTone.error,
     ));
   }
 
@@ -64,19 +67,21 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Hesabın için yeni bir şifre gir.'),
+                Text(
+                  'Hesabın için yeni bir şifre gir.',
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _passwordCtrl,
                   obscureText: _obscure,
                   autofillHints: const [AutofillHints.newPassword],
                   validator: _validatePassword,
-                  decoration: InputDecoration(
+                  decoration: authInputDecoration(
+                    context,
                     labelText: 'Yeni şifre',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      tooltip: _obscure ? 'Şifreyi göster' : 'Şifreyi gizle',
-                      icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                    suffixIcon: PasswordVisibilityButton(
+                      obscured: _obscure,
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -86,17 +91,15 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   controller: _confirmCtrl,
                   obscureText: _obscure,
                   validator: (v) => v == _passwordCtrl.text ? null : 'Şifreler eşleşmiyor',
-                  decoration: const InputDecoration(
-                    labelText: 'Yeni şifre (tekrar)',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: authInputDecoration(context, labelText: 'Yeni şifre (tekrar)'),
                 ),
                 const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: isLoading ? null : _submit,
-                  child: isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Şifreyi Kaydet'),
+                SizedBox(
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: isLoading ? null : _submit,
+                    child: isLoading ? const ButtonSpinner() : const Text('Şifreyi Kaydet'),
+                  ),
                 ),
               ],
             ),

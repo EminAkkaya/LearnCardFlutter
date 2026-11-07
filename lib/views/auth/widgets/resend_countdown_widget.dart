@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ResendCountdownWidget extends StatelessWidget {
   final bool canResend;
@@ -16,16 +17,15 @@ class ResendCountdownWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(
           'Kod gelmedi mi?',
-          style: TextStyle(
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-          ),
+          style: TextStyle(color: palette.textSecondary),
         ),
         const SizedBox(width: 4),
         canResend
@@ -33,7 +33,7 @@ class ResendCountdownWidget extends StatelessWidget {
                 onPressed: isLoading ? null : onResend,
                 child: const Text(
                   'Kodu Tekrar Gönder',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
               )
             : Padding(
@@ -41,8 +41,9 @@ class ResendCountdownWidget extends StatelessWidget {
                 child: Text(
                   'Tekrar gönder (${secondsRemaining.toString().padLeft(2, '0')}s)',
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                    color: palette.textMuted,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
               ),

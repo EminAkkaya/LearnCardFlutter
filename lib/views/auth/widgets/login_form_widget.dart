@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../providers/auth_provider.dart';
 import '../dialogs/forgot_password_dialog.dart';
 import '../email_verification_screen.dart';
+import 'auth_ui.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class LoginFormWidget extends ConsumerStatefulWidget {
   const LoginFormWidget({super.key});
@@ -38,13 +41,7 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Başarıyla giriş yapıldı! Hoş geldiniz.'),
-          backgroundColor: Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAuthSnackBar(context, 'Başarıyla giriş yapıldı! Hoş geldiniz.', tone: AuthSnackTone.success);
       if (Navigator.canPop(context)) {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
@@ -54,15 +51,14 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
       final isUnconfirmed = currentAuthState.pendingEmail != null &&
           currentAuthState.pendingEmail!.isNotEmpty;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: isUnconfirmed ? const Color(0xFF6366F1) : Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          action: isUnconfirmed
+      showAuthSnackBar(
+        context,
+        error,
+        tone: isUnconfirmed ? AuthSnackTone.info : AuthSnackTone.error,
+        action: isUnconfirmed
               ? SnackBarAction(
                   label: 'Doğrula',
-                  textColor: Colors.white,
+                  textColor: FeedbackColors.of(context).onAccent,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -73,7 +69,6 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
                   },
                 )
               : null,
-        ),
       );
 
       if (isUnconfirmed) {
@@ -89,7 +84,6 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
 
     return Form(
@@ -101,13 +95,11 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'E-posta Adresi',
               hintText: 'ornek@email.com',
-              prefixIcon: const Icon(Icons.email_outlined),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-              filled: true,
-              fillColor: theme.colorScheme.surface,
+              prefixIcon: LucideIcons.mail,
             ),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
@@ -125,18 +117,14 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
             obscureText: _obscurePassword,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _handleLogin(),
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'Şifre',
-              prefixIcon: const Icon(Icons.lock_outline_rounded),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                ),
+              prefixIcon: LucideIcons.lock,
+              suffixIcon: PasswordVisibilityButton(
+                obscured: _obscurePassword,
                 onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
               ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-              filled: true,
-              fillColor: theme.colorScheme.surface,
             ),
             validator: (val) {
               if (val == null || val.isEmpty) return 'Lütfen şifrenizi girin.';
@@ -151,42 +139,18 @@ class _LoginFormWidgetState extends ConsumerState<LoginFormWidget> {
                 context,
                 initialEmail: _emailController.text,
               ),
-              child: Text(
+              child: const Text(
                 'Şifremi Unuttum',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
               ),
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 52,
+            height: 48,
             child: ElevatedButton(
               onPressed: authState.isLoading ? null : _handleLogin,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: authState.isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Giriş Yap',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+              child: authState.isLoading ? const ButtonSpinner() : const Text('Giriş Yap'),
             ),
           ),
         ],

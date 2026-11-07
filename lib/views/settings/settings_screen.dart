@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../core/theme/app_palette.dart';
 import '../../providers/theme_provider.dart';
 import 'widgets/account_section_card.dart';
 import 'widgets/app_info_card.dart';
@@ -14,11 +16,12 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
     final themeState = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ayarlar'), elevation: 0),
+      appBar: AppBar(title: const Text('Ayarlar')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
@@ -28,22 +31,22 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             LivePreviewCard(themeState: themeState),
             const SizedBox(height: 20),
-            const SettingsSectionTitle(title: 'Görünüm Modu', icon: Icons.palette_outlined),
+            const SettingsSectionTitle(title: 'Görünüm Modu', icon: LucideIcons.sunMoon),
             const SizedBox(height: 10),
             const ThemeModeSelectorCard(),
             const SizedBox(height: 24),
-            const SettingsSectionTitle(title: 'Ana Tema Rengi', icon: Icons.color_lens_outlined),
+            const SettingsSectionTitle(title: 'Ana Tema Rengi', icon: LucideIcons.palette),
             const SizedBox(height: 6),
             Text(
               'Uygulamanın vurgu ve buton renklerini kişiselleştirin',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+              style: theme.textTheme.bodySmall?.copyWith(fontSize: 13, color: palette.textSecondary),
             ),
             const SizedBox(height: 12),
             const PrimaryColorPickerCard(),
             const SizedBox(height: 24),
-            const SettingsSectionTitle(title: 'Uygulama Bilgisi', icon: Icons.info_outline_rounded),
+            const SettingsSectionTitle(title: 'Uygulama Bilgisi', icon: LucideIcons.info),
             const SizedBox(height: 10),
-            AppInfoCard(primaryColor: themeState.primaryColor),
+            const AppInfoCard(),
             const SizedBox(height: 24),
             Center(
               child: TextButton.icon(
@@ -57,9 +60,9 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.restore_rounded, size: 18),
+                icon: const Icon(LucideIcons.rotateCcw, size: 18),
                 label: const Text('Varsayılan Temaya Dön'),
-                style: TextButton.styleFrom(foregroundColor: theme.hintColor),
+                style: TextButton.styleFrom(foregroundColor: palette.textSecondary),
               ),
             ),
             const SizedBox(height: 16),

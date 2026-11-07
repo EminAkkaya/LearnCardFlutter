@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../providers/auth_provider.dart';
 import '../email_verification_screen.dart';
+import 'auth_ui.dart';
 
 class RegisterFormWidget extends ConsumerStatefulWidget {
   const RegisterFormWidget({super.key});
@@ -45,12 +47,10 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hesap oluşturuldu! Lütfen e-postanıza gelen 6 haneli kodu doğrulayın.'),
-          backgroundColor: Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAuthSnackBar(
+        context,
+        'Hesap oluşturuldu! Lütfen e-postanıza gelen 6 haneli kodu doğrulayın.',
+        tone: AuthSnackTone.success,
       );
       Navigator.pushReplacement(
         context,
@@ -60,19 +60,12 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
       );
     } else {
       final error = ref.read(authProvider).error ?? 'Kayıt işlemi başarısız oldu.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAuthSnackBar(context, error, tone: AuthSnackTone.error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
 
     return Form(
@@ -83,12 +76,10 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
           TextFormField(
             controller: _nameController,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'Ad Soyad',
-              prefixIcon: const Icon(Icons.person_outline_rounded),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-              filled: true,
-              fillColor: theme.colorScheme.surface,
+              prefixIcon: LucideIcons.user,
             ),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
@@ -102,13 +93,11 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'E-posta Adresi',
               hintText: 'ornek@email.com',
-              prefixIcon: const Icon(Icons.email_outlined),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-              filled: true,
-              fillColor: theme.colorScheme.surface,
+              prefixIcon: LucideIcons.mail,
             ),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
@@ -125,18 +114,14 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
             controller: _passwordController,
             obscureText: _obscurePassword,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'Şifre',
-              prefixIcon: const Icon(Icons.lock_outline_rounded),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                ),
+              prefixIcon: LucideIcons.lock,
+              suffixIcon: PasswordVisibilityButton(
+                obscured: _obscurePassword,
                 onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
               ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-              filled: true,
-              fillColor: theme.colorScheme.surface,
             ),
             validator: (val) {
               if (val == null || val.isEmpty) return 'Lütfen şifrenizi girin.';
@@ -150,18 +135,14 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
             obscureText: _obscureConfirmPassword,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _handleRegister(),
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'Şifre Tekrar',
-              prefixIcon: const Icon(Icons.lock_reset_rounded),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                ),
+              prefixIcon: LucideIcons.lockKeyhole,
+              suffixIcon: PasswordVisibilityButton(
+                obscured: _obscureConfirmPassword,
                 onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
               ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-              filled: true,
-              fillColor: theme.colorScheme.surface,
             ),
             validator: (val) {
               if (val == null || val.isEmpty) return 'Lütfen şifrenizi tekrar girin.';
@@ -171,30 +152,10 @@ class _RegisterFormWidgetState extends ConsumerState<RegisterFormWidget> {
           ),
           const SizedBox(height: 28),
           SizedBox(
-            height: 52,
+            height: 48,
             child: ElevatedButton(
               onPressed: authState.isLoading ? null : _handleRegister,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: authState.isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Hesap Oluştur',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+              child: authState.isLoading ? const ButtonSpinner() : const Text('Hesap Oluştur'),
             ),
           ),
         ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../../../providers/reading_provider.dart';
@@ -63,12 +65,13 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authProvider.select((s) => s.isLoading));
+    final feedback = FeedbackColors.of(context);
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.delete_forever_rounded, color: Colors.redAccent),
-          SizedBox(width: 10),
-          Expanded(child: Text('Hesabı Sil')),
+          Icon(LucideIcons.trash2, size: 20, color: feedback.danger),
+          const SizedBox(width: 10),
+          const Expanded(child: Text('Hesabı Sil')),
         ],
       ),
       content: Column(
@@ -87,10 +90,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
             autofocus: true,
             textCapitalization: TextCapitalization.characters,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
+            decoration: const InputDecoration(isDense: true),
           ),
         ],
       ),
@@ -102,14 +102,14 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
         ElevatedButton(
           onPressed: _confirmed && !isLoading ? _delete : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
-            foregroundColor: Colors.white,
+            backgroundColor: feedback.danger,
+            foregroundColor: feedback.onAccent,
           ),
           child: isLoading
-              ? const SizedBox(
+              ? SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: feedback.onAccent),
                 )
               : const Text('Kalıcı Olarak Sil'),
         ),

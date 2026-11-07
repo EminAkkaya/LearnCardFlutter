@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../providers/auth_provider.dart';
 
 class GuestModeSection extends ConsumerWidget {
@@ -7,25 +9,26 @@ class GuestModeSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: Divider(color: theme.dividerColor.withValues(alpha: 0.3))),
+            Expanded(child: Divider(color: palette.border)),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(
                 'VEYA',
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                  color: palette.textMuted,
                 ),
               ),
             ),
-            Expanded(child: Divider(color: theme.dividerColor.withValues(alpha: 0.3))),
+            Expanded(child: Divider(color: palette.border)),
           ],
         ),
         const SizedBox(height: 16),
@@ -36,26 +39,17 @@ class GuestModeSection extends ConsumerWidget {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
-          icon: const Icon(Icons.person_outline_rounded),
+          icon: const Icon(LucideIcons.userRound, size: 18),
           label: const Text('Giriş Yapmadan Kullan (Misafir Modu)'),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            side: BorderSide(
-              color: theme.colorScheme.primary.withValues(alpha: 0.4),
-            ),
           ),
         ),
         const SizedBox(height: 6),
         Center(
           child: Text(
             'Verileriniz yalnızca bu cihazda yerel olarak saklanır',
-            style: TextStyle(
-              fontSize: 11,
-              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
-            ),
+            style: TextStyle(fontSize: 12, color: palette.textMuted),
           ),
         ),
       ],

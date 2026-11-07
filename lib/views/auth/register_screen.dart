@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_palette.dart';
 import 'widgets/guest_mode_section.dart';
 import 'widgets/register_form_widget.dart';
 
@@ -9,6 +10,7 @@ class RegisterScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,35 +27,37 @@ class RegisterScreen extends ConsumerWidget {
                 Text(
                   'Yeni Hesap Oluştur',
                   style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: palette.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Kendi kelime desteni oluştur, makaleleri oku ve tüm cihazlarında senkronize kal.',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                    color: palette.textSecondary,
+                    height: 1.5,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
                 const RegisterFormWidget(),
                 const SizedBox(height: 16),
                 const GuestModeSection(),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       'Zaten bir hesabınız var mı?',
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-                      ),
+                      style: TextStyle(color: palette.textSecondary),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
                         'Giriş Yapın',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],

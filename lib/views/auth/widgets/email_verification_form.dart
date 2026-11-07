@@ -2,10 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../providers/auth_provider.dart';
 import '../auth_gate.dart';
 import '../dialogs/change_email_dialog.dart';
 import 'auth_header_widget.dart';
+import 'auth_ui.dart';
 import 'email_badge_widget.dart';
 import 'otp_input_row.dart';
 import 'resend_countdown_widget.dart';
@@ -110,12 +112,10 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
   Future<void> _handleVerify() async {
     final token = _getEnteredOtp();
     if (token.length != _otpLength) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lütfen 6 haneli doğrulama kodunun tamamını girin.'),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAuthSnackBar(
+        context,
+        'Lütfen 6 haneli doğrulama kodunun tamamını girin.',
+        tone: AuthSnackTone.error,
       );
       return;
     }
@@ -128,14 +128,10 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'E-posta adresiniz başarıyla doğrulandı! Giriş yapılıyor...',
-          ),
-          backgroundColor: Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAuthSnackBar(
+        context,
+        'E-posta adresiniz başarıyla doğrulandı! Giriş yapılıyor...',
+        tone: AuthSnackTone.success,
       );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AuthGate()),
@@ -144,13 +140,7 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
     } else {
       final error =
           ref.read(authProvider).error ?? 'Geçersiz veya süresi dolmuş kod.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAuthSnackBar(context, error, tone: AuthSnackTone.error);
     }
   }
 
@@ -164,24 +154,16 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
     if (!mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Yeni doğrulama kodu e-posta adresinize gönderildi.'),
-          backgroundColor: Color(0xFF10B981),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showAuthSnackBar(
+        context,
+        'Yeni doğrulama kodu e-posta adresinize gönderildi.',
+        tone: AuthSnackTone.success,
       );
       _startResendTimer();
     } else {
       final error =
           ref.read(authProvider).error ?? 'Kod gönderilirken bir hata oluştu.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showAuthSnackBar(context, error, tone: AuthSnackTone.error);
     }
   }
 
@@ -203,7 +185,6 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
 
     return Column(
@@ -213,7 +194,7 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
           title: 'Hesabınızı Doğrulayın',
           subtitle:
               'Lütfen aşağıdaki e-posta adresine gönderdiğimiz 6 haneli güvenlik kodunu girin:',
-          icon: Icons.mark_email_read_rounded,
+          icon: LucideIcons.mailCheck,
         ),
         const SizedBox(height: 10),
         EmailBadgeWidget(
@@ -230,30 +211,12 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
         ),
         const SizedBox(height: 28),
         SizedBox(
-          height: 52,
+          height: 48,
           child: ElevatedButton(
             onPressed: authState.isLoading ? null : _handleVerify,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
             child: authState.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    'Kodu Doğrula ve Giriş Yap',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                ? const ButtonSpinner()
+                : const Text('Kodu Doğrula ve Giriş Yap'),
           ),
         ),
         const SizedBox(height: 24),
@@ -275,11 +238,8 @@ class _EmailVerificationFormState extends ConsumerState<EmailVerificationForm> {
                 );
               }
             },
-            icon: const Icon(Icons.logout_rounded, size: 18),
-            label: const Text(
-              'Giriş Ekranına Geri Dön',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+            icon: const Icon(LucideIcons.arrowLeft, size: 16),
+            label: const Text('Giriş Ekranına Geri Dön'),
           ),
         ),
       ],

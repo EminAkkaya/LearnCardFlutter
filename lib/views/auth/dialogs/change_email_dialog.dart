@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../widgets/auth_ui.dart';
 
 class ChangeEmailDialog extends StatefulWidget {
   final String currentEmail;
@@ -46,9 +48,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
   void _submit() {
     final newEmail = _newEmailController.text.trim();
     if (newEmail.isEmpty || !newEmail.contains('@') || !newEmail.contains('.')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Geçerli bir e-posta adresi girin.')),
-      );
+      showAuthSnackBar(context, 'Geçerli bir e-posta adresi girin.', tone: AuthSnackTone.error);
       return;
     }
 
@@ -59,12 +59,11 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.edit_note_rounded, color: Color(0xFF6366F1)),
-          SizedBox(width: 10),
-          Text('E-postayı Değiştir'),
+          Icon(LucideIcons.squarePen, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 10),
+          const Flexible(child: Text('E-postayı Değiştir')),
         ],
       ),
       content: Column(
@@ -73,16 +72,16 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
         children: [
           const Text(
             'Doğrulama kodunun gönderileceği yeni e-posta adresini girin:',
-            style: TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _newEmailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'Yeni E-posta Adresi',
-              prefixIcon: const Icon(Icons.email_outlined),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              prefixIcon: LucideIcons.mail,
             ),
           ),
         ],

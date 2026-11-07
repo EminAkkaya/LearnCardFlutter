@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
 /// Uygulama içi gizlilik politikası. Metin docs/PRIVACY_POLICY.md ile aynı
 /// tutulmalıdır; mağazalar ayrıca herkese açık bir URL ister (RELEASE.md §6).
@@ -43,6 +44,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Gizlilik Politikası')),
       body: SafeArea(
@@ -50,9 +52,19 @@ class PrivacyPolicyScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           children: [
             for (final (title, body) in _sections) ...[
-              Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: palette.textPrimary,
+                ),
+              ),
               const SizedBox(height: 6),
-              Text(body, style: theme.textTheme.bodyMedium?.copyWith(height: 1.5)),
+              Text(
+                body,
+                style: theme.textTheme.bodyMedium?.copyWith(height: 1.5, color: palette.textSecondary),
+              ),
               const SizedBox(height: 20),
             ],
           ],

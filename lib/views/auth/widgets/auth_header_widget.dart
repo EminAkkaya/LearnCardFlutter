@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 
+/// Giriş ekranı başlığı: küçük opak logo kutusu, başlık ve açıklama.
 class AuthHeaderWidget extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -9,54 +12,41 @@ class AuthHeaderWidget extends StatelessWidget {
     super.key,
     this.title = 'LearnCard',
     this.subtitle = 'Kelimelerinizi ve metinlerinizi güvenle senkronize edin',
-    this.icon = Icons.style_rounded,
+    this.icon = LucideIcons.layers,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                theme.colorScheme.primary,
-                theme.colorScheme.secondary,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.primary.withValues(alpha: 0.35),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(AppPalette.radiusCard),
           ),
-          child: Icon(icon, size: 42, color: Colors.white),
+          child: Icon(icon, size: 24, color: theme.colorScheme.onPrimary),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         Text(
           title,
           textAlign: TextAlign.center,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.6,
+            color: palette.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-          ),
+          style: theme.textTheme.bodyMedium?.copyWith(color: palette.textSecondary, height: 1.5),
         ),
       ],
     );

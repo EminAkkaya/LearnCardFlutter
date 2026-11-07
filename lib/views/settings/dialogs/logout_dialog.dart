@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../../../providers/reading_provider.dart';
@@ -16,13 +18,13 @@ class LogoutDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = AppPalette.of(context);
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.logout_rounded, color: Colors.redAccent),
-          SizedBox(width: 10),
-          Text('Çıkış Yap'),
+          Icon(LucideIcons.logOut, size: 20, color: palette.textSecondary),
+          const SizedBox(width: 10),
+          const Flexible(child: Text('Çıkış Yap')),
         ],
       ),
       content: const Text('Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
@@ -41,10 +43,6 @@ class LogoutDialog extends ConsumerWidget {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
-            foregroundColor: Colors.white,
-          ),
           child: const Text('Çıkış Yap'),
         ),
       ],

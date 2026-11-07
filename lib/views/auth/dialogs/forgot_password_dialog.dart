@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../widgets/auth_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/auth_provider.dart';
 
@@ -36,9 +38,7 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
   Future<void> _submitReset() async {
     final email = _resetEmailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Geçerli bir e-posta adresi girin.')),
-      );
+      showAuthSnackBar(context, 'Geçerli bir e-posta adresi girin.', tone: AuthSnackTone.error);
       return;
     }
 
@@ -47,28 +47,23 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
     if (!mounted) return;
 
     final error = ref.read(authProvider).error;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.'
-              : (error ?? 'Sıfırlama e-postası gönderilemedi.'),
-        ),
-        backgroundColor: success ? const Color(0xFF10B981) : Colors.redAccent,
-        behavior: SnackBarBehavior.floating,
-      ),
+    showAuthSnackBar(
+      context,
+      success
+          ? 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.'
+          : (error ?? 'Sıfırlama e-postası gönderilemedi.'),
+      tone: success ? AuthSnackTone.success : AuthSnackTone.error,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.lock_reset_rounded, color: Color(0xFF6366F1)),
-          SizedBox(width: 10),
-          Text('Şifre Sıfırlama'),
+          Icon(LucideIcons.keyRound, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 10),
+          const Flexible(child: Text('Şifre Sıfırlama')),
         ],
       ),
       content: Column(
@@ -77,16 +72,16 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
         children: [
           const Text(
             'Hesabınıza kayıtlı e-posta adresinizi girin. Şifre sıfırlama bağlantısı gönderilecektir.',
-            style: TextStyle(fontSize: 13),
+            style: TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _resetEmailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration: authInputDecoration(
+              context,
               labelText: 'E-posta Adresi',
-              prefixIcon: const Icon(Icons.email_outlined),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              prefixIcon: LucideIcons.mail,
             ),
           ),
         ],
