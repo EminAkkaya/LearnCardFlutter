@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../core/theme/app_palette.dart';
 import '../../providers/flashcard_provider.dart';
 import '../games/mini_games_hub_screen.dart';
 import 'dialogs/add_edit_card_dialog.dart';
@@ -27,13 +29,14 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
   Widget build(BuildContext context) {
     final cardState = ref.watch(flashcardProvider);
     final notifier = ref.read(flashcardProvider.notifier);
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Deste Yönetimi'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.sports_esports_rounded),
+            icon: const Icon(LucideIcons.gamepad2, size: 20),
             tooltip: 'Mini Oyunlar & Alıştırmalar',
             onPressed: () => Navigator.push(
               context,
@@ -41,7 +44,7 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(LucideIcons.refreshCw, size: 20),
             tooltip: 'Kartları Yenile',
             onPressed: () => notifier.loadCards(),
           ),
@@ -49,8 +52,17 @@ class _DeckManagerScreenState extends ConsumerState<DeckManagerScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => AddEditCardDialog.show(context, ref),
-        icon: const Icon(Icons.add_rounded),
+        icon: const Icon(LucideIcons.plus, size: 20),
         label: const Text('Yeni Kart'),
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppPalette.radiusControl),
+        ),
       ),
       body: CustomScrollView(
         slivers: [

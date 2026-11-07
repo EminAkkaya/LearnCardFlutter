@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class DeckSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -19,18 +20,13 @@ class DeckSearchBar extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: 'Kartlarda ara (Kelime, çeviri)...',
-        prefixIcon: const Icon(Icons.search_rounded),
+        prefixIcon: const Icon(LucideIcons.search, size: 18),
         suffixIcon: controller.text.isNotEmpty
             ? IconButton(
-                icon: const Icon(Icons.clear_rounded),
+                icon: const Icon(LucideIcons.x, size: 18),
                 onPressed: onClear,
               )
             : null,
-        filled: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
       ),
     );
   }

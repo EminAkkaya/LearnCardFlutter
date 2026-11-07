@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/flashcard_model.dart';
+import 'deck_card_status_badge.dart';
 
 class FlashcardFrontView extends StatelessWidget {
   final FlashcardModel card;
@@ -9,37 +12,21 @@ class FlashcardFrontView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Flexible(
-          flex: 0,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              cardStatusLabel(card.status),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
+        Flexible(flex: 0, child: DeckCardStatusBadge(status: card.status)),
         const Spacer(),
         Text(
           card.word,
           softWrap: true,
           style: theme.textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.6,
+            height: 1.15,
+            color: palette.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -50,7 +37,7 @@ class FlashcardFrontView extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontStyle: FontStyle.italic,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              color: palette.textSecondary,
             ),
           ),
         ],
@@ -58,36 +45,41 @@ class FlashcardFrontView extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             '(${card.partOfSpeech})',
-            style: TextStyle(fontSize: 14, color: theme.colorScheme.secondary),
+            style: TextStyle(fontSize: 13, color: palette.textMuted),
           ),
         ],
         if (card.exampleSentence.isNotEmpty) ...[
           const SizedBox(height: 24),
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.5,
-              ),
-              borderRadius: BorderRadius.circular(12),
+              color: palette.subtle,
+              borderRadius: BorderRadius.circular(AppPalette.radiusControl),
+              border: Border.all(color: palette.border),
             ),
             child: Text(
               '"${card.exampleSentence}"',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                fontStyle: FontStyle.italic,
+                color: palette.textSecondary,
+              ),
             ),
           ),
         ],
         const Spacer(),
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.touch_app_rounded, size: 18, color: Colors.grey),
-            SizedBox(width: 6),
+            Icon(LucideIcons.pointer, size: 16, color: palette.textMuted),
+            const SizedBox(width: 6),
             Flexible(
               child: Text(
                 'Cevap için karta dokunun',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
+                style: TextStyle(fontSize: 13, color: palette.textMuted),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../providers/stats_provider.dart';
 import '../settings/settings_screen.dart';
@@ -32,7 +33,7 @@ class StatsOverviewScreen extends ConsumerWidget {
         title: const Text('Gelişim & İstatistikler'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_rounded),
+            icon: const Icon(LucideIcons.settings, size: 20),
             tooltip: 'Ayarlar',
             onPressed: () => _openSettings(context),
           ),
@@ -45,22 +46,21 @@ class StatsOverviewScreen extends ConsumerWidget {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               StreakHeaderCard(userStats: userStats),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               TodayActivityCard(todayActivity: userStats.todayActivity, onNavigateToTab: onNavigateToTab),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               WeeklyActivityTrendCard(activities: userStats.last7DaysActivities),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               DeckDistributionCard(cardState: cardState, onNavigateToTab: onNavigateToTab),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               MinigamesStatsCard(totalGameScore: userStats.totalGameScore, totalGamesPlayed: userStats.totalGamesPlayed),
-              const SizedBox(height: 20),
-              StatsQuickActionList(dueCount: cardState.dueCards.length, onNavigateToTab: onNavigateToTab),
               const SizedBox(height: 24),
+              StatsQuickActionList(dueCount: cardState.dueCards.length, onNavigateToTab: onNavigateToTab),
             ],
           ),
         ),

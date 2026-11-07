@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../services/srs_service.dart';
 import 'flashcard_back_view.dart';
@@ -33,7 +34,7 @@ class _FlashcardItemViewState extends State<FlashcardItemView>
     super.initState();
     _flipController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: AppPalette.motionSlow,
     );
     _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
@@ -59,7 +60,7 @@ class _FlashcardItemViewState extends State<FlashcardItemView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
     final card = widget.card;
 
     return GestureDetector(
@@ -75,45 +76,23 @@ class _FlashcardItemViewState extends State<FlashcardItemView>
               ..setEntry(3, 2, 0.001)
               ..rotateY(angle),
             alignment: Alignment.center,
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(28.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: LinearGradient(
-                    colors: isBackVisible
-                        ? [
-                            theme.colorScheme.secondaryContainer,
-                            theme.colorScheme.surface,
-                          ]
-                        : [
-                            theme.colorScheme.surface,
-                            theme.colorScheme.primaryContainer.withValues(
-                              alpha: 0.3,
-                            ),
-                          ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: FillOrScroll(
-                  child: isBackVisible
-                      ? Transform(
-                          transform: Matrix4.identity()..rotateY(pi),
-                          alignment: Alignment.center,
-                          child: FlashcardBackView(
-                            card: card,
-                            previews: widget.previews,
-                            onRating: widget.onRating,
-                          ),
-                        )
-                      : FlashcardFrontView(card: card),
-                ),
+            // Opak kart: 1px kenarlık + açık temada hafif gölge; gradient yok.
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24.0),
+              decoration: palette.cardDecoration(),
+              child: FillOrScroll(
+                child: isBackVisible
+                    ? Transform(
+                        transform: Matrix4.identity()..rotateY(pi),
+                        alignment: Alignment.center,
+                        child: FlashcardBackView(
+                          card: card,
+                          previews: widget.previews,
+                          onRating: widget.onRating,
+                        ),
+                      )
+                    : FlashcardFrontView(card: card),
               ),
             ),
           );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/feedback_colors.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../flashcard_review_screen.dart';
@@ -58,7 +59,13 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
 
   @override
   Widget build(BuildContext context) {
-    final fb = FeedbackColors.of(context);
+    final palette = AppPalette.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final sectionLabel = TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w500,
+      color: palette.textSecondary,
+    );
     final matching = _getMatchingCards();
     final availableCount = matching.length;
     final actualCount = (_countOption == 0 || _countOption > availableCount)
@@ -81,21 +88,25 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+                color: palette.border,
+                borderRadius: BorderRadius.circular(AppPalette.radiusPill),
               ),
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Icon(Icons.school_rounded, color: fb.success, size: 28),
+              Icon(LucideIcons.graduationCap, color: scheme.primary, size: 20),
               const SizedBox(width: 10),
-              Text(
-                'Özel Çalışma Ayarları',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              Flexible(
+                child: Text(
+                  'Özel Çalışma Ayarları',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: palette.textPrimary,
+                      ),
+                ),
               ),
             ],
           ),
@@ -104,11 +115,11 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
             'Algoritmayı etkilemeden serbest çalışma yapın.',
             style: TextStyle(
               fontSize: 13,
-              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              color: palette.textSecondary,
             ),
           ),
           const Divider(height: 24),
-          const Text('Kart Kategorisi / Durumu', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('Kart Kategorisi / Durumu', style: sectionLabel),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -142,7 +153,7 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
             ],
           ),
           const SizedBox(height: 20),
-          const Text('Çalışılacak Kart Sayısı', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text('Çalışılacak Kart Sayısı', style: sectionLabel),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -157,8 +168,14 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
           const SizedBox(height: 16),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Kartları Karıştır', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-            subtitle: const Text('Soruların sırasını rastgele değiştirir', style: TextStyle(fontSize: 12)),
+            title: Text(
+              'Kartları Karıştır',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: palette.textPrimary),
+            ),
+            subtitle: Text(
+              'Soruların sırasını rastgele değiştirir',
+              style: TextStyle(fontSize: 12, color: palette.textMuted),
+            ),
             value: _shuffle,
             onChanged: (val) => setState(() => _shuffle = val),
           ),
@@ -167,19 +184,24 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(12),
+              color: palette.subtle,
+              borderRadius: BorderRadius.circular(AppPalette.radiusControl),
+              border: Border.all(color: palette.border),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline_rounded, color: Theme.of(context).colorScheme.primary, size: 20),
+                Icon(LucideIcons.info, color: scheme.primary, size: 18),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     availableCount == 0
                         ? 'Seçilen kategoride kullanılabilir kart yok.'
                         : 'Toplam $availableCount kart arasından $actualCount kelime çalışılacak.',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: palette.textPrimary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
               ],
@@ -188,16 +210,11 @@ class _CustomStudySheetContentState extends State<CustomStudySheetContent> {
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 48,
             child: ElevatedButton.icon(
               onPressed: availableCount == 0 ? null : () => _startStudy(matching, actualCount),
-              icon: const Icon(Icons.play_arrow_rounded),
-              label: const Text('Çalışmayı Başlat', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: fb.success,
-                foregroundColor: fb.onAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
+              icon: const Icon(LucideIcons.play, size: 18),
+              label: const Text('Çalışmayı Başlat'),
             ),
           ),
         ],

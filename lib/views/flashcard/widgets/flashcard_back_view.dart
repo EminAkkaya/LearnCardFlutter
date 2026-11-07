@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/utils/audio_helper.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../services/srs_service.dart';
@@ -19,6 +21,13 @@ class FlashcardBackView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
+    final sectionLabel = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.6,
+      color: palette.textSecondary,
+    );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -31,52 +40,42 @@ class FlashcardBackView extends StatelessWidget {
                 card.word,
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.3,
+                  color: palette.textPrimary,
                 ),
               ),
             ),
             if (card.audioUrl.isNotEmpty)
-              IconButton.filledTonal(
+              IconButton.outlined(
                 onPressed: () => AudioHelper.playAudio(card.audioUrl),
-                icon: const Icon(Icons.volume_up_rounded),
+                icon: const Icon(LucideIcons.volume2, size: 18),
               ),
           ],
         ),
         const Divider(height: 24),
         const Spacer(),
-        Text(
-          'TÜRKÇE ÇEVİRİ',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-            color: theme.colorScheme.secondary,
-          ),
-        ),
+        Text('TÜRKÇE ÇEVİRİ', style: sectionLabel),
         const SizedBox(height: 8),
         Text(
           card.trTranslation.isNotEmpty ? card.trTranslation : 'Çeviri bulunamadı',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: palette.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
         if (card.definition.isNotEmpty) ...[
-          Text(
-            'İNGİLİZCE TANIM',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: theme.colorScheme.secondary,
-            ),
-          ),
+          Text('İNGİLİZCE TANIM', style: sectionLabel),
           const SizedBox(height: 6),
           Text(
             card.definition,
-            style: const TextStyle(fontSize: 15),
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.5,
+              color: palette.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../../../providers/word_lookup_provider.dart';
@@ -135,7 +136,7 @@ class _AddEditCardDialogState extends ConsumerState<AddEditCardDialog> {
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.search_rounded),
+                        : const Icon(LucideIcons.search, size: 18),
                     tooltip: 'Otomatik Çeviri & Sözlük Getir',
                   ),
                 ],

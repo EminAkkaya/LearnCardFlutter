@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/feedback_colors.dart';
 import '../../../providers/flashcard_provider.dart';
 import 'deck_distribution_legend_tile.dart';
 
+/// Deste durum dağılımı: bölümlenmiş yatay şerit (§9) + lejant.
 class DeckDistributionCard extends StatelessWidget {
   final FlashcardState cardState;
   final Function(int tabIndex)? onNavigateToTab;
-
-  static const Color emerald = Color(0xFF10B981);
 
   const DeckDistributionCard({
     super.key,
@@ -17,6 +18,8 @@ class DeckDistributionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
+    final fb = FeedbackColors.of(context);
     final total = cardState.cards.length;
     final mastered = cardState.masteredCards.length;
     final learning = cardState.learningCards.length;
@@ -27,80 +30,83 @@ class DeckDistributionCard extends StatelessWidget {
     final double learningPct = total > 0 ? (learning / total) : 0;
     final double newPct = total > 0 ? (newCards / total) : 0;
 
+    final segments = [
+      (mastered, fb.success),
+      (learning, fb.warning),
+      (newCards, fb.info),
+    ].where((s) => s.$1 > 0).toList();
+
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(18.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Deste Durum Dağılımı',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    'Deste Durum Dağılımı',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Text(
                   'Toplam $total Kelime',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: palette.textSecondary,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppPalette.radiusPill),
               child: SizedBox(
-                height: 12,
-                child: total == 0
-                    ? Container(color: theme.dividerColor.withValues(alpha: 0.2))
+                height: 10,
+                child: segments.isEmpty
+                    ? Container(color: palette.border)
                     : Row(
                         children: [
-                          if (masteredPct > 0)
+                          for (var i = 0; i < segments.length; i++) ...[
+                            if (i > 0) Container(width: 2, color: palette.card),
                             Expanded(
-                              flex: (masteredPct * 100).toInt(),
-                              child: Container(color: emerald),
+                              flex: segments[i].$1,
+                              child: Container(color: segments[i].$2),
                             ),
-                          if (learningPct > 0)
-                            Expanded(
-                              flex: (learningPct * 100).toInt(),
-                              child: Container(color: Colors.blue),
-                            ),
-                          if (newPct > 0)
-                            Expanded(
-                              flex: (newPct * 100).toInt(),
-                              child: Container(color: Colors.purple),
-                            ),
+                          ],
                         ],
                       ),
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              spacing: 20,
+              runSpacing: 12,
               children: [
                 DeckDistributionLegendTile(
                   label: 'Öğrenildi',
                   value: '$mastered (%${(masteredPct * 100).toInt()})',
-                  color: emerald,
+                  color: fb.success,
                 ),
                 DeckDistributionLegendTile(
                   label: 'Öğrenilen',
                   value: '$learning (%${(learningPct * 100).toInt()})',
-                  color: Colors.blue,
+                  color: fb.warning,
                 ),
                 DeckDistributionLegendTile(
                   label: 'Yeni',
                   value: '$newCards (%${(newPct * 100).toInt()})',
-                  color: Colors.purple,
+                  color: fb.info,
                 ),
                 DeckDistributionLegendTile(
                   label: 'Bugün Tekrar',
                   value: '$due',
-                  color: Colors.amber,
+                  color: fb.highlight,
                 ),
               ],
             ),

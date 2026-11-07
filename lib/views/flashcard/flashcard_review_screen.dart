@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../core/theme/app_palette.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../services/srs_service.dart';
@@ -63,6 +65,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
     final cardState = ref.watch(flashcardProvider);
 
     if (cardState.isLoading) {
@@ -110,7 +113,7 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
             if (_canUndo)
               IconButton(
                 tooltip: 'Son cevabı geri al',
-                icon: const Icon(Icons.undo_rounded),
+                icon: const Icon(LucideIcons.undo2, size: 20),
                 onPressed: _handleUndo,
               ),
             Padding(
@@ -122,14 +125,17 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
+                    color: palette.subtle,
+                    borderRadius: BorderRadius.circular(AppPalette.radiusPill),
+                    border: Border.all(color: palette.border),
                   ),
                   child: Text(
                     '${_currentIndex + 1} / ${dueCards.length}',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onPrimaryContainer,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: palette.textSecondary,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
@@ -142,9 +148,9 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
             children: [
               LinearProgressIndicator(
                 value: (_currentIndex + 1) / dueCards.length,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                backgroundColor: palette.border,
                 color: theme.colorScheme.primary,
-                minHeight: 6,
+                minHeight: 4,
               ),
               const SizedBox(height: 20),
               Expanded(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/feedback_colors.dart';
 import '../../../services/srs_service.dart';
 import 'srs_rating_button.dart';
@@ -16,18 +17,20 @@ class SRSRatingActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fb = FeedbackColors.of(context);
+    final palette = AppPalette.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           'Hatırlama Kalitesini Seçin',
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.4,
+            color: palette.textSecondary,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         Row(
           children: [
             SRSRatingButton(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class LearningProgressCard extends StatelessWidget {
   final double masteryRatio;
   final int masteredCount;
   final int totalCount;
-
-  static const Color emeraldAccent = Color(0xFF34D399);
 
   const LearningProgressCard({
     super.key,
@@ -17,66 +18,59 @@ class LearningProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
+    final fb = FeedbackColors.of(context);
+    const tabular = [FontFeature.tabularFigures()];
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [
-              theme.colorScheme.primary,
-              theme.colorScheme.secondary,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Row(
               children: [
+                Icon(LucideIcons.trendingUp, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
                 Text(
                   'Öğrenme İlerlemesi',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                 ),
-                Icon(Icons.insights_rounded, color: Colors.white),
               ],
             ),
             const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '%${(masteryRatio * 100).toStringAsFixed(0)} Ustalaşıldı',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Expanded(
+                  child: Text(
+                    '%${(masteryRatio * 100).toStringAsFixed(0)} Ustalaşıldı',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: palette.textPrimary,
+                      fontFeatures: tabular,
+                    ),
                   ),
                 ),
                 Text(
                   '$masteredCount / $totalCount Kelime',
-                  style: const TextStyle(color: Colors.white70),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: palette.textSecondary,
+                    fontFeatures: tabular,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppPalette.radiusPill),
               child: LinearProgressIndicator(
                 value: masteryRatio,
-                minHeight: 8,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                color: emeraldAccent,
+                minHeight: 6,
+                backgroundColor: palette.border,
+                color: fb.success,
               ),
             ),
           ],

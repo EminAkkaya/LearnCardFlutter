@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/flashcard_model.dart';
 import '../../../providers/flashcard_provider.dart';
 import '../dialogs/add_edit_card_dialog.dart';
@@ -17,7 +18,7 @@ class DeckCardsListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
 
     if (isLoading) {
       return const SliverFillRemaining(
@@ -33,8 +34,8 @@ class DeckCardsListView extends ConsumerWidget {
           child: Text(
             'Hiç kart bulunamadı.',
             style: TextStyle(
-              fontSize: 16,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              fontSize: 15,
+              color: palette.textSecondary,
             ),
           ),
         ),
