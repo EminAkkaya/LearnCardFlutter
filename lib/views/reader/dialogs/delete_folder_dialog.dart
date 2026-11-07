@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/feedback_colors.dart';
 
 class DeleteFolderDialog extends StatelessWidget {
   final String folderName;
@@ -16,6 +17,7 @@ class DeleteFolderDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fb = FeedbackColors.of(context);
     return AlertDialog(
       title: const Text('Klasörü Sil'),
       content: Text(
@@ -29,8 +31,8 @@ class DeleteFolderDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
+            backgroundColor: fb.danger,
+            foregroundColor: fb.onAccent,
           ),
           child: const Text('Sil'),
         ),

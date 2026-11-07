@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ThemeSliderControl extends StatelessWidget {
   final String title;
@@ -39,22 +40,24 @@ class ThemeSliderControl extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: textColor,
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: textColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: textColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppPalette.radiusPill),
+                border: Border.all(color: textColor.withValues(alpha: 0.15)),
               ),
               child: Text(
                 badgeText,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
                   color: textColor,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ),

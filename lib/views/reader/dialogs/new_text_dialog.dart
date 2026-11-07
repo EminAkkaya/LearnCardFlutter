@@ -58,7 +58,6 @@ class _NewTextDialogState extends State<NewTextDialog> {
           maxLines: 8,
           decoration: const InputDecoration(
             hintText: 'Metninizi buraya yapıştırın...',
-            border: OutlineInputBorder(),
           ),
         ),
       ),

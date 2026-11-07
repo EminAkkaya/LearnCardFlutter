@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ExtractedWordsHeader extends StatelessWidget {
   final int selectedCount;
@@ -19,9 +20,12 @@ class ExtractedWordsHeader extends StatelessWidget {
       children: [
         Text(
           'Çıkarılan Kelimeler ($selectedCount/$totalCount)',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppPalette.of(context).textPrimary,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
         ),
         TextButton(
           onPressed: onToggleAll,

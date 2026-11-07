@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/reading_article_model.dart';
 import '../../../providers/reading_provider.dart';
 import '../widgets/saved_article_tile.dart';
@@ -15,9 +17,9 @@ class SavedArticlesSheet extends ConsumerStatefulWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppPalette.of(context).bg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppPalette.radiusCard)),
       ),
       builder: (_) => const SavedArticlesSheet(),
     );
@@ -29,7 +31,6 @@ class SavedArticlesSheet extends ConsumerStatefulWidget {
 
 /// Arama metni ve seçili klasör yalnız bu sheet'e ait geçici UI durumudur.
 class _SavedArticlesSheetState extends ConsumerState<SavedArticlesSheet> {
-  static const Color emerald = Color(0xFF10B981);
   final _searchController = TextEditingController();
   String _filterFolder = 'Tümü';
 
@@ -58,6 +59,7 @@ class _SavedArticlesSheetState extends ConsumerState<SavedArticlesSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
     final readingState = ref.watch(readingProvider);
     final notifier = ref.read(readingProvider.notifier);
     final articles = readingState.articles;
@@ -71,15 +73,19 @@ class _SavedArticlesSheetState extends ConsumerState<SavedArticlesSheet> {
         children: [
           Row(
             children: [
-              const Icon(Icons.folder_copy_rounded, color: emerald),
+              Icon(LucideIcons.folders, size: 20, color: palette.textSecondary),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Kayıtlı Okuma Metinleri (${articles.length})',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: palette.textPrimary),
                 ),
               ),
-              IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+              IconButton(
+                tooltip: 'Kapat',
+                icon: const Icon(LucideIcons.x, size: 20),
+                onPressed: () => Navigator.pop(context),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -88,19 +94,15 @@ class _SavedArticlesSheetState extends ConsumerState<SavedArticlesSheet> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: 'Metinlerde veya başlıklarda ara...',
-              prefixIcon: const Icon(Icons.search_rounded),
+              prefixIcon: const Icon(LucideIcons.search, size: 18),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear_rounded, size: 20),
+                      tooltip: 'Temizle',
+                      icon: const Icon(LucideIcons.x, size: 18),
                       onPressed: () => setState(_searchController.clear),
                     )
                   : null,
-              filled: true,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -120,7 +122,7 @@ class _SavedArticlesSheetState extends ConsumerState<SavedArticlesSheet> {
           Expanded(
             child: articles.isEmpty || filtered.isEmpty
                 ? _EmptyMessage(
-                    icon: articles.isEmpty ? Icons.folder_open_rounded : Icons.search_off_rounded,
+                    icon: articles.isEmpty ? LucideIcons.folderOpen : LucideIcons.searchX,
                     text: articles.isEmpty
                         ? 'Henüz kaydedilmiş bir okuma metni yok.'
                         : '"$_filterFolder" klasöründe aramanıza uygun metin bulunamadı.',
@@ -155,13 +157,14 @@ class _EmptyMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 48, color: Colors.grey),
+          Icon(icon, size: 28, color: palette.textMuted),
           const SizedBox(height: 12),
-          Text(text, textAlign: TextAlign.center),
+          Text(text, textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: palette.textSecondary)),
         ],
       ),
     );

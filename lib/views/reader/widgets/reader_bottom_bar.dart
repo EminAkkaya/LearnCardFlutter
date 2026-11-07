@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../models/reader_theme.dart';
 import 'reader_bottom_action_button.dart';
 
@@ -23,51 +24,44 @@ class ReaderBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       decoration: BoxDecoration(
         color: colors.surface,
         border: Border(
           top: BorderSide(
-            color: colors.defaultText.withValues(alpha: 0.08),
+            color: colors.defaultText.withValues(alpha: 0.1),
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
-          ),
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           ReaderBottomActionButton(
-            icon: Icons.paste_rounded,
+            icon: LucideIcons.clipboardPaste,
             label: 'Yeni Metin',
             color: colors.defaultText,
             onTap: onNewTextTap,
           ),
           ReaderBottomActionButton(
-            icon: Icons.folder_open_rounded,
+            icon: LucideIcons.folderOpen,
             label: 'Kayıtlılar',
             color: colors.defaultText,
             onTap: onSavedTap,
           ),
           ReaderBottomActionButton(
-            icon: Icons.palette_outlined,
+            icon: LucideIcons.palette,
             label: 'Tema',
             color: colors.defaultText,
             onTap: onThemeTap,
           ),
           ReaderBottomActionButton(
-            icon: Icons.save_outlined,
+            icon: LucideIcons.save,
             label: 'Kaydet',
             color: colors.defaultText,
             onTap: onSaveTap,
           ),
           ReaderBottomActionButton(
-            icon: Icons.fullscreen_rounded,
+            icon: LucideIcons.maximize2,
             label: 'Odak Modu',
             color: colors.defaultText,
             onTap: onFocusTap,

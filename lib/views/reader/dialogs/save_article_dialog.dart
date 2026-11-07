@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../providers/reading_provider.dart';
 import 'create_folder_dialog.dart';
 
@@ -29,7 +31,6 @@ class SaveArticleDialog extends StatefulWidget {
 }
 
 class _SaveArticleDialogState extends State<SaveArticleDialog> {
-  static const Color emerald = Color(0xFF10B981);
   final TextEditingController _titleController = TextEditingController();
   String _selectedFolder = 'Genel';
 
@@ -56,13 +57,13 @@ class _SaveArticleDialogState extends State<SaveArticleDialog> {
       SnackBar(
         content: Text('Makale "$_selectedFolder" klasörüne kaydedildi!'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: emerald,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
     final allFolders = widget.ref.watch(readingProvider).allFolders;
     if (!allFolders.contains(_selectedFolder)) {
       _selectedFolder = allFolders.first;
@@ -79,7 +80,6 @@ class _SaveArticleDialogState extends State<SaveArticleDialog> {
             decoration: const InputDecoration(
               labelText: 'Makale Başlığı',
               hintText: 'Örn: The Art of Learning',
-              border: OutlineInputBorder(),
             ),
             autofocus: true,
           ),
@@ -87,14 +87,14 @@ class _SaveArticleDialogState extends State<SaveArticleDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Klasör Seçin',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: palette.textSecondary),
               ),
               TextButton.icon(
                 style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-                label: const Text('Yeni Klasör', style: TextStyle(fontSize: 12)),
+                icon: const Icon(LucideIcons.folderPlus, size: 16),
+                label: const Text('Yeni Klasör', style: TextStyle(fontSize: 13)),
                 onPressed: () {
                   CreateFolderDialog.show(
                     context,
@@ -111,7 +111,6 @@ class _SaveArticleDialogState extends State<SaveArticleDialog> {
           DropdownButtonFormField<String>(
             initialValue: _selectedFolder,
             decoration: const InputDecoration(
-              border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             items: allFolders.map((f) {
@@ -119,7 +118,7 @@ class _SaveArticleDialogState extends State<SaveArticleDialog> {
                 value: f,
                 child: Row(
                   children: [
-                    const Icon(Icons.folder_outlined, size: 18, color: emerald),
+                    Icon(LucideIcons.folder, size: 16, color: palette.textSecondary),
                     const SizedBox(width: 8),
                     Text(f),
                   ],

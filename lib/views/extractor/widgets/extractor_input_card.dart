@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ExtractorInputCard extends StatelessWidget {
   final TextEditingController controller;
@@ -12,21 +13,19 @@ class ExtractorInputCard extends StatelessWidget {
       children: [
         Text(
           'İngilizce Metin Yapıştırın',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppPalette.of(context).textPrimary,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           maxLines: 6,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText:
                 'Makale, ders notu veya herhangi bir İngilizce metin yapıştırın...',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            filled: true,
           ),
         ),
       ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/theme/app_palette.dart';
 import '../../../models/offline_entry.dart';
 import 'word_sense_row.dart';
 
@@ -34,8 +36,8 @@ class _WordMeaningsSectionState extends State<WordMeaningsSection> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7);
+    final palette = AppPalette.of(context);
+    final muted = palette.textMuted;
     final senses = widget.entry.senses;
     final visible = _expanded ? senses : senses.take(WordMeaningsSection.collapsedCount).toList();
 
@@ -44,7 +46,7 @@ class _WordMeaningsSectionState extends State<WordMeaningsSection> {
       children: [
         Row(
           children: [
-            Text('Sözlük Anlamları', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Sözlük Anlamları', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: palette.textSecondary)),
             if (widget.entry.isInflected) ...[
               const SizedBox(width: 8),
               Flexible(
@@ -54,13 +56,14 @@ class _WordMeaningsSectionState extends State<WordMeaningsSection> {
             ],
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         for (final sense in visible)
           WordSenseRow(sense: sense, selected: widget.selected, onPick: widget.onPick),
         if (senses.length > WordMeaningsSection.collapsedCount)
-          TextButton(
+          TextButton.icon(
             onPressed: () => setState(() => _expanded = !_expanded),
-            child: Text(_expanded ? 'Daha az göster' : 'Tüm anlamlar (${senses.length})'),
+            icon: Icon(_expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown, size: 16),
+            label: Text(_expanded ? 'Daha az göster' : 'Tüm anlamlar (${senses.length})'),
           ),
         _OnlineRow(
           online: widget.online,
@@ -69,7 +72,7 @@ class _WordMeaningsSectionState extends State<WordMeaningsSection> {
           onPick: widget.onPick,
           onFetch: widget.onFetchOnline,
         ),
-        Text('Kaynak: Wiktionary (CC BY-SA)', style: TextStyle(fontSize: 11, color: muted)),
+        Text('Kaynak: Wiktionary (CC BY-SA)', style: TextStyle(fontSize: 11.5, color: muted)),
       ],
     );
   }
@@ -102,7 +105,7 @@ class _OnlineRow extends StatelessWidget {
     if (text == null) {
       return TextButton.icon(
         onPressed: onFetch,
-        icon: const Icon(Icons.translate_rounded, size: 18),
+        icon: const Icon(LucideIcons.languages, size: 16),
         label: const Text('Çevrimiçi çeviriyi de göster'),
       );
     }
@@ -112,12 +115,9 @@ class _OnlineRow extends StatelessWidget {
         spacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          const Text('Çevrimiçi:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-          ChoiceChip(
-            label: Text(text),
-            selected: selected == text,
-            onSelected: (_) => onPick(text),
-          ),
+          Text('Çevrimiçi:',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppPalette.of(context).textSecondary)),
+          WordPickChip(label: text, selected: selected == text, onPick: onPick),
         ],
       ),
     );

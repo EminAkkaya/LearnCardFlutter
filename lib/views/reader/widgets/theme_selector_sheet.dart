@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../../../core/theme/app_palette.dart';
 import '../../../models/reader_theme.dart';
 import '../../../providers/reader_settings_provider.dart';
 import 'theme_option_tile.dart';
@@ -16,7 +18,7 @@ class ThemeSelectorSheet extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: currentColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppPalette.radiusCard)),
       ),
       builder: (_) => ThemeSelectorSheet(currentColors: currentColors),
     );
@@ -43,13 +45,14 @@ class ThemeSelectorSheet extends ConsumerWidget {
                 Text(
                   'Okuma Teması ve Görünüm',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
                     color: currentColors.defaultText,
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.close, color: currentColors.defaultText),
+                  tooltip: 'Kapat',
+                  icon: Icon(LucideIcons.x, size: 20, color: currentColors.defaultText),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -58,10 +61,10 @@ class ThemeSelectorSheet extends ConsumerWidget {
             Text(
               'TEMA SEÇİMİ',
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: currentColors.defaultText.withValues(alpha: 0.6),
-                letterSpacing: 1.0,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: currentColors.defaultText.withValues(alpha: 0.75),
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 8),
@@ -73,7 +76,7 @@ class ThemeSelectorSheet extends ConsumerWidget {
               );
             }),
             const SizedBox(height: 12),
-            Divider(color: currentColors.defaultText.withValues(alpha: 0.15)),
+            Divider(color: currentColors.defaultText.withValues(alpha: 0.12)),
             const SizedBox(height: 8),
             ThemeSliderControl(
               title: 'Yazı Boyutu',
@@ -82,10 +85,10 @@ class ThemeSelectorSheet extends ConsumerWidget {
               min: 14.0,
               max: 28.0,
               divisions: 14,
-              activeColor: currentColors.newWordColor,
+              activeColor: currentColors.defaultText,
               textColor: currentColors.defaultText,
-              startIcon: Text('A', style: TextStyle(fontSize: 12, color: currentColors.defaultText, fontWeight: FontWeight.bold)),
-              endIcon: Text('A', style: TextStyle(fontSize: 22, color: currentColors.defaultText, fontWeight: FontWeight.bold)),
+              startIcon: Text('A', style: TextStyle(fontSize: 12, color: currentColors.defaultText, fontWeight: FontWeight.w600)),
+              endIcon: Text('A', style: TextStyle(fontSize: 20, color: currentColors.defaultText, fontWeight: FontWeight.w600)),
               onChanged: notifier.setFontSize,
             ),
             const SizedBox(height: 12),
@@ -96,10 +99,10 @@ class ThemeSelectorSheet extends ConsumerWidget {
               min: 1.2,
               max: 2.4,
               divisions: 12,
-              activeColor: currentColors.newWordColor,
+              activeColor: currentColors.defaultText,
               textColor: currentColors.defaultText,
-              startIcon: Icon(Icons.format_line_spacing, size: 16, color: currentColors.defaultText),
-              endIcon: Icon(Icons.format_line_spacing, size: 24, color: currentColors.defaultText),
+              startIcon: Icon(LucideIcons.lineHeight, size: 16, color: currentColors.defaultText),
+              endIcon: Icon(LucideIcons.lineHeight, size: 22, color: currentColors.defaultText),
               onChanged: notifier.setLineHeight,
             ),
             const SizedBox(height: 8),

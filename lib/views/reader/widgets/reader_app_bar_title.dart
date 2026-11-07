@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../models/reader_theme.dart';
 import '../../../providers/reading_provider.dart';
 
@@ -25,7 +26,7 @@ class ReaderAppBarTitle extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: themeColors.defaultText,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
         ),
@@ -35,16 +36,16 @@ class ReaderAppBarTitle extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.folder_outlined,
+                LucideIcons.folder,
                 size: 12,
-                color: themeColors.defaultText.withValues(alpha: 0.6),
+                color: themeColors.defaultText.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 4),
               Text(
                 article.folder,
                 style: TextStyle(
-                  color: themeColors.defaultText.withValues(alpha: 0.65),
-                  fontSize: 11,
+                  color: themeColors.defaultText.withValues(alpha: 0.75),
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),

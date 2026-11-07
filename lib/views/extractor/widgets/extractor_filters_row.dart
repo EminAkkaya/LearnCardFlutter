@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_palette.dart';
 
 class ExtractorFiltersRow extends StatelessWidget {
   final bool filterStopWords;
@@ -22,6 +23,7 @@ class ExtractorFiltersRow extends StatelessWidget {
           children: [
             Expanded(
               child: FilterChip(
+                shape: const StadiumBorder(),
                 selected: filterStopWords,
                 label: const Text('Yaygın Kelimeleri Filtrele (the, a, is...)'),
                 onSelected: onFilterStopWordsChanged,
@@ -34,7 +36,12 @@ class ExtractorFiltersRow extends StatelessWidget {
           children: [
             Text(
               'Min. Kelime Uzunluğu: $minWordLength harf',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: AppPalette.of(context).textSecondary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
             Expanded(
               child: Slider(

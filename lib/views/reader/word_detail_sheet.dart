@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/app_palette.dart';
 import '../../models/flashcard_model.dart';
 import '../../providers/flashcard_provider.dart';
 import '../../providers/word_lookup_provider.dart';
 import 'widgets/word_detail_action_button.dart';
+import 'widgets/word_detail_field_label.dart';
 import 'widgets/word_detail_header.dart';
 import 'widgets/word_meanings_section.dart';
 
@@ -25,8 +27,6 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
   late final TextEditingController _trController;
   late final TextEditingController _defController;
   bool _isAdding = false;
-
-  static const Color emerald = Color(0xFF10B981);
 
   @override
   void initState() {
@@ -71,14 +71,13 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
       SnackBar(
         content: Text('"${widget.word}" desteye eklendi!'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: emerald,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
     final cardState = ref.watch(flashcardProvider);
     final lookup = ref.watch(wordLookupProvider(widget.word));
     ref.listen(wordLookupProvider(widget.word), _onLookup);
@@ -93,12 +92,13 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
-        top: 16,
+        top: 12,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: palette.card,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppPalette.radiusCard)),
+        border: Border(top: BorderSide(color: palette.border)),
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -110,14 +110,14 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+                  color: palette.controlBorder.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(AppPalette.radiusPill),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             WordDetailHeader(word: widget.word, dictResult: lookup.details),
-            const Divider(height: 24),
+            const Divider(height: 28),
             if (lookup.isLoading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24.0),
@@ -136,43 +136,38 @@ class _WordDetailSheetState extends ConsumerState<WordDetailSheet> {
                     onFetchOnline: () => ref.read(wordLookupProvider(widget.word).notifier).fetchOnline(),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
               ],
-              Text('Türkçe Çeviri', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const WordDetailFieldLabel('Türkçe Çeviri'),
               const SizedBox(height: 6),
               TextField(
                 controller: _trController,
-                decoration: InputDecoration(
-                  hintText: 'Çeviri girin...',
-                  filled: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                ),
+                decoration: const InputDecoration(hintText: 'Çeviri girin...'),
               ),
               const SizedBox(height: 14),
-              Text('İngilizce Tanım', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+              const WordDetailFieldLabel('İngilizce Tanım'),
               const SizedBox(height: 6),
               TextField(
                 controller: _defController,
                 maxLines: 2,
-                decoration: InputDecoration(
-                  hintText: 'Definition...',
-                  filled: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                ),
+                decoration: const InputDecoration(hintText: 'Definition...'),
               ),
               const SizedBox(height: 14),
               if (widget.sentenceContext.isNotEmpty) ...[
-                Text('Cümle İçerisindeki Kullanımı', style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+                const WordDetailFieldLabel('Cümle İçerisindeki Kullanımı'),
                 const SizedBox(height: 6),
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(10),
+                    color: palette.subtle,
+                    borderRadius: BorderRadius.circular(AppPalette.radiusControl),
+                    border: Border.all(color: palette.border),
                   ),
-                  child: Text(widget.sentenceContext, style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic)),
+                  child: Text(
+                    widget.sentenceContext,
+                    style: TextStyle(fontSize: 13, height: 1.5, fontStyle: FontStyle.italic, color: palette.textSecondary),
+                  ),
                 ),
                 const SizedBox(height: 16),
               ],

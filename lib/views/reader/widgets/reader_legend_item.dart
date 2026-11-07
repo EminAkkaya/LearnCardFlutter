@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'reader_word_style.dart';
 
+/// Lejant öğesi: metindeki görünümün aynısı ("Aa" örneği: renk + alt çizgi
+/// deseni) ve durum adı. Etiket renge değil temanın metin rengine yazılır.
 class ReaderLegendItem extends StatelessWidget {
-  final Color color;
+  final ReaderWordStyle look;
   final String label;
+  final Color labelColor;
 
   const ReaderLegendItem({
     super.key,
-    required this.color,
+    required this.look,
     required this.label,
+    required this.labelColor,
   });
 
   @override
@@ -15,18 +20,27 @@ class ReaderLegendItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ExcludeSemantics(
+          child: Text(
+            'Aa',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: look.color,
+              decoration: TextDecoration.underline,
+              decorationColor: look.underline,
+              decorationStyle: look.pattern,
+              decorationThickness: look.thickness,
+            ),
+          ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: color.withValues(alpha: 0.9),
+            color: labelColor,
           ),
         ),
       ],

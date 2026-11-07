@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/text_parser.dart';
 import '../../../models/reader_theme.dart';
+import 'reader_word_style.dart';
 
 class ReaderParagraph extends ConsumerStatefulWidget {
   final String text;
@@ -76,43 +77,20 @@ class _ReaderParagraphState extends ConsumerState<ReaderParagraph> {
         _recognizers.add(recognizer);
 
         final status = widget.cardMap[token.cleanWord];
-        final Color wordColor;
-        final Color underlineColor;
-        final double decorationThickness;
-
-        if (status == 'new') {
-          wordColor = widget.colors.newWordColor;
-          underlineColor = widget.colors.newWordColor.withValues(alpha: 0.8);
-          decorationThickness = 2.0;
-        } else if (status == 'learning') {
-          wordColor = widget.colors.learningWordColor;
-          underlineColor = widget.colors.learningWordColor.withValues(
-            alpha: 0.8,
-          );
-          decorationThickness = 2.0;
-        } else if (status == 'mastered') {
-          wordColor = widget.colors.masteredWordColor;
-          underlineColor = widget.colors.masteredWordColor.withValues(
-            alpha: 0.8,
-          );
-          decorationThickness = 2.0;
-        } else {
-          wordColor = widget.colors.unaddedWordColor;
-          underlineColor = widget.colors.defaultText.withValues(alpha: 0.25);
-          decorationThickness = 1.0;
-        }
+        final look = ReaderWordStyle.forStatus(status, widget.colors);
 
         spans.add(
           TextSpan(
             text: token.text,
             style: TextStyle(
               fontSize: effectiveFontSize,
-              fontWeight: status != null ? FontWeight.bold : FontWeight.w500,
-              color: wordColor,
+              fontWeight: status != null ? FontWeight.w600 : FontWeight.w400,
+              color: look.color,
               height: effectiveLineHeight,
               decoration: TextDecoration.underline,
-              decorationColor: underlineColor,
-              decorationThickness: decorationThickness,
+              decorationColor: look.underline,
+              decorationStyle: look.pattern,
+              decorationThickness: look.thickness,
             ),
             recognizer: recognizer,
           ),

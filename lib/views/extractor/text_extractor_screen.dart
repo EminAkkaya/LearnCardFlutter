@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/text_parser.dart';
 import '../../providers/flashcard_provider.dart';
@@ -24,8 +25,6 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
   List<ExtractedWordItem> _extractedWords = [];
   final Set<String> _selectedWords = {};
   bool _isProcessing = false;
-
-  static const Color emerald = Color(0xFF10B981);
 
   @override
   void dispose() {
@@ -84,7 +83,6 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
         SnackBar(
           content: Text('$addedCount yeni kelime destenize başarıyla eklendi!'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: emerald,
         ),
       );
     }
@@ -100,7 +98,7 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ExtractorInputCard(controller: _textController),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             ExtractorFiltersRow(
               filterStopWords: _filterStopWords,
               minWordLength: _minWordLength,
@@ -114,7 +112,7 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
               height: 48,
               child: ElevatedButton.icon(
                 onPressed: _extractWords,
-                icon: const Icon(Icons.bolt_rounded),
+                icon: const Icon(LucideIcons.zap, size: 18),
                 label: const Text('Kelimeleri Çıkar'),
               ),
             ),
@@ -158,26 +156,22 @@ class _TextExtractorScreenState extends ConsumerState<TextExtractorScreen> {
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                height: 50,
+                height: 48,
                 child: ElevatedButton.icon(
                   onPressed: _isProcessing ? null : _bulkAddToDeck,
                   icon: _isProcessing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         )
-                      : const Icon(Icons.library_add_rounded),
+                      : const Icon(LucideIcons.bookPlus, size: 18),
                   label: Text(_isProcessing
                       ? 'Sözlükten Çeviriler Getiriliyor...'
                       : 'Seçilenleri Desteye Ekle (${_selectedWords.length})'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: emerald,
-                    foregroundColor: Colors.white,
-                  ),
                 ),
               ),
             ],

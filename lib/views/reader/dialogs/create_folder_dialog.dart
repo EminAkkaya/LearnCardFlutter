@@ -50,7 +50,6 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
         decoration: const InputDecoration(
           labelText: 'Klasör Adı',
           hintText: 'Örn: Hikayeler, Ders Notları',
-          border: OutlineInputBorder(),
         ),
         autofocus: true,
       ),
