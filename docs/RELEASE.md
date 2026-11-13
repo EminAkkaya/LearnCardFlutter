@@ -21,18 +21,13 @@ hazırlık `docs/STORE_READINESS_PLAN.md` içinde takip edilir.
   AndroidManifest intent-filter'ı ve iOS `CFBundleURLTypes` ile aynıdır; birini değiştirirsen hepsini değiştir.
 
 ## 2. Android imza anahtarı
-```bash
-keytool -genkey -v -keystore ~/learncard-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-```
-`android/key.properties` oluştur (gitignore'da, commit'leme):
-```properties
-storePassword=<parola>
-keyPassword=<parola>
-keyAlias=upload
-storeFile=/home/<kullanıcı>/learncard-upload.jks
-```
+Oluşturuldu (2026-11-13): `bash tool/create_upload_key.sh` parolayı terminalde sorar,
+`~/.android-keys/learncard-upload.jks` (PKCS12, RSA 4096, alias `upload`) ve
+`android/key.properties` (gitignore'da) yazar. Sertifika SHA-256:
+`04:AF:E8:73:19:F4:2D:46:D8:67:FE:38:BA:B1:59:DF:D8:BA:10:E3:46:46:5A:79:C5:9A:FE:46:A7:19:51:3E`
 - `.jks` dosyasını ve parolayı **yedekle**. Play App Signing'i aç; bu dosya "upload key" olur.
 - `key.properties` yoksa release build debug anahtarıyla imzalanır (yalnız yerel test için).
+- Mağaza paketi: `flutter build appbundle --release` → `build/app/outputs/bundle/release/app-release.aab`.
 
 ## 3. Sürüm numarası
 `pubspec.yaml` → `version: 1.0.0+1`. Her mağaza yüklemesinde `+N` (build numarası) artmalı.

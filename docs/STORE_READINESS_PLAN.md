@@ -73,7 +73,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 
 ## Kullanıcıya sorulacaklar
 1. ~~Nihai paket/bundle id~~ → `dev.eminakkaya.learncard` (2026-11-13, Android/iOS/macOS/Linux).
-2. **Release keystore:** `keytool` ile üretilip `android/key.properties` yazılacak (şablon `docs/RELEASE.md`). Parolayı sen belirle ve yedekle; Play App Signing önerilir.
+2. ~~Release keystore~~ (2026-11-13 oluşturuldu, `tool/create_upload_key.sh`): `keytool` ile üretilip `android/key.properties` yazılacak (şablon `docs/RELEASE.md`). Parolayı sen belirle ve yedekle; Play App Signing önerilir.
 3. ~~Gizlilik/hesap silme/destek~~ → eminakkaya.dev/learncard, /learncard/gizlilik, /learncard/hesap-silme; iletisim@eminakkaya.dev (2026-11-13).
 4. ~~Hesap silme~~ (deploy edildi, 2026-11-13 doğrulandı): fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).
 5. ~~Supabase paneli~~ (001/002 SQL, RLS ve fonksiyon 2026-11-13'te doğrulandı): `001_sync_columns.sql` ve `002_rls_policies.sql`'i çalıştır, redirect URL `io.learncard.app://login-callback` ekle, `delete-account` fonksiyonunu deploy et.
