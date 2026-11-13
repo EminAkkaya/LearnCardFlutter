@@ -58,7 +58,11 @@ class StatsOverviewScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               DeckDistributionCard(cardState: cardState, onNavigateToTab: onNavigateToTab),
               const SizedBox(height: 16),
-              MinigamesStatsCard(totalGameScore: userStats.totalGameScore, totalGamesPlayed: userStats.totalGamesPlayed),
+              MinigamesStatsCard(
+                totalGameScore: userStats.totalGameScore,
+                totalGamesPlayed: userStats.totalGamesPlayed,
+                onOpenGames: onNavigateToTab == null ? null : () => onNavigateToTab!(3),
+              ),
               const SizedBox(height: 24),
               StatsQuickActionList(dueCount: cardState.dueCards.length, onNavigateToTab: onNavigateToTab),
             ],

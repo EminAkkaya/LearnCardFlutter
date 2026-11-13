@@ -18,7 +18,8 @@ class FlashcardFrontView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Flexible(flex: 0, child: DeckCardStatusBadge(status: card.status)),
-        const Spacer(),
+        // Üst boşluk alttakinden küçük: kelime kartın ortasının biraz üstünde.
+        const Spacer(flex: 2),
         Text(
           card.word,
           softWrap: true,
@@ -70,7 +71,7 @@ class FlashcardFrontView extends StatelessWidget {
             ),
           ),
         ],
-        const Spacer(),
+        const Spacer(flex: 3),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/flashcard_provider.dart';
 import '../providers/reading_provider.dart';
-import 'extractor/text_extractor_screen.dart';
+import 'games/mini_games_hub_screen.dart';
 import 'flashcard/deck_manager_screen.dart';
 import 'flashcard/flashcard_review_screen.dart';
 import 'reader/reader_screen.dart';
@@ -43,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       const FlashcardReviewScreen(),
       const ReaderScreen(),
       const DeckManagerScreen(),
-      const TextExtractorScreen(),
+      const MiniGamesHubScreen(),
       StatsOverviewScreen(onNavigateToTab: _onTabTapped),
     ];
 

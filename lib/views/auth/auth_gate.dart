@@ -13,6 +13,15 @@ class AuthGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Sıfırlama bağlantısı uygulamaya döndüğünde üstte açık kalan giriş sayfası
+    // (ör. Ayarlar'dan açılan LoginScreen) ya da diyaloglar ResetPasswordScreen'i
+    // örtmesin diye kök rotaya dönülür.
+    ref.listen<bool>(authProvider.select((s) => s.isPasswordRecovery), (prev, next) {
+      if (next && prev != true) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    });
+
     final authState = ref.watch(authProvider);
     final onboardingDone = ref.watch(onboardingProvider);
 

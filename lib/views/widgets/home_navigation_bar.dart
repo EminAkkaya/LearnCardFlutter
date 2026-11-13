@@ -18,7 +18,7 @@ class HomeNavigationBar extends StatelessWidget {
     (LucideIcons.layers, 'Tekrar'),
     (LucideIcons.bookOpen, 'Okuyucu'),
     (LucideIcons.library, 'Deste'),
-    (LucideIcons.textSearch, 'Çıkarıcı'),
+    (LucideIcons.gamepad2, 'Oyunlar'),
     (LucideIcons.chartColumn, 'İstatistik'),
   ];
 

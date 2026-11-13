@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_palette.dart';
-import '../../games/mini_games_hub_screen.dart';
 
 class StatsQuickActionList extends StatelessWidget {
   final int dueCount;
@@ -45,20 +44,6 @@ class StatsQuickActionList extends StatelessWidget {
           icon: LucideIcons.gamepad2,
           title: 'Kelime Öğrenme Mini Oyunları',
           subtitle: 'Eşleştirme, Harf Dizici, Hızlı Test, Boşluk Doldurma',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const MiniGamesHubScreen(),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 8),
-        _QuickActionTile(
-          icon: LucideIcons.textSearch,
-          title: 'Toplu Kelime Çıkarıcı',
-          subtitle: 'Metinden otomatik frekanslı kelimeler çıkar',
           onTap: () => onNavigateToTab?.call(3),
         ),
       ],

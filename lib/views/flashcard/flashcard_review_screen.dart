@@ -152,10 +152,11 @@ class _FlashcardReviewScreenState extends ConsumerState<FlashcardReviewScreen> {
                 color: theme.colorScheme.primary,
                 minHeight: 4,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  // Altta boşluk: kart alt çubuğa yapışmaz, gözle biraz yukarıda durur.
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
                   child: FlashcardItemView(
                     key: ValueKey<String>('${card.id}_$_currentIndex'),
                     card: card,

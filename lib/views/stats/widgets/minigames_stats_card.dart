@@ -8,11 +8,26 @@ class MinigamesStatsCard extends StatelessWidget {
   final int totalGameScore;
   final int totalGamesPlayed;
 
+  /// Ana sayfadaki Oyunlar sekmesine geçer; verilmezse oyun merkezi ayrı sayfa açılır.
+  final VoidCallback? onOpenGames;
+
   const MinigamesStatsCard({
     super.key,
     required this.totalGameScore,
     required this.totalGamesPlayed,
+    this.onOpenGames,
   });
+
+  void _openGames(BuildContext context) {
+    if (onOpenGames != null) {
+      onOpenGames!();
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const MiniGamesHubScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +53,7 @@ class MinigamesStatsCard extends StatelessWidget {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const MiniGamesHubScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => _openGames(context),
                   icon: const Icon(LucideIcons.play, size: 16),
                   label: const Text('Oyna', style: TextStyle(fontSize: 13)),
                 ),
