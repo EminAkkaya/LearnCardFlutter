@@ -72,7 +72,7 @@ kısa not düşer ve görev başına commit atar. Öncelik: P0 (yayın engeli) �
 - [x] **G11 (P2) Fikirler:** zayıf kartlara ağırlıklı seçim (`practice_order.dart`), Hızlı Karar'da dönüşümlü TR→EN soruları, oyun sonu kaçırılan kartlar listesi (G1).
 
 ## Kullanıcıya sorulacaklar
-1. **Nihai paket/bundle id:** şu an Android `com.learncard.learncard_flutter`, iOS `com.learncard.learncardFlutter`. Yayından sonra değiştirilemez. Öneri: ikisinde de aynı, ör. `com.<senin-alan-adın>.learncard`. Onay gelene kadar dokunulmadı.
+1. ~~Nihai paket/bundle id~~ → `dev.eminakkaya.learncard` (2026-11-13, Android/iOS/macOS/Linux).
 2. **Release keystore:** `keytool` ile üretilip `android/key.properties` yazılacak (şablon `docs/RELEASE.md`). Parolayı sen belirle ve yedekle; Play App Signing önerilir.
 3. **Gizlilik politikası + hesap silme web URL'si + destek e-postası** (taslak metni ben hazırlayabilirim, yayınlanacak yer senin).
 4. **Hesap silme:** fonksiyon yazıldı → `supabase functions deploy delete-account` senin (RELEASE.md §1).

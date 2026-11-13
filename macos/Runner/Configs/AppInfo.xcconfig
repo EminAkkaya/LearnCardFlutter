@@ -8,7 +8,7 @@
 PRODUCT_NAME = learncard_flutter
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.learncard.learncardFlutter
+PRODUCT_BUNDLE_IDENTIFIER = dev.eminakkaya.learncard
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.learncard. All rights reserved.

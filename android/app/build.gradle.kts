@@ -19,7 +19,7 @@ if (hasReleaseKeystore) {
 }
 
 android {
-    namespace = "com.learncard.learncard_flutter"
+    namespace = "dev.eminakkaya.learncard"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         // Play'de yayından sonra değiştirilemez; nihai kimlik docs/STORE_READINESS_PLAN.md'de onay bekliyor.
-        applicationId = "com.learncard.learncard_flutter"
+        applicationId = "dev.eminakkaya.learncard"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

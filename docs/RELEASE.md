@@ -4,11 +4,8 @@ Bu dosya mağazaya yükleme için senin yapman gereken adımları toplar. Kod ta
 hazırlık `docs/STORE_READINESS_PLAN.md` içinde takip edilir.
 
 ## 0. Önce karar ver
-- **Paket / bundle id:** Şu an Android `com.learncard.learncard_flutter`, iOS `com.learncard.learncardFlutter`.
-  Play Store'da yayından sonra **değiştirilemez**. İkisini aynı yap (ör. `com.<alanadın>.learncard`).
-  Değiştirmek için: `android/app/build.gradle.kts` (`namespace`, `applicationId`),
-  `android/app/src/main/kotlin/...` paket klasörü + `MainActivity.kt` package satırı,
-  `ios/Runner.xcodeproj/project.pbxproj` (`PRODUCT_BUNDLE_IDENTIFIER`).
+- **Paket / bundle id:** `dev.eminakkaya.learncard` (Android, iOS, macOS, Linux; 2026-11-13 kararı).
+  Play Store'da yayından sonra **değiştirilemez**.
 
 ## 1. Supabase yapılandırması
 - `lib/config/supabase_config.dart` gitignore'dadır; `lib/config/supabase_config.template.dart`

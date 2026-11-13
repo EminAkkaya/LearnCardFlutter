@@ -1,4 +1,4 @@
-package com.learncard.learncard_flutter
+package dev.eminakkaya.learncard
 
 import io.flutter.embedding.android.FlutterActivity
 
