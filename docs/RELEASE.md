@@ -54,8 +54,8 @@ flutter build ipa --release
 Çıktıyı Transporter veya Xcode Organizer ile App Store Connect'e yükle.
 
 ## 6. Mağaza formları
-- **Gizlilik politikası URL'si:** `docs/PRIVACY_POLICY.md` taslağını bir web sayfasında yayınla
-  (GitHub Pages, Notion vb.) ve hem mağaza formuna hem uygulamadaki ayarlara bağla.
-- **Hesap silme URL'si:** Play, uygulama dışından da silme talebi yapılabilecek bir web adresi ister.
+- **Gizlilik politikası URL'si:** https://eminakkaya.dev/learncard/gizlilik
+- **Hesap silme URL'si (Play zorunlu):** https://eminakkaya.dev/learncard/hesap-silme
+- **Destek:** https://eminakkaya.dev/learncard · iletisim@eminakkaya.dev
 - **Data Safety (Play) / App Privacy (Apple):** `docs/DATA_SAFETY.md` cevaplarını kullan.
 - **İçerik derecelendirmesi:** eğitim uygulaması, kullanıcılar arası iletişim yok.

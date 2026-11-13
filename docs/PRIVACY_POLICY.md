@@ -1,11 +1,12 @@
-# LearnCard Gizlilik Politikası (TASLAK)
+# LearnCard Gizlilik Politikası
 
-> Taslaktır. Yayınlamadan önce `<...>` alanlarını doldur ve hukuki açıdan gözden geçir.
-> Yürürlük tarihi: `<tarih>` · İletişim: `<destek e-postası>`
+> Yayında: https://eminakkaya.dev/learncard/gizlilik (kaynak: `eminakkaya-dev/src/pages/learncard/gizlilik.astro`).
+> Metni değiştirirsen sitedeki sayfayı ve uygulama içi gizlilik ekranını da güncelle.
+> Yürürlük tarihi: 13 Kasım 2026 · İletişim: iletisim@eminakkaya.dev
 
 ## Türkçe
 
-**LearnCard** (`<geliştirici adı>`), yabancı dilde okuma ve kelime öğrenmeye yardımcı bir uygulamadır.
+**LearnCard** (Muhammet Emin Akkaya), yabancı dilde okuma ve kelime öğrenmeye yardımcı bir uygulamadır.
 Bu politika hangi verileri neden işlediğimizi açıklar.
 
 **Misafir modu.** Hesap açmadan kullanabilirsiniz. Bu durumda kartlarınız, metinleriniz ve
@@ -25,9 +26,9 @@ servislerine de gönderilir. Bu servislere kimlik bilgileriniz gönderilmez.
 verilerinizi satmıyoruz ya da paylaşmıyoruz.
 
 **Haklarınız ve silme.** Hesabınızı ve tüm verilerinizi uygulama içinden
-(Ayarlar → Hesabı Sil) veya `<silme talebi web adresi>` üzerinden silebilirsiniz.
+(Ayarlar → Hesabı Sil) veya https://eminakkaya.dev/learncard/hesap-silme üzerinden silebilirsiniz.
 Silme talebi en geç 30 gün içinde tamamlanır. KVKK kapsamındaki talepleriniz için
-`<destek e-postası>` adresine yazabilirsiniz.
+iletisim@eminakkaya.dev adresine yazabilirsiniz.
 
 **Çocuklar.** Uygulama 13 yaş altına yönelik değildir ve bilerek bu yaştaki çocuklardan veri toplamaz.
 
@@ -35,7 +36,7 @@ Silme talebi en geç 30 gün içinde tamamlanır. KVKK kapsamındaki taleplerini
 
 ## English
 
-**LearnCard** (`<developer name>`) helps you read in a foreign language and learn vocabulary.
+**LearnCard** (Muhammet Emin Akkaya) helps you read in a foreign language and learn vocabulary.
 
 - **Guest mode:** no account needed; your cards, texts and stats stay on your device.
 - **With an account** we store your email address (sign-in and verification) and your flashcards,
@@ -47,5 +48,5 @@ Silme talebi en geç 30 gün içinde tamamlanır. KVKK kapsamındaki taleplerini
   No identity data is sent to them.
 - **We do not** show ads, use analytics or tracking, sell or share your data.
 - **Deletion:** delete your account and all data in-app (Settings → Delete account) or via
-  `<deletion web URL>`; requests are completed within 30 days. Contact: `<support email>`.
+  https://eminakkaya.dev/learncard/hesap-silme; requests are completed within 30 days. Contact: iletisim@eminakkaya.dev.
 - Not directed at children under 13.

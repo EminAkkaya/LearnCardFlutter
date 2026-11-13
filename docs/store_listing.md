@@ -68,4 +68,4 @@ ingilizce,kelime,flashcard,okuma,sözlük,çeviri,aralıklı tekrar,kelime kart�
 ## Kategori ve derecelendirme
 - Kategori: Eğitim (Education)
 - Yaş: 4+ / Herkes (kullanıcılar arası iletişim yok, kullanıcı içeriği yalnız kişisel)
-- Destek URL'si ve pazarlama URL'si: `<doldur>`
+- Destek URL'si ve pazarlama URL'si: https://eminakkaya.dev/learncard
