@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../models/offline_entry.dart';
+import 'definition_picker.dart';
 import 'offline_dictionary.dart';
 
 class WordDefinitionResult {
@@ -11,6 +13,9 @@ class WordDefinitionResult {
   final String partOfSpeech;
   final String audioUrl;
 
+  /// API'nin tüm anlamları; [forSense] doğru anlamı bunlardan seçer.
+  final List<ApiMeaning> meanings;
+
   WordDefinitionResult({
     required this.word,
     required this.definition,
@@ -18,16 +23,29 @@ class WordDefinitionResult {
     required this.phonetic,
     required this.partOfSpeech,
     required this.audioUrl,
+    this.meanings = const [],
   });
 
-  WordDefinitionResult withTranslation(String tr) => WordDefinitionResult(
+  WordDefinitionResult _copy({String? definition, String? trTranslation, String? partOfSpeech}) =>
+      WordDefinitionResult(
         word: word,
-        definition: definition,
-        trTranslation: tr,
+        definition: definition ?? this.definition,
+        trTranslation: trTranslation ?? this.trTranslation,
         phonetic: phonetic,
-        partOfSpeech: partOfSpeech,
+        partOfSpeech: partOfSpeech ?? this.partOfSpeech,
         audioUrl: audioUrl,
+        meanings: meanings,
       );
+
+  WordDefinitionResult withTranslation(String tr) => _copy(trTranslation: tr);
+
+  /// Tanımı ve türü çevrimdışı sözlükteki anlama göre seçer; anlam yoksa aynısı.
+  WordDefinitionResult forSense(OfflineSense? sense) {
+    if (sense == null) return this;
+    final picked = pickDefinition(meanings, pos: sense.pos, gloss: sense.sense);
+    if (picked == null) return this;
+    return _copy(definition: picked.definition, partOfSpeech: picked.partOfSpeech);
+  }
 }
 
 class DictionaryService {
@@ -78,10 +96,11 @@ class DictionaryService {
   /// Tanım, okunuş, ses ve Türkçe çeviri. Çeviri önce [offline] sözlükten alınır;
   /// orada yoksa çevrimiçi servise gidilir.
   static Future<WordDefinitionResult> fetchWordDefinition(String word, {OfflineDictionary? offline}) async {
-    final offlineTr = offline?.lookup(word)?.primaryTranslation;
+    final entry = offline?.lookup(word);
+    final offlineTr = entry?.primaryTranslation;
     final trFuture = offlineTr != null ? Future.value(offlineTr) : translateToTurkish(word.toLowerCase().trim());
     final details = await fetchEnglishDetails(word);
-    return details.withTranslation(await trFuture);
+    return details.forSense(entry?.senses.first).withTranslation(await trFuture);
   }
 
   /// Yalnız İngilizce bilgiler (tanım, okunuş, tür, ses); çeviri boş döner.
@@ -95,6 +114,7 @@ class DictionaryService {
     String phonetic = '';
     String partOfSpeech = '';
     String audioUrl = '';
+    final meanings = <ApiMeaning>[];
 
     try {
       final uri = Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/${Uri.encodeComponent(normalized)}');
@@ -124,12 +144,24 @@ class DictionaryService {
             }
           }
 
-          if (entry['meanings'] is List && (entry['meanings'] as List).isNotEmpty) {
-            final Map meaning = entry['meanings'][0];
-            partOfSpeech = meaning['partOfSpeech']?.toString() ?? '';
-            if (meaning['definitions'] is List && (meaning['definitions'] as List).isNotEmpty) {
-              definition = meaning['definitions'][0]['definition']?.toString() ?? '';
+          // Birden çok sözcük girdisi (ör. "waves" hem "wave" hem "waive") olabilir.
+          for (final e in data) {
+            if (e is! Map || e['meanings'] is! List) continue;
+            for (final m in e['meanings']) {
+              if (m is! Map || m['definitions'] is! List) continue;
+              meanings.add(ApiMeaning(
+                partOfSpeech: m['partOfSpeech']?.toString() ?? '',
+                definitions: [
+                  for (final d in m['definitions'])
+                    if (d is Map && d['definition'] != null) d['definition'].toString(),
+                ],
+              ));
             }
+          }
+          final first = pickDefinition(meanings);
+          if (first != null) {
+            definition = first.definition;
+            partOfSpeech = first.partOfSpeech;
           }
         }
       }
@@ -142,6 +174,7 @@ class DictionaryService {
       phonetic: phonetic,
       partOfSpeech: partOfSpeech,
       audioUrl: audioUrl,
+      meanings: meanings,
     );
 
     _cache[normalized] = result;

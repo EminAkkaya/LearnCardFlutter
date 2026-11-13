@@ -74,7 +74,8 @@ class WordLookupNotifier extends StateNotifier<WordLookupState> {
     final offline = dict?.lookup(word);
     final detailsFuture = _ref.read(englishDetailsFetcherProvider)(word).then<WordDefinitionResult?>((d) => d, onError: (_) => null);
     final onlineFuture = offline == null ? _translate() : Future<String?>.value(null);
-    final details = await detailsFuture;
+    // Tanım, kartın varsayılan çevirisiyle aynı anlamdan seçilir.
+    final details = (await detailsFuture)?.forSense(offline?.senses.first);
     final online = await onlineFuture;
     if (!mounted) return;
     state = WordLookupState(isLoading: false, details: details, offline: offline, online: online);

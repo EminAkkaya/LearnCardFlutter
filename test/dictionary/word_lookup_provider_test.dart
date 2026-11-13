@@ -1,12 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learncard_flutter/providers/word_lookup_provider.dart';
+import 'package:learncard_flutter/services/definition_picker.dart';
 import 'package:learncard_flutter/services/dictionary_service.dart';
 
 import 'dict_fixture.dart';
 
-WordDefinitionResult _details(String w) => WordDefinitionResult(
-    word: w, definition: 'def of $w', trTranslation: '', phonetic: '', partOfSpeech: '', audioUrl: '');
+WordDefinitionResult _details(String w) => w == 'bank'
+    ? WordDefinitionResult(
+        word: w,
+        definition: 'The edge of a river.',
+        trTranslation: '',
+        phonetic: '',
+        partOfSpeech: 'noun',
+        audioUrl: '',
+        meanings: const [
+          ApiMeaning(partOfSpeech: 'noun', definitions: ['The edge of a river.', 'A financial institution.']),
+        ],
+      )
+    : WordDefinitionResult(
+        word: w, definition: 'def of $w', trTranslation: '', phonetic: '', partOfSpeech: '', audioUrl: '');
 
 void main() {
   late List<String> onlineCalls;
@@ -41,6 +54,12 @@ void main() {
     expect(s.suggestedTranslation, 'serbest');
     expect(s.details!.definition, 'def of free');
     expect(onlineCalls, isEmpty);
+  });
+
+  test('İngilizce tanım, varsayılan çeviriyle aynı anlamdan seçilir', () async {
+    final s = await loaded('bank');
+    expect(s.suggestedTranslation, 'banka');
+    expect(s.details!.definition, 'A financial institution.');
   });
 
   test('sözlükte yoksa çevrimiçi çeviri otomatik gelir', () async {
