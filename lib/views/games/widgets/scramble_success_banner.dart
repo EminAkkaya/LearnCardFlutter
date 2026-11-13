@@ -58,14 +58,12 @@ class ScrambleSuccessBanner extends StatelessWidget {
                   style: TextStyle(fontStyle: FontStyle.italic, color: p.textSecondary),
                 ),
               ],
-              if (card.audioUrl.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                IconButton.outlined(
-                  tooltip: 'Telaffuzu dinle',
-                  onPressed: () => AudioHelper.playAudio(card.audioUrl),
-                  icon: const Icon(LucideIcons.volume2, size: 20),
-                ),
-              ],
+              const SizedBox(height: 8),
+              IconButton.outlined(
+                tooltip: 'Telaffuzu dinle',
+                onPressed: () => AudioHelper.speak(card.word),
+                icon: const Icon(LucideIcons.volume2, size: 20),
+              ),
             ],
           ),
         ),

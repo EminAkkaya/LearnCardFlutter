@@ -87,11 +87,11 @@ class DeckCardListItem extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (card.audioUrl.isNotEmpty)
-              IconButton(
-                icon: Icon(LucideIcons.volume2, size: 20, color: palette.textSecondary),
-                onPressed: () => AudioHelper.playAudio(card.audioUrl),
-              ),
+            IconButton(
+              icon: Icon(LucideIcons.volume2, size: 20, color: palette.textSecondary),
+              tooltip: 'Telaffuzu dinle',
+              onPressed: () => AudioHelper.speak(card.word),
+            ),
             PopupMenuButton<String>(
               icon: Icon(LucideIcons.ellipsisVertical, size: 20, color: palette.textSecondary),
               onSelected: (val) {

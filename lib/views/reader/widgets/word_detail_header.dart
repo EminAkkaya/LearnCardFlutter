@@ -78,19 +78,18 @@ class WordDetailHeader extends StatelessWidget {
             ],
           ),
         ),
-        if (dictResult?.audioUrl.isNotEmpty == true)
-          IconButton.outlined(
-            onPressed: () => AudioHelper.playAudio(dictResult!.audioUrl),
-            icon: const Icon(LucideIcons.volume2, size: 20),
-            tooltip: 'Ses Dinle',
-            style: IconButton.styleFrom(
-              foregroundColor: palette.textPrimary,
-              side: BorderSide(color: palette.controlBorder),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppPalette.radiusControl),
-              ),
+        IconButton.outlined(
+          onPressed: () => AudioHelper.speak(word),
+          icon: const Icon(LucideIcons.volume2, size: 20),
+          tooltip: 'Telaffuzu dinle',
+          style: IconButton.styleFrom(
+            foregroundColor: palette.textPrimary,
+            side: BorderSide(color: palette.controlBorder),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppPalette.radiusControl),
             ),
           ),
+        ),
       ],
     );
   }

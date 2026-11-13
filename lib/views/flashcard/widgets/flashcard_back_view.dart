@@ -46,11 +46,11 @@ class FlashcardBackView extends StatelessWidget {
                 ),
               ),
             ),
-            if (card.audioUrl.isNotEmpty)
-              IconButton.outlined(
-                onPressed: () => AudioHelper.playAudio(card.audioUrl),
-                icon: const Icon(LucideIcons.volume2, size: 18),
-              ),
+            IconButton.outlined(
+              tooltip: 'Telaffuzu dinle',
+              onPressed: () => AudioHelper.speak(card.word),
+              icon: const Icon(LucideIcons.volume2, size: 18),
+            ),
           ],
         ),
         const Divider(height: 24),

@@ -43,6 +43,15 @@ void main() {
     expect(n.state.maxStreak, 2);
   });
 
+  test('doğru cevapta kartın İngilizce kelimesi sesli okunur', () {
+    final played = <String>[];
+    final quiz = SpeedQuizNotifier(gameTestCards, playAudio: played.add, recordScore: (_) {}, useTimer: false);
+    addTearDown(quiz.dispose);
+    final word = quiz.state.currentQuestion.card.word;
+    quiz.selectOption(quiz.state.currentQuestion.correctAnswer);
+    expect(played, [word]);
+  });
+
   test('yanlış cevap seriyi sıfırlar ve puan vermez', () {
     n.selectOption(n.state.currentQuestion.correctAnswer);
     n.next();

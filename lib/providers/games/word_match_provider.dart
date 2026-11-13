@@ -164,7 +164,7 @@ class WordMatchNotifier extends StateNotifier<WordMatchState> {
   }
 
   void _onMatch(WordMatchTileModel first, WordMatchTileModel second, Set<String> ids) {
-    _playAudio((first.isEnglish ? first.card : second.card).audioUrl);
+    _playAudio((first.isEnglish ? first.card : second.card).word);
     final streak = state.streak + 1;
     state = state.copyWith(
       tiles: _update(ids, (t) => t.copyWith(isMatched: true, isSelected: false)),

@@ -51,10 +51,10 @@ class ClozeSentenceCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (isAnswered && question.card.audioUrl.isNotEmpty)
+              if (isAnswered)
                 IconButton.outlined(
                   tooltip: 'Telaffuzu dinle',
-                  onPressed: () => AudioHelper.playAudio(question.card.audioUrl),
+                  onPressed: () => AudioHelper.speak(question.card.word),
                   icon: const Icon(LucideIcons.volume2, size: 20),
                 ),
             ],

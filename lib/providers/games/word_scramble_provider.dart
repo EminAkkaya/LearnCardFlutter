@@ -206,7 +206,7 @@ class WordScrambleNotifier extends StateNotifier<WordScrambleState> {
       state = state.copyWith(hasError: true);
       return;
     }
-    _playAudio(state.currentCard.audioUrl);
+    _playAudio(state.currentCard.word);
     state = state.copyWith(
       isCompleted: true,
       hasError: false,

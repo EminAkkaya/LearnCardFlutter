@@ -223,7 +223,7 @@ class SpeedQuizNotifier extends StateNotifier<SpeedQuizState> {
       return;
     }
 
-    _playAudio(q.card.audioUrl);
+    _playAudio(q.card.word);
     final points = 100 + (state.secondsRemaining * 10) + (state.streak * 20).clamp(0, speedQuizMaxStreakBonus);
     final streak = state.streak + 1;
     state = state.copyWith(

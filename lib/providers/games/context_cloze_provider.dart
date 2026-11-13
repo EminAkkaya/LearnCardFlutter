@@ -162,7 +162,7 @@ class ContextClozeNotifier extends StateNotifier<ContextClozeState> {
       return;
     }
 
-    _playAudio(q.card.audioUrl);
+    _playAudio(q.card.word);
     state = state.copyWith(
       selectedOption: () => option,
       isAnswered: true,

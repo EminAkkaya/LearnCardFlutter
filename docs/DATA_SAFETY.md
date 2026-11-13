@@ -21,7 +21,7 @@ Koddan çıkarılmıştır (2026-11-07). Yeni bir servis eklenince güncelle.
 Türkçe karşılıklar uygulamaya gömülü sözlükten (Wiktionary, CC BY-SA 4.0) gelir. Kullanıcının
 dokunduğu **kelime** şu servislere gönderilir (kişisel kimlik bilgisi gönderilmez); çeviri
 servislerine yalnız kelime sözlükte yoksa ya da kullanıcı "çevrimiçi çeviri" isterse:
-- `api.dictionaryapi.dev` — İngilizce tanım ve telaffuz sesi
+- `api.dictionaryapi.dev` — İngilizce tanım (telaffuz cihazın kendi TTS motoruyla)
 - `api.mymemory.translated.net` — çeviri
 - `translate.googleapis.com` — çeviri (**resmî olmayan uç nokta, bkz. plan SEC2**)
 

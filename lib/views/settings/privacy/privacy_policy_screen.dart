@@ -21,7 +21,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
     (
       'Üçüncü taraf servisler',
       'Türkçe karşılıklar uygulamanın içindeki sözlükten gelir. Bir kelimeye dokunduğunda İngilizce '
-          'tanım ve telaffuz için yalnızca o kelime dictionaryapi.dev\'e gönderilir. Kelime sözlükte '
+          'tanım için yalnızca o kelime dictionaryapi.dev\'e gönderilir; telaffuz cihazının kendi metin okuma '
+          'motoruyla yapılır. Kelime sözlükte '
           'yoksa ya da sen istersen, çeviri için MyMemory ve Google çeviri servislerine de gönderilir. '
           'Bu servislere kimlik bilgin gönderilmez.',
     ),
